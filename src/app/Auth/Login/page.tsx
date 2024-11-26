@@ -186,14 +186,29 @@ export default function LoginPage() {
                   ),
                 }}
               />
-              <div>
-                Don't have an account?{" "}
+              <div className="flex w-full justify-between">
+                <div>
+                  Don't have an account?{" "}
+                  <Link
+                    href="/auth/register"
+                    variant="body2"
+                    sx={{ display: "block", pt: 1 }}
+                  >
+                    Create one here
+                  </Link>
+                </div>
+
                 <Link
-                  href="/Auth/Register"
+                  href="/"
                   variant="body2"
-                  sx={{ display: "block", mt: 2 }}
+                  className="flex items-center justify-end whitespace-nowrap"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenModal(false);
+                    router.push("/auth/forgot-password");
+                  }}
                 >
-                  Create one here
+                  Forgot your password?
                 </Link>
               </div>
 
