@@ -21,10 +21,11 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, WavesIcon as Wave } from "lucide-react";
-import { FormTextField } from "@/components/input";
+import { FormTextField } from "@/components/Input";
 import { ImagePicker } from "@/components/ImagePicker";
-import { register } from "@/services/Auth/auth.service";
+import { login, resendVerificationEmail } from "@/services/Auth/auth.service";
 import { useRouter } from "next/navigation";
+import ForgotPassword from "@/components/ForgotPassword";
 
 type FormData = {
   email: string;
@@ -68,11 +69,42 @@ const theme = createTheme({
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const { control, handleSubmit, setValue } = useForm<FormData>();
+  const { control, handleSubmit, setValue, getValues } = useForm<FormData>();
   const [openModal, setOpenModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [openResendModal, setOpenResendModal] = useState(false);
+  const [resendEmailMessage, setResendEmailMessage] = useState<string | null>();
+
+  const handleCloseModal = () => setOpenModal(false);
   const router = useRouter();
-  const onSubmit: SubmitHandler<FormData> = (data) => {};
+  const onSubmit: SubmitHandler<FormData> = (data) => {
+    login(data)
+      .then(() => {
+        // Success logic (e.g., redirecting the user)
+        // router.push("/");
+      })
+      .catch((error) => {
+        console.log("Error received:", error); // Debugging the full error
+        const errorMessage =
+          error.response?.data?.message || "An unknown error occurred";
+        setErrorMessage(errorMessage); // Update error message state
+        setOpenModal(true); // Trigger modal visibility
+      });
+  };
+
+  const resendEmailVerification = async (email: string) => {
+    try {
+      await resendVerificationEmail(email);
+      setResendEmailMessage(
+        "Verification email has been resent. Please check your inbox."
+      );
+    } catch (error) {
+      console.log("Error received:", error); // Debugging the full error
+      const errorMessage =
+        error.response?.data?.message || "An unknown error occurred";
+      setResendEmailMessage(errorMessage); // Update error message state
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -157,7 +189,7 @@ export default function LoginPage() {
               <div>
                 Don't have an account?{" "}
                 <Link
-                  href="/register"
+                  href="/Auth/Register"
                   variant="body2"
                   sx={{ display: "block", mt: 2 }}
                 >
@@ -176,13 +208,99 @@ export default function LoginPage() {
                   variant="contained"
                   sx={{ mt: 3, mb: 2, height: 56 }}
                 >
-                  Register
+                  Login
                 </Button>
               </motion.div>
             </Box>
           </Paper>
         </motion.div>
       </Container>
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>
+          {errorMessage ? "Login Failed" : "Login Successful"}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            {errorMessage
+              ? errorMessage
+              : "An unknown error occurred. Please try again."}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="primary">
+            {errorMessage ? "Go Back" : "Close"}
+          </Button>
+          <Button onClick={() => setOpenResendModal(true)} color="primary">
+            Resend Email
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openResendModal} onClose={() => setOpenResendModal(false)}>
+        <DialogTitle>Resend Verification Email</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Please enter your email address to resend the verification email.
+          </Typography>
+          <FormTextField
+            name="email"
+            control={control}
+            label="Email"
+            type="email"
+            required
+            rules={{
+              pattern: {
+                value: /^\S+@\S+$/i,
+                message: "Invalid email address",
+              },
+            }}
+          />
+          {resendEmailMessage !==
+            "Verification email has been resent. Please check your inbox." && (
+            <Typography variant="body1" color="error">
+              {resendEmailMessage}
+            </Typography>
+          )}
+          {resendEmailMessage ===
+            "Verification email has been resent. Please check your inbox." && (
+            <Typography variant="body1" color="success">
+              {resendEmailMessage}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              if (
+                resendEmailMessage ===
+                "Verification email has been resent. Please check your inbox."
+              ) {
+                setOpenResendModal(false);
+                setOpenModal(false);
+              } else {
+                setOpenResendModal(true);
+              }
+              setOpenResendModal(false);
+            }}
+            color="primary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              const email = getValues("email");
+              resendEmailVerification(email);
+              // Resend verification email
+            }}
+            disabled={
+              resendEmailMessage ===
+              "Verification email has been resent. Please check your inbox."
+            }
+            color="primary"
+          >
+            Resend Email
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }
