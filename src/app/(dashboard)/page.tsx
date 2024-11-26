@@ -1,7 +1,7 @@
 import * as React from "react";
-import Image from "next/image";
 import { CiHeart } from "react-icons/ci";
 import { FaComments } from "react-icons/fa";
+import Image from 'next/image';
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { FaLocationArrow, FaRegSave } from "react-icons/fa";
@@ -103,12 +103,12 @@ export default function Home() {
     {
       logo: "poza1",
       name: "Jason Culcat",
-      image: "pozacontent1",
+      image: "/post.jpg",
     },
     {
       logo: "poza2",
       name: "Jason Culcat2",
-      image: "pozacontent2",
+      image: "/post.jpg",
     },
   ];
   return (
@@ -154,7 +154,13 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-auto border-b border-b-black">
-            {post[0].image}
+          <Image
+            src={post[0].image}
+            alt="Public Image"
+            width={500} 
+            height={500}    
+            objectFit="cover"         
+          />
           </div>
           <div className="w-full border-b px-4 py-2 border-b-black flex justify-between">
             <div className="flex gap-12">
