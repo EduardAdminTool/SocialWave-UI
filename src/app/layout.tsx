@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Header from "./header/page";
-import Footer from "./footer/page";
+import Header from "./(dashboard)/header/page";
+import Footer from "./(dashboard)/footer/page";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,10 +15,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`flex flex-col h-screen`}>
-        <Header />
-        <main className="flex-1 overflow-y-scroll">{children}</main>
-        <Footer />
+      <body className={`flex flex-col min-h-screen`}>
+        <div>{children}</div>
       </body>
     </html>
   );

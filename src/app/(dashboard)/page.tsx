@@ -139,7 +139,7 @@ export default function Home() {
       </div>
       <div className="py-4 h-screen">
         <div className="bg-white p-4">
-          <div className="w-full border border-b-black">
+          <div className="w-full border-b border-b-black">
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="bg-black rounded-full w-[80px] h-[80px] flex items-center justify-center">
@@ -152,8 +152,10 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="w-full h-[900px] border border-b-black">content</div>
-          <div className="w-full border px-4 py-2 border-b-black flex justify-between">
+          <div className="w-full h-[900px] border-b border-b-black">
+            {post[0].image}
+          </div>
+          <div className="w-full border-b px-4 py-2 border-b-black flex justify-between">
             <div className="flex gap-12">
               <CiHeart size={32} />
               <FaComments size={32} />
