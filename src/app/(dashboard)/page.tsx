@@ -112,8 +112,9 @@ export default function Home() {
     },
   ];
   return (
-    <div className="text-blue-500 bg-black min-h-screen">
-      <div className="bg-white h-[120px] flex items-center">
+    <div className="px-8">
+<div className="text-blue-500 min-h-screen">
+      <div className="bg-white h-[120px] flex items-center border border-b-black">
         <div className="flex flex-col justify-start px-8">
           <div className="rounded-full bg-black h-[80px] w-[80px] flex justify-center items-center">
             Poza
@@ -121,7 +122,7 @@ export default function Home() {
           <div>Your Story</div>
         </div>
         <ScrollArea className="w-128 whitespace-nowrap">
-          <div className="flex w-max space-x-4 p-4">
+          <div className="flex w-max space-x-4 p-4 ">
             {story.map((story) => (
               <div
                 key={story.name}
@@ -137,7 +138,7 @@ export default function Home() {
           <ScrollBar orientation="horizontal" className="opacity-0" />
         </ScrollArea>
       </div>
-      <div className="py-4 h-screen">
+      <div className="h-screen">
         <div className="bg-white p-4">
           <div className="w-full border-b border-b-black">
             <div className="p-4 flex items-center justify-between">
@@ -152,7 +153,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="w-full h-[900px] border-b border-b-black">
+          <div className="w-full h-auto border-b border-b-black">
             {post[0].image}
           </div>
           <div className="w-full border-b px-4 py-2 border-b-black flex justify-between">
@@ -167,5 +168,7 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </div>
+    
   );
 }
