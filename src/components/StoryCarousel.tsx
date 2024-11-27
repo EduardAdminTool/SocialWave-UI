@@ -29,7 +29,7 @@ function StoryItem({ name, image }: StoryItemProps) {
           bg-blue-200
         `}
       >
-        <Avatar className="h-16 w-16 border-2 border-white">
+        <Avatar className="h-16 w-16 border-2 border-white hover:scale-105 cursor-pointer">
           <AvatarImage src={image} alt={name} />
           <AvatarFallback className="bg-blue-300 text-blue-800">
             {name.charAt(0)}
