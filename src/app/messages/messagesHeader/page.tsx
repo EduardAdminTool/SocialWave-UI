@@ -37,11 +37,11 @@ export default function MessagesHeader() {
       <Link href={"/"}>
         <h1 className="text-3xl font-light text-blue-500 ">SocialWave</h1>
       </Link>
-      <div className="relative w-[200px]">
+      <div className="relative w-[250px]">
         <input
           placeholder="Search"
           value={searchQuery}
-          className="border border-black w-[200px] text-center rounded-full h-[30px]"
+          className="border border-black w-full text-center rounded-full h-[40px]"
           onChange={handleInputChange}
           onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
         />

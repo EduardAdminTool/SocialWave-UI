@@ -39,16 +39,16 @@ export default function Header() {
         <Link href={"/"}>
           <h1 className="text-3xl font-light">SocialWave</h1>
         </Link>
-        <div className="relative w-[200px]">
+        <div className="relative w-[250px]">
           <input
             placeholder="Search"
             value={searchQuery}
-            className="border border-black w-full text-center rounded-full h-[30px]"
+            className="border border-black w-full text-center rounded-full h-[40px]"
             onChange={handleInputChange}
             onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
           />
           {showHistory && (
-            <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+            <div className="absolute mt-1 w-full z-10 bg-white border border-gray-300 rounded-lg shadow-lg">
               {searchHistory.length > 0 ? (
                 searchHistory.map((item, index) => (
                   <div
@@ -60,7 +60,7 @@ export default function Header() {
                   </div>
                 ))
               ) : (
-                <div className="px-4 py-2 text-sm text-gray-500 z-10">
+                <div className="px-4 py-2 text-sm text-gray-500">
                   No recent searches
                 </div>
               )}

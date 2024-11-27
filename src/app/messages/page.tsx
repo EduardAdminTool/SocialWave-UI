@@ -83,12 +83,12 @@ export default function Messages() {
             </div>
           </div>
         </div>
-        <div className="border text-center py-4 h-auto border-b-black text-xl flex flex-col justify-between items-center">
+        <div className="border text-center py-4 h-auto border-b-black text-xl flex px-4 justify-between items-center">
           <input
             placeholder="Type a message..."
-            className="px-4 w-[350px] border border-black rounded-full"
+            className="px-4 w-[500px] h-[50px] border border-black rounded-full"
           />
-          <button className="bg-blue-500 text-white px-4 py-2 mt-2 rounded-full">
+          <button className="bg-blue-500 h-[50px] text-white px-4 py-2 mt-2 rounded-full">
             Send
           </button>
         </div>

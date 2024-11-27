@@ -10,3 +10,8 @@ export interface Posts {
   };
   image: string;
 }
+
+export interface SignInProps {
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void;
+}
