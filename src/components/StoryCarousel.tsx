@@ -23,7 +23,7 @@ export function StoryCarousel({ stories }: StoryCarouselProps) {
 
 function StoryItem({ name, image }: StoryItemProps) {
   return (
-    <div className="flex flex-col items-center space-y-1">
+    <div className="flex flex-col items-center space-y-2">
       <div
         className={`p-[3px] rounded-full 
           bg-blue-200
