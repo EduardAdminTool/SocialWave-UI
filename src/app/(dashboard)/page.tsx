@@ -10,9 +10,25 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { FaLocationArrow, FaRegSave } from "react-icons/fa";
 import { IoIosOptions } from "react-icons/io";
 
+import { getPosts } from "@/services/posts";
+import { Posts } from "@/types/types";
 export default function Home() {
   const [isLiked, setIsLiked] = useState(false);
-  const [postedAgo, setPostedAgo] = useState<string[]>([]); // State to hold time differences for each post
+  const [postedAgo, setPostedAgo] = useState<string[]>([]);
+  const [error, setError] = useState("");
+  const [posts, setPosts] = useState<Posts[]>([]);
+
+  useEffect(() => {
+    fetchPosts();
+  });
+  const fetchPosts = async () => {
+    try {
+      const fetchedPosts = await getPosts();
+      setPosts(fetchedPosts);
+    } catch (err) {
+      setError("Nu s-au putut obtine postari");
+    }
+  };
 
   const story = [
     {
@@ -112,12 +128,6 @@ export default function Home() {
       image: "/post.jpg",
       date: "2024-11-27T10:53:00",
     },
-    {
-      logo: "poza2",
-      name: "Jason Culcat2",
-      image: "/post.jpg",
-      date: "2024-10-01T15:30:00",
-    },
   ];
 
   const handleLikeClick = () => {
@@ -216,15 +226,15 @@ export default function Home() {
           </ScrollArea>
         </div>
         <div className="min-h-screen py-4 space-y-4">
-          {post.map((item, index) => (
-            <div className="bg-white p-4 border border-black" key={item.name}>
+          {posts.map((item, index) => (
+            <div className="bg-white p-4 border border-black" key={item.userId}>
               <div className="w-full">
                 <div className="p-4 flex items-center">
                   <div className="flex items-center gap-4">
                     <div className="bg-black rounded-full w-[80px] h-[80px] flex items-center justify-center">
-                      {item.logo}
+                      {post[0].logo}
                     </div>
-                    <div>{item.name}</div>
+                    <div>{post[0].name}</div>
                     <div className="px-4 font-semibold">
                       {postedAgo[index]}{" "}
                     </div>
@@ -233,7 +243,7 @@ export default function Home() {
               </div>
               <div className="w-full h-auto p-4">
                 <Image
-                  src={item.image}
+                  src={post[0].image}
                   alt="Public Image"
                   width={500}
                   height={500}
@@ -241,6 +251,7 @@ export default function Home() {
                 />
               </div>
 
+              <div>{item.description}</div>
               <div className="w-full border-b px-4 py-2 border-b-black flex justify-between">
                 <div className="flex gap-12">
                   <div className="cursor-pointer" onClick={handleLikeClick}>
