@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { createPost } from "@/services/posts";
 export default function createPostPage() {
+  const router = useRouter();
+
   const [media, setMedia] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>("");
@@ -31,6 +34,7 @@ export default function createPostPage() {
 
     if (response.message) {
       setSucces("Postare creata cu succes");
+      router.push("/");
     }
   };
 

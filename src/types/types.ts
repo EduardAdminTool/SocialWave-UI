@@ -4,4 +4,9 @@ export interface Posts {
   description: string;
   createdAt: string;
   updatedAt: string;
+  author: {
+    name: string;
+    avatar: string;
+  };
+  image: string;
 }
