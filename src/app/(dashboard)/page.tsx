@@ -10,17 +10,18 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { FaLocationArrow, FaRegSave } from "react-icons/fa";
 import { IoIosOptions } from "react-icons/io";
 
-import { getPosts } from "@/services/posts";
+import { getPosts, deletePost } from "@/services/posts";
 import { Posts } from "@/types/types";
 export default function Home() {
   const [isLiked, setIsLiked] = useState(false);
-  const [postedAgo, setPostedAgo] = useState<string[]>([]);
+  const [postedAgo, setPostedAgo] = useState<{ [key: string]: string }>({});
   const [error, setError] = useState("");
   const [posts, setPosts] = useState<Posts[]>([]);
 
   useEffect(() => {
     fetchPosts();
-  });
+  }, []);
+
   const fetchPosts = async () => {
     try {
       const fetchedPosts = await getPosts();
@@ -182,7 +183,11 @@ export default function Home() {
   };
 
   const updatePostTimes = () => {
-    const updatedPostedAgo = post.map((p) => calculateDateDifference(p.date));
+    const updatedPostedAgo = post.reduce((acc, p) => {
+      acc[p.date] = calculateDateDifference(p.date);
+      return acc;
+    }, {} as { [key: string]: string });
+
     setPostedAgo(updatedPostedAgo);
   };
 
@@ -197,6 +202,10 @@ export default function Home() {
       clearInterval(intervalId);
     };
   }, []);
+
+  const handleDeletePost = async (postId: number) => {
+    await deletePost(postId);
+  };
 
   return (
     <div className="py-8">
@@ -227,7 +236,7 @@ export default function Home() {
         </div>
         <div className="min-h-screen py-4 space-y-4">
           {posts.map((item, index) => (
-            <div className="bg-white p-4 border border-black" key={item.userId}>
+            <div className="bg-white p-4 border border-black" key={item.postId}>
               <div className="w-full">
                 <div className="p-4 flex items-center">
                   <div className="flex items-center gap-4">
@@ -235,7 +244,12 @@ export default function Home() {
                       {post[0].logo}
                     </div>
                     <div>{post[0].name}</div>
-                    <div className="px-4 font-semibold">{postedAgo[index]}</div>
+                    <button onClick={() => handleDeletePost(item.postId)}>
+                      Delete post
+                    </button>
+                    <div className="px-4 font-semibold">
+                      {postedAgo[item.createdAt]}
+                    </div>
                   </div>
                 </div>
               </div>

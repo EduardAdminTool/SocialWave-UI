@@ -1,6 +1,7 @@
 export interface Posts {
+  postId: number;
   userId: number;
   description: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

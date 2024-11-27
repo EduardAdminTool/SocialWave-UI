@@ -43,3 +43,19 @@ export const createPost = async (
 
   return response.json();
 };
+
+export const deletePost = async (postId: number) => {
+  const response = await fetch(`http://localhost:3001/post/${postId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
