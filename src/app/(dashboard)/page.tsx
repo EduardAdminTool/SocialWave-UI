@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { FaComments } from "react-icons/fa";
@@ -12,7 +12,8 @@ import { IoIosOptions } from "react-icons/io";
 
 export default function Home() {
   const [isLiked, setIsLiked] = useState(false);
-  const [postedAgo, setPostedAgo] = useState("");
+  const [postedAgo, setPostedAgo] = useState<string[]>([]); // State to hold time differences for each post
+
   const story = [
     {
       image: "poza",
@@ -109,7 +110,7 @@ export default function Home() {
       logo: "poza1",
       name: "Jason Culcat",
       image: "/post.jpg",
-      date: "2024-11-27T10:42:55",
+      date: "2024-11-27T10:53:00",
     },
     {
       logo: "poza2",
@@ -128,11 +129,17 @@ export default function Home() {
     const itemDate = new Date(dateString);
 
     const isToday = today.toDateString() === itemDate.toDateString();
+    const diffMs = today.getTime() - itemDate.getTime();
 
     if (isToday) {
-      const diffMs = today.getTime() - itemDate.getTime();
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffSeconds = Math.floor(diffMs / 1000);
+      if (diffSeconds < 60) {
+        return diffSeconds === 1
+          ? "1 second ago"
+          : `${diffSeconds} seconds ago`;
+      }
 
+      const diffMinutes = Math.floor(diffSeconds / 60);
       if (diffMinutes < 60) {
         return diffMinutes === 1
           ? "1 minute ago"
@@ -143,18 +150,44 @@ export default function Home() {
       return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
     }
 
-    const differenceMs = today.getTime() - itemDate.getTime();
-    const differenceDays = Math.floor(differenceMs / (1000 * 60 * 60 * 24));
+    const differenceDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (differenceDays >= 30) {
-      const differenceMonths = Math.floor(differenceDays / 30);
-      return differenceMonths === 1
-        ? "1 month ago"
-        : `${differenceMonths} months ago`;
+    if (differenceDays < 30) {
+      return differenceDays === 1 ? "1 day ago" : `${differenceDays} days ago`;
     }
 
-    return differenceDays === 1 ? "1 day ago" : `${differenceDays} days ago`;
+    const differenceMonths = Math.floor(differenceDays / 30);
+    if (differenceMonths >= 6) {
+      const options: Intl.DateTimeFormatOptions = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      return itemDate.toLocaleDateString("en-US", options);
+    }
+
+    return differenceMonths === 1
+      ? "1 month ago"
+      : `${differenceMonths} months ago`;
   };
+
+  const updatePostTimes = () => {
+    const updatedPostedAgo = post.map((p) => calculateDateDifference(p.date));
+    setPostedAgo(updatedPostedAgo);
+  };
+
+  useEffect(() => {
+    updatePostTimes();
+
+    const intervalId = setInterval(() => {
+      updatePostTimes();
+    }, 30000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   return (
     <div className="py-8">
       <div className="text-blue-500 min-h-screen px-8">
@@ -183,18 +216,18 @@ export default function Home() {
           </ScrollArea>
         </div>
         <div className="min-h-screen py-4 space-y-4">
-          {post.map((item) => (
+          {post.map((item, index) => (
             <div className="bg-white p-4 border border-black" key={item.name}>
               <div className="w-full">
-                <div className="p-4 flex items-center justify-between">
+                <div className="p-4 flex items-center">
                   <div className="flex items-center gap-4">
                     <div className="bg-black rounded-full w-[80px] h-[80px] flex items-center justify-center">
                       {item.logo}
                     </div>
                     <div>{item.name}</div>
-                  </div>
-                  <div>
-                    <IoIosOptions size={36} />
+                    <div className="px-4 font-semibold">
+                      {postedAgo[index]}{" "}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -207,9 +240,7 @@ export default function Home() {
                   objectFit="cover"
                 />
               </div>
-              <div className="px-4 font-semibold">
-                {calculateDateDifference(item.date)}
-              </div>
+
               <div className="w-full border-b px-4 py-2 border-b-black flex justify-between">
                 <div className="flex gap-12">
                   <div className="cursor-pointer" onClick={handleLikeClick}>
