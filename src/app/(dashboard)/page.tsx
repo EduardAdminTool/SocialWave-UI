@@ -183,8 +183,8 @@ export default function Home() {
   };
 
   const updatePostTimes = () => {
-    const updatedPostedAgo = post.reduce((acc, p) => {
-      acc[p.date] = calculateDateDifference(p.date);
+    const updatedPostedAgo = posts.reduce((acc, p) => {
+      acc[p.createdAt] = calculateDateDifference(p.createdAt);
       return acc;
     }, {} as { [key: string]: string });
 
@@ -196,15 +196,16 @@ export default function Home() {
 
     const intervalId = setInterval(() => {
       updatePostTimes();
-    }, 30000);
+    }, 1);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [posts]);
 
   const handleDeletePost = async (postId: number) => {
     await deletePost(postId);
+    fetchPosts();
   };
 
   return (
@@ -244,12 +245,12 @@ export default function Home() {
                       {post[0].logo}
                     </div>
                     <div>{post[0].name}</div>
-                    <button onClick={() => handleDeletePost(item.postId)}>
-                      Delete post
-                    </button>
                     <div className="px-4 font-semibold">
                       {postedAgo[item.createdAt]}
                     </div>
+                    <button onClick={() => handleDeletePost(item.postId)}>
+                      Delete post
+                    </button>
                   </div>
                 </div>
               </div>
