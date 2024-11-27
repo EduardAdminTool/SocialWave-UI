@@ -251,6 +251,17 @@ export default function RegisterPage() {
                   Register
                 </Button>
               </motion.div>
+              <div className="flex w-full justify-between">
+                <div>
+                  Already have an account?{" "}
+                  <Button
+                    variant="text"
+                    onClick={() => router.push("/auth/login")}
+                  >
+                    Login here
+                  </Button>
+                </div>
+              </div>
             </Box>
           </Paper>
         </motion.div>

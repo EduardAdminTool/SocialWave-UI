@@ -190,7 +190,11 @@ export default function LoginPage() {
                 <div>
                   Don't have an account?{" "}
                   <Link
-                    href="/auth/register"
+                    href="/"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.push("/auth/register");
+                    }}
                     variant="body2"
                     sx={{ display: "block", pt: 1 }}
                   >

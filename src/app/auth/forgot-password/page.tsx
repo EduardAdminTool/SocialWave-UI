@@ -68,9 +68,17 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
   const handleCloseModal = () => {
-    setOpenModal(false);
-    setMessage(null);
-    router.push("/auth/login");
+    if (
+      message ===
+      "A password reset link has been sent to your email. Please check your inbox."
+    ) {
+      setOpenModal(false);
+      setMessage(null);
+      router.push("/auth/login");
+    } else {
+      setOpenModal(false);
+      setMessage(null);
+    }
   };
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
@@ -161,7 +169,8 @@ export default function ForgotPasswordPage() {
               </motion.div>
 
               <Link
-                href="/auth/login"
+                href="/"
+                onClick={() => router.push("/auth/login")}
                 variant="body2"
                 sx={{ display: "block", textAlign: "center", mt: 2 }}
               >
