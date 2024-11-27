@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createPost } from "@/services/posts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,7 @@ export default function CreatePostPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((file: File) => {
     setMedia(file);
@@ -75,6 +76,12 @@ export default function CreatePostPage() {
     }
   };
 
+  const handleSelectFileClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
@@ -104,17 +111,20 @@ export default function CreatePostPage() {
               Drag and drop your file here, or click to select a file
             </p>
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/*,video/*"
               onChange={handleFileChange}
               className="hidden"
               id="file-upload"
             />
-            <label htmlFor="file-upload">
-              <Button className="mt-4" variant="outline">
-                Select File
-              </Button>
-            </label>
+            <Button
+              className="mt-4"
+              variant="outline"
+              onClick={handleSelectFileClick}
+            >
+              Select File
+            </Button>
           </div>
           {preview && (
             <div className="flex justify-center">
