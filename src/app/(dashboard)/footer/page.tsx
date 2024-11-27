@@ -4,8 +4,8 @@ import { Home, Search, PlusSquare, Bell, User } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-blue-200 shadow-sm py-2">
-      <div className="container mx-auto max-w-lg">
-        <div className="flex justify-between items-center px-4">
+      <div className="container mx-auto">
+        <div className="flex justify-between items-center">
           <Link href="/" className="flex flex-col items-center">
             <Home className="h-6 w-6 text-blue-600" />
             <span className="text-xs font-medium text-blue-800 mt-1">Home</span>
