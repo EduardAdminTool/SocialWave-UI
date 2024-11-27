@@ -2,9 +2,13 @@
 
 import React, { useState } from "react";
 
-export default function createPost() {
+import { createPost } from "@/services/posts";
+export default function createPostPage() {
   const [media, setMedia] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>("");
+  const [succes, setSucces] = useState<string | null>("");
+  const [description, setDescription] = useState<string | null>("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -15,12 +19,19 @@ export default function createPost() {
     }
   };
 
-  const handleUpload = () => {
-    if (!media) {
-      alert("Please select a file to upload.");
+  const handleUpload = async () => {
+    setError(null);
+    setSucces(null);
+    if (!description) {
+      alert("Please enter a description");
       return;
     }
-    alert(`Uploading: ${media.name}`);
+    const today = new Date();
+    const response = await createPost(description, today, today);
+
+    if (response.message) {
+      setSucces("Postare creata cu succes");
+    }
   };
 
   return (
@@ -31,6 +42,7 @@ export default function createPost() {
           <textarea
             placeholder="Write your caption.."
             className="h-[150px] w-[800px]"
+            onChange={(e) => setDescription(e.target.value)}
           ></textarea>
         </div>
       </div>

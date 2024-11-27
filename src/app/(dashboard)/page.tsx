@@ -235,9 +235,7 @@ export default function Home() {
                       {post[0].logo}
                     </div>
                     <div>{post[0].name}</div>
-                    <div className="px-4 font-semibold">
-                      {postedAgo[index]}{" "}
-                    </div>
+                    <div className="px-4 font-semibold">{postedAgo[index]}</div>
                   </div>
                 </div>
               </div>
@@ -250,8 +248,7 @@ export default function Home() {
                   objectFit="cover"
                 />
               </div>
-
-              <div>{item.description}</div>
+              <div className="px-4 text-xl">{item.description}</div>
               <div className="w-full border-b px-4 py-2 border-b-black flex justify-between">
                 <div className="flex gap-12">
                   <div className="cursor-pointer" onClick={handleLikeClick}>
