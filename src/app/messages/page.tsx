@@ -15,7 +15,7 @@ export default function Messages() {
     },
     {
       logo: "logo2",
-      name: "name2",
+      name: "name22",
       message: "message2",
     },
     {
@@ -48,7 +48,10 @@ export default function Messages() {
         </div>
         <div className="flex flex-col py-4 gap-4 text-xl border border-b-black px-4 cursor-pointer">
           {dm.map((item) => (
-            <div className="flex items-center gap-4 border-b border-b-black py-4 hover:scale-95">
+            <div
+              className="flex items-center gap-4 border-b border-b-black py-4 hover:scale-95"
+              key={item.name}
+            >
               <div className="bg-black rounded-full w-[80px] h-[80px] flex justify-center items-center text-white">
                 {item.logo}
               </div>
