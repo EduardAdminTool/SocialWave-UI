@@ -125,8 +125,8 @@ export default function Home() {
   return (
     <div className="py-8">
       <div className="text-blue-500 min-h-screen px-8">
-        <div className="bg-white h-[120px] flex items-center border border-black">
-          <div className="flex  flex-col justify-start px-8 border-2 border-white space-y-2">
+        <div className="h-[120px] flex items-center bg-gradient-to-b from-blue-100 to-white border rounded-md">
+          <div className="flex  flex-col justify-start px-8 space-y-2">
             <div
               className="h-16 w-16 flex justify-center items-center rounded-full 
           bg-blue-200"

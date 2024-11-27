@@ -90,12 +90,11 @@ export function PostCard({ post }: PostCardProps) {
   }, [post]);
 
   return (
-    <Card className="w-full max-w-2xl mx-auto mb-6">
+    <Card className="w-full max-w-4xl mx-auto mb-6">
       <CardHeader className="flex flex-row items-center space-x-4 pb-4">
         <Avatar className="h-12 w-12">
-          poza
-          {/* <AvatarImage src={post.author.avatar} alt={post.author.name} />
-          <AvatarFallback>{post.author.name[0]}</AvatarFallback> */}
+          <AvatarImage src={"/post.jpg"} />
+          <AvatarFallback>Matei</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">Matei</h3>
