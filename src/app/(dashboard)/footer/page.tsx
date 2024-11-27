@@ -13,13 +13,14 @@ export default function Footer() {
           <RiLoopLeftLine size={36} />
         </Link>
         <FaSearch size={36} />
-        <FaPlusSquare size={36} />
+        <Link href={"/createPost"}>
+          <FaPlusSquare size={36} />
+        </Link>
         <IoIosNotifications size={36} />
         <Link href={"/account"}>
           <VscAccount size={36} />
         </Link>
       </div>
     </div>
-
   );
 }

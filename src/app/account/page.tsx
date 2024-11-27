@@ -1,8 +1,10 @@
+"use client";
+
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-import * as React from "react"
-import Image from 'next/image';
-import { Button } from "@/components/ui/button"
+import React, { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,9 +12,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 export default function AccountPage() {
+  const [followClicked, setIsFollowClicked] = useState(false);
   const story = [
     {
       image: "poza",
@@ -117,19 +120,36 @@ export default function AccountPage() {
     {
       photo: "/post.jpg",
     },
-  ]
+  ];
+
+  const handleFollowButton = () => {
+    setIsFollowClicked(!followClicked);
+  };
   return (
     <div className="py-2">
       <div className="grid grid-cols-2 h-[300px]">
         <div className="flex justify-center items-center">
-        <div className="bg-black w-[280px] h-[280px] rounded-full flex justify-center items-center">
-          Account Photo
-        </div>
+          <div className="bg-black w-[280px] h-[280px] rounded-full flex justify-center items-center relative">
+            <Image
+              src="/post.jpg"
+              alt="Public Image"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-full"
+            />
+          </div>
         </div>
         <div className="py-8 flex flex-col">
           <div className="flex gap-4 items-center">
             <span className="text-3xl font-light">Account</span>
-            <button className="bg-black text-white rounded-full w-[80px] h-[40px]">Follow</button>
+            <button
+              className={`rounded-full w-[80px] h-[40px] ${
+                followClicked ? "bg-white text-black" : "bg-black text-white"
+              }`}
+              onClick={handleFollowButton}
+            >
+              Follow
+            </button>
           </div>
           <div className="flex gap-12 py-4 text-xl">
             <span>12 Posts</span>
@@ -145,7 +165,7 @@ export default function AccountPage() {
         <ScrollArea className="w-128 whitespace-nowrap">
           <div className="flex w-max space-x-4 p-4 gap-4">
             {story.map((item) => (
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-2" key={item.name}>
                 <div className="bg-black rounded-full w-[80px] h-[80px] flex justify-center items-center text-white">
                   {item.image}
                 </div>
@@ -157,18 +177,20 @@ export default function AccountPage() {
         </ScrollArea>
       </div>
       <div className="grid grid-cols-3 p-4 gap-4">
-        {posts.map((item) => (
-          <Card className="w-auto">
-          <CardContent>
-            <Image
-                src={item.photo}
-                alt="Public Image"
-                width={800} 
-                height={600}    
-                objectFit="cover"         
-            />
-          </CardContent>
-        </Card>
+        {posts.map((item, index) => (
+          <Card className="w-auto" key={index}>
+            <CardContent className="p-0">
+              <div className="relative w-full h-64">
+                {" "}
+                <Image
+                  src={item.photo}
+                  alt="Public Image"
+                  layout="fill"
+                  objectFit="cover"
+                />
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
