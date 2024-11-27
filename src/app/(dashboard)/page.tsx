@@ -123,7 +123,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="py-4">
+    <div>
       <div className="text-blue-500 min-h-screen">
         <div className="h-[120px] flex items-center bg-gradient-to-b from-blue-100 to-white border rounded-md">
           <div className="flex flex-col justify-start px-8 space-y-2">

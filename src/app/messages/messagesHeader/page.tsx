@@ -5,7 +5,7 @@ export default function MessagesHeader() {
   return (
     <div className="border-b border-b-black p-4 flex justify-between">
       <Link href={"/"}>
-         <span className="text-blue-500 font-light text-2xl">Social Wave</span>
+        <span className="text-blue-500 font-light text-2xl">SocialWave</span>
       </Link>
       <input
         placeholder="search"

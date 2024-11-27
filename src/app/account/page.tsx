@@ -13,6 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { StoryCarousel } from "@/components/StoryCarousel";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
@@ -127,51 +129,36 @@ export default function AccountPage() {
   };
   return (
     <div className="py-2">
-      <div className="grid grid-cols-2 h-[300px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-md p-8">
         <div className="flex justify-center items-center">
-          <div className="bg-black w-[280px] h-[280px] rounded-full flex justify-center items-center relative">
-            <Image
-              src="/post.jpg"
-              alt="Public Image"
-              layout="fill"
-              objectFit="cover"
-              className="rounded-full"
-            />
-          </div>
+          <Avatar className="w-64 h-64">
+            <AvatarImage src="/post.jpg" alt="Profile picture" />
+            <AvatarFallback>AC</AvatarFallback>
+          </Avatar>
         </div>
-        <div className="py-8 flex flex-col">
-          <div className="flex gap-4 items-center">
-            <span className="text-3xl font-light">Account</span>
-            <button
-              className={`rounded-full w-[80px] h-[40px] ${
-                followClicked ? "bg-white text-black" : "bg-black text-white"
-              }`}
+        <div className="flex flex-col justify-center space-y-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-3xl font-semibold text-blue-800">Account</h2>
+            <Button
+              variant={followClicked ? "outline" : "default"}
+              className="w-24"
               onClick={handleFollowButton}
             >
-              Follow
-            </button>
+              {followClicked ? "Following" : "Follow"}
+            </Button>
           </div>
-          <div className="flex gap-12 py-4 text-xl">
-            <span>12 Posts</span>
-            <span>12.521 Followers</span>
-            <span>700 Following</span>
+          <div className="flex gap-8 text-lg text-blue-600">
+            <span className="font-medium">12 Posts</span>
+            <span className="font-medium">12,521 Followers</span>
+            <span className="font-medium">700 Following</span>
           </div>
-          <div className="py-8 text-xl font-light">
-            <span>Descrierea contului</span>
-          </div>
+          <p className="text-xl text-gray-600">Descrierea contului</p>
         </div>
       </div>
-      <div className="border border-black py-4 px-8 flex">
+      <div className="border-b border-t border-black flex">
         <ScrollArea className="w-128 whitespace-nowrap">
-          <div className="flex w-max space-x-4 p-4 gap-4">
-            {story.map((item) => (
-              <div className="flex flex-col items-center gap-2" key={item.name}>
-                <div className="bg-black rounded-full w-[80px] h-[80px] flex justify-center items-center text-white">
-                  {item.image}
-                </div>
-                <span>{item.name}</span>
-              </div>
-            ))}
+          <div className="flex w-max">
+            <StoryCarousel stories={story} />
           </div>
           <ScrollBar orientation="horizontal" className="opacity-0" />
         </ScrollArea>
