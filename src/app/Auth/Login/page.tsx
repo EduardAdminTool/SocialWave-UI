@@ -77,19 +77,24 @@ export default function LoginPage() {
 
   const handleCloseModal = () => setOpenModal(false);
   const router = useRouter();
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    login(data)
-      .then(() => {
-        // Success logic (e.g., redirecting the user)
-        // router.push("/");
-      })
-      .catch((error) => {
-        console.log("Error received:", error); // Debugging the full error
-        const errorMessage =
-          error.response?.data?.message || "An unknown error occurred";
-        setErrorMessage(errorMessage); // Update error message state
-        setOpenModal(true); // Trigger modal visibility
-      });
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    try {
+      const response = await login(data); // Call the login API
+      const { access_token } = response.data; // Adjust this line to match the API's response structure
+      if (access_token) {
+        localStorage.setItem("authToken", access_token); // Save token in localStorage
+        console.log("Login successful, token saved:", access_token);
+        router.push("/"); // Redirect after successful login
+      } else {
+        throw new Error("Access token not found in the response.");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      const errorMessage =
+        error.response?.data?.message || "An unknown error occurred";
+      setErrorMessage(errorMessage); // Update state with error message
+      setOpenModal(true); // Open error modal
+    }
   };
 
   const resendEmailVerification = async (email: string) => {
