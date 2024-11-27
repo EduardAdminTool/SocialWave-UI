@@ -42,13 +42,13 @@ export default function Messages() {
   return (
     <div className="grid grid-cols-2 px-16 py-12">
       <div className="flex-col flex">
-        <div className="flex items-center border border-b-black justify-between px-4">
+        <div className="flex items-center border border-b-black justify-between p-4">
           <span className="text-2xl">Direct</span>
           <BiMessageRoundedAdd size={36} />
         </div>
-        <div className="flex flex-col py-4 gap-4 text-xl border border-b-black px-4">
+        <div className="flex flex-col py-4 gap-4 text-xl border border-b-black px-4 cursor-pointer">
           {dm.map((item) => (
-            <div className="flex items-center gap-4 border-b border-b-black py-4">
+            <div className="flex items-center gap-4 border-b border-b-black py-4 hover:scale-95">
               <div className="bg-black rounded-full w-[80px] h-[80px] flex justify-center items-center text-white">
                 {item.logo}
               </div>
@@ -61,7 +61,7 @@ export default function Messages() {
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="border border-b-black px-4 flex justify-between items-center">
+        <div className="border border-b-black p-4 flex justify-between items-center">
           <span className="text-2xl">User</span>
           <FaExclamationCircle size={36} />
         </div>

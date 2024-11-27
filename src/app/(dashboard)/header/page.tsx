@@ -4,12 +4,18 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <div className="bg-white h-[40px] w-full border-b border-b-black flex justify-between items-center text-blue-500 p-8">
-      <FaCameraRetro size={36} />
-      <h1 className="text-3xl font-light">SocialWave</h1>
-      <Link href={"/messages"}>
-        <FaLocationArrow size={36} href="/messages" />
-      </Link>
+    <div className="px-8">
+      <div className="bg-blue-50 h-[40px] w-full border-b border-b-black flex justify-between items-center text-blue-500 p-8">
+        <h1 className="text-3xl font-light">SocialWave</h1>
+        <Link href="/messages" className="group">
+          <div className="transition-all duration-300 ease-in-out transform group-hover:scale-110">
+            <FaLocationArrow 
+              size={36} 
+              className="transition-colors duration-300 ease-in-out group-hover:text-blue-600"
+            />
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }
