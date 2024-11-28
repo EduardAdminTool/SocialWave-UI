@@ -98,25 +98,31 @@ export default function CreatePostPage() {
     }
 
     setError(null);
-    console.log(media);
+
     const today = new Date();
+
+    const localTime = today.toISOString();
+    const localTimeWithOffset = new Date(
+      today.getTime() - today.getTimezoneOffset() * 60000
+    ).toISOString();
+
     const formData = new FormData();
     formData.append("description", description);
-    formData.append("createdAt", today.toISOString());
-    formData.append("updatedAt", today.toISOString());
+    formData.append("createdAt", localTimeWithOffset);
+    formData.append("updatedAt", localTimeWithOffset);
     formData.append("images", media);
 
     try {
-      const response = await createPost(
-        description,
-        today.toISOString(),
-        today.toISOString(),
-        media
-      );
-      if (response.message) {
-        setSuccess("Post created successfully");
-        router.push("/");
-      }
+      // const response = await createPost(
+      //   description,
+      //   today.toISOString(),
+      //   today.toISOString(),
+      //   media
+      // );
+      // if (response.message) {
+      //   setSuccess("Post created successfully");
+      //   router.push("/");
+      // }
     } catch (err) {
       setError("Failed to create post. Please try again.");
     } finally {

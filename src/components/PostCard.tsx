@@ -103,7 +103,6 @@ export function PostCard({ post }: PostCardProps) {
         </Button>
       </CardHeader>
       <CardContent className="p-0">
-        {/* Scrollable Image Container */}
         <div className="relative w-full overflow-x-auto flex items-center space-x-4 py-4">
           {post.images?.map((imageUrl, index) => (
             <div
