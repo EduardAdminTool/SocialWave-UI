@@ -29,30 +29,19 @@ export function PostCard({ post }: PostCardProps) {
     const today = new Date();
     const itemDate = new Date(dateString);
 
-    const isToday = today.toDateString() === itemDate.toDateString();
     const diffMs = today.getTime() - itemDate.getTime();
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
 
-    if (isToday) {
-      const diffSeconds = Math.floor(diffMs / 1000);
-      if (diffSeconds < 60) {
-        return diffSeconds === 1
-          ? "1 second ago"
-          : `${diffSeconds} seconds ago`;
-      }
-
-      const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffHours < 24) {
       if (diffMinutes < 60) {
-        return diffMinutes === 1
-          ? "1 minute ago"
-          : `${diffMinutes} minutes ago`;
+        return diffMinutes <= 1 ? "1 minute ago" : `${diffMinutes} minutes ago`;
       }
-
-      const diffHours = Math.floor(diffMinutes / 60);
       return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
     }
 
-    const differenceDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
+    const differenceDays = Math.floor(diffHours / 24);
     if (differenceDays < 30) {
       return differenceDays === 1 ? "1 day ago" : `${differenceDays} days ago`;
     }
