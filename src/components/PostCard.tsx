@@ -105,9 +105,7 @@ export function PostCard({ post }: PostCardProps) {
       <CardContent className="p-0">
         <div className="relative aspect-square w-full">
           <Image
-            src={
-              "https://s3.eu-north-1.amazonaws.com/socialwaveadmintools/1732785994485-Screenshot%202024-1[…]f0ade66c0bcea9b&X-Amz-SignedHeaders=host&x-id=GetObject"
-            }
+            src={"/post.jpg"}
             alt="Post image"
             layout="fill"
             objectFit="cover"

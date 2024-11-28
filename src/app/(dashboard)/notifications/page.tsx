@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
+import { Button } from "@/components/ui/button";
 
 export default function Notifications() {
   const requests = [
@@ -18,9 +22,13 @@ export default function Notifications() {
       name: "Andreea",
     },
   ];
+  const [followClicked, setIsFollowClicked] = useState(false);
+  const handleFollowButton = () => {
+    setIsFollowClicked(!followClicked);
+  };
   return (
     <div className="flex flex-col items-center gap-4 justify-center bg-blue-50">
-      <div className="flex items-center gap-4 p-2 w-[600px] justify-between">
+      <div className="flex items-center gap-4 p-2 w-[600px] justify-between hover:scale-95 cursor-pointer">
         <div className="flex gap-4 py-4">
           <div className="relative w-12 h-12">
             <div className="absolute inset-0 top-2 flex justify-center items-center rounded-full bg-blue-600 w-10 h-10">
@@ -52,7 +60,31 @@ export default function Notifications() {
           </div>
         </div>
       </div>
-      <div className="border border-black">Today</div>
+      <div className="w-[600px] gap-4 flex flex-col px-4 py-4">
+        <span className="text-3xl">Astazi</span>
+        <div className="flex justify-between">
+          <div className="flex gap-2">
+            <div className="inset-0 border-2 border-black flex justify-center items-center rounded-full bg-green-500 w-10 h-10">
+              <span className="text-white text-xl font-bold">+</span>
+            </div>
+            <div className="flex flex-col">
+              <p>
+                <span className="font-bold">Account name</span> started
+                following you
+              </p>
+              <span>This is an message bla bla</span>
+            </div>
+          </div>
+
+          <Button
+            variant={followClicked ? "outline" : "default"}
+            className="w-24"
+            onClick={handleFollowButton}
+          >
+            {followClicked ? "Following" : "Follow"}
+          </Button>
+        </div>
+      </div>
       <div className="border border-black">In the last 7 days</div>
       <div className="border border-black">In the last 30 days</div>
     </div>
