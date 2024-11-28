@@ -34,48 +34,46 @@ export default function Header() {
   };
 
   return (
-    <div>
-      <div className="bg-blue-50 h-[40px] w-full border-b border-b-black flex justify-between items-center text-blue-500 py-8 px-4">
-        <Link href={"/"}>
-          <h1 className="text-3xl font-light">SocialWave</h1>
-        </Link>
-        <div className="relative w-[250px]">
-          <input
-            placeholder="Search"
-            value={searchQuery}
-            className="border border-black w-full text-center rounded-full h-[40px]"
-            onChange={handleInputChange}
-            onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
-          />
-          {showHistory && (
-            <div className="absolute mt-1 w-full z-10 bg-white border border-gray-300 rounded-lg shadow-lg">
-              {searchHistory.length > 0 ? (
-                searchHistory.map((item, index) => (
-                  <div
-                    key={index}
-                    className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleHistoryClick(item)}
-                  >
-                    {item}
-                  </div>
-                ))
-              ) : (
-                <div className="px-4 py-2 text-sm text-gray-500">
-                  No recent searches
+    <div className="bg-blue-50 h-[40px] w-full border-b border-b-black flex justify-between items-center text-blue-500 py-8 px-2">
+      <Link href={"/"}>
+        <h1 className="text-3xl font-light">SocialWave</h1>
+      </Link>
+      <div className="relative w-[250px]">
+        <input
+          placeholder="Search"
+          value={searchQuery}
+          className="border border-black text-center rounded-full h-[40px]"
+          onChange={handleInputChange}
+          onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
+        />
+        {showHistory && (
+          <div className="absolute mt-1 w-full z-10 bg-white border border-gray-300 rounded-lg shadow-lg">
+            {searchHistory.length > 0 ? (
+              searchHistory.map((item, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleHistoryClick(item)}
+                >
+                  {item}
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-        <Link href="/messages" className="group">
-          <div className="transition-all duration-300 ease-in-out transform group-hover:scale-110">
-            <FaLocationArrow
-              size={36}
-              className="transition-colors duration-300 ease-in-out group-hover:text-blue-600"
-            />
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-500">
+                No recent searches
+              </div>
+            )}
           </div>
-        </Link>
+        )}
       </div>
+      <Link href="/messages" className="group">
+        <div className="transition-all duration-300 ease-in-out transform group-hover:scale-110">
+          <FaLocationArrow
+            size={36}
+            className="transition-colors duration-300 ease-in-out group-hover:text-blue-600"
+          />
+        </div>
+      </Link>
     </div>
   );
 }

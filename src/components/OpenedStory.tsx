@@ -71,7 +71,7 @@ export default function OpenedStory({ isOpen, setIsOpen }: SignInProps) {
             <div className="transition-all duration-300 ease-in-out transform group-hover:scale-110">
               <FaLocationArrow
                 size={36}
-                className="transition-colors duration-300 ease-in-out group-hover:text-blue-600"
+                className="transition-colors duration-300 ease-in-out"
               />
             </div>
           </Link>

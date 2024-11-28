@@ -41,7 +41,7 @@ export default function Messages() {
   const [selectedUser, setSelectedUser] = useState(dm[0]);
 
   return (
-    <div className="grid grid-cols-2 px-16 py-12">
+    <div className="grid grid-cols-2 px-8 py-12">
       <div className="flex-col flex">
         <div className="flex items-center border border-b-black justify-between p-4">
           <span className="text-2xl">Direct</span>

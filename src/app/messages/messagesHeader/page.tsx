@@ -41,7 +41,7 @@ export default function MessagesHeader() {
         <input
           placeholder="Search"
           value={searchQuery}
-          className="border border-black w-full text-center rounded-full h-[40px]"
+          className="border border-black text-center rounded-full h-[40px]"
           onChange={handleInputChange}
           onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
         />
