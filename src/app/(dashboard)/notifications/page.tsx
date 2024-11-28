@@ -61,7 +61,7 @@ export default function Notifications() {
         </div>
       </div>
       <div className="w-[600px] gap-4 flex flex-col px-4 py-4">
-        <span className="text-3xl">Astazi</span>
+        <span className="text-3xl">Today</span>
         <div className="flex justify-between">
           <div className="flex gap-2">
             <div className="inset-0 border-2 border-black flex justify-center items-center rounded-full bg-green-500 w-10 h-10">
@@ -85,8 +85,41 @@ export default function Notifications() {
           </Button>
         </div>
       </div>
-      <div className="border border-black">In the last 7 days</div>
-      <div className="border border-black">In the last 30 days</div>
+      <div className="w-[600px] px-4 py-4 flex flex-col gap-4">
+        <span className="text-3xl">In the last 7 days</span>
+        <div className="flex gap-2">
+          <div className="inset-0 border-2 border-red-500 flex justify-center items-center rounded-full bg-blue-500 w-10 h-10">
+            <span className="text-white text-xl font-bold">+</span>
+          </div>
+          <div className="flex flex-col">
+            <p>
+              <span className="font-bold">Account name</span> posted a thread
+            </p>
+            <span>
+              This a thread posted by Account name to describe instagram
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="w-[600px] px-4 py-4 flex flex-col gap-4">
+        <span className="text-3xl">In the last 30 days</span>
+        <div className="flex gap-2">
+          <div className="inset-0 border-2 border-red-500 flex justify-center items-center rounded-full bg-blue-500 w-10 h-10">
+            <span className="text-white text-xl font-bold">+</span>
+          </div>
+          <div className="flex flex-col">
+            <p>
+              <span className="font-bold">Account name</span> posted a thread
+            </p>
+            <span>
+              This a thread posted by Account name to describe instagram
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="flex px-4 py-20 flex-col w-[600px]">
+        <span className="text-3xl">People you might know</span>
+      </div>
     </div>
   );
 }
