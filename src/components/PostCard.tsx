@@ -104,7 +104,7 @@ export function PostCard({ post }: PostCardProps) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative w-full overflow-x-auto flex items-center space-x-4 py-4">
-          {post.images?.map((imageUrl, index) => (
+          {/* {post.images?.map((imageUrl, index) => (
             <div
               key={index}
               className="flex-shrink-0 w-full h-[500px] relative"
@@ -117,7 +117,7 @@ export function PostCard({ post }: PostCardProps) {
                 className="rounded-lg"
               />
             </div>
-          ))}
+          ))} */}
         </div>
         <div className="p-4">
           <p className="text-lg">{post.description}</p>

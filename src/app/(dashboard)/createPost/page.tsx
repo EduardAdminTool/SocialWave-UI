@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
 import imageCompression from "browser-image-compression";
-import { createPost } from "@/services/posts";
+import { createPost, getPosts } from "@/services/posts";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -106,23 +106,17 @@ export default function CreatePostPage() {
       today.getTime() - today.getTimezoneOffset() * 60000
     ).toISOString();
 
-    const formData = new FormData();
-    formData.append("description", description);
-    formData.append("createdAt", localTimeWithOffset);
-    formData.append("updatedAt", localTimeWithOffset);
-    formData.append("images", media);
-
     try {
-      // const response = await createPost(
-      //   description,
-      //   today.toISOString(),
-      //   today.toISOString(),
-      //   media
-      // );
-      // if (response.message) {
-      //   setSuccess("Post created successfully");
-      //   router.push("/");
-      // }
+      const response = await createPost(
+        description,
+        localTimeWithOffset,
+        localTimeWithOffset,
+        media
+      );
+      if (response.message) {
+        setSuccess("Post created successfully");
+        router.push("/");
+      }
     } catch (err) {
       setError("Failed to create post. Please try again.");
     } finally {

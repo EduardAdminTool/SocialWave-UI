@@ -18,18 +18,19 @@ export default function Home() {
   const [error, setError] = useState("");
   const [posts, setPosts] = useState<Posts[]>([]);
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  // useEffect(() => {
+  //   fetchPosts();
+  // }, []);
 
-  const fetchPosts = async () => {
-    try {
-      const fetchedPosts = await getPosts();
-      setPosts(fetchedPosts);
-    } catch (err) {
-      setError("Nu s-au putut obtine postari");
-    }
-  };
+  // const fetchPosts = async () => {
+  // setError(null);
+  //   try {
+  //     const fetchedPosts = await getPosts();
+  //     setPosts(fetchedPosts);
+  //   } catch (err) {
+  //     setError("Nu s-au putut obtine postari");
+  //   }
+  // };
 
   const story = [
     {

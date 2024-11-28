@@ -2,7 +2,7 @@
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +15,13 @@ import {
 } from "@/components/ui/card";
 import { StoryCarousel } from "@/components/StoryCarousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import { Posts } from "@/types/types";
+import { getPostsById, getPosts } from "@/services/posts";
 export default function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
+  const [posts, setPosts] = useState<Posts[]>([]);
+  const [error, setError] = useState<string | null>("");
+
   const story = [
     {
       image: "poza",
@@ -109,21 +113,19 @@ export default function AccountPage() {
     },
   ];
 
-  const posts = [
-    {
-      photo: "/post.jpg",
-    },
-    {
-      photo: "/post.jpg",
-    },
-    {
-      photo: "/post.jpg",
-    },
-    {
-      photo: "/post.jpg",
-    },
-  ];
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
+  const fetchPosts = async () => {
+    setError(null);
+    try {
+      const fetchedPosts = await getPosts();
+      setPosts(fetchedPosts);
+    } catch (err) {
+      setError("Nu s-au putut obtine postari");
+    }
+  };
   const handleFollowButton = () => {
     setIsFollowClicked(!followClicked);
   };
@@ -169,12 +171,13 @@ export default function AccountPage() {
             <CardContent className="p-0">
               <div className="relative w-full h-64">
                 {" "}
-                <Image
-                  src={item.photo}
+                {/* <Image
+                  src={posts[0]}
                   alt="Public Image"
                   layout="fill"
                   objectFit="cover"
-                />
+                /> */}
+                {item.description}
               </div>
             </CardContent>
           </Card>
