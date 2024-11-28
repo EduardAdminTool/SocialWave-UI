@@ -134,7 +134,7 @@ export default function AccountPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-md p-8">
         <div className="flex justify-center items-center">
           <Avatar className="w-64 h-64">
-            <AvatarImage src="/post.jpg" alt="Profile picture" />
+            <AvatarImage src={"post.jpg"} alt="Profile picture" />
             <AvatarFallback>AC</AvatarFallback>
           </Avatar>
         </div>
@@ -170,14 +170,12 @@ export default function AccountPage() {
           <Card className="w-auto" key={index}>
             <CardContent className="p-0">
               <div className="relative w-full h-64">
-                {" "}
-                {/* <Image
-                  src={posts[0]}
+                <Image
+                  src={item.images[0].imageUrl}
                   alt="Public Image"
                   layout="fill"
                   objectFit="cover"
-                /> */}
-                {item.description}
+                />
               </div>
             </CardContent>
           </Card>

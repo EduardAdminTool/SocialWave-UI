@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "s3.eu-north-1.amazonaws.com",
+        hostname: "socialwaveadmintools.s3.eu-north-1.amazonaws.com",
         port: "",
         pathname: "/**",
       },

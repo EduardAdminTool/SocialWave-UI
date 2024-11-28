@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
 import imageCompression from "browser-image-compression";
-import { createPost, getPosts } from "@/services/posts";
+import { createPost } from "@/services/posts";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -101,16 +101,15 @@ export default function CreatePostPage() {
 
     const today = new Date();
 
-    const localTime = today.toISOString();
-    const localTimeWithOffset = new Date(
-      today.getTime() - today.getTimezoneOffset() * 60000
-    ).toISOString();
-
+    const bucharestOffset = 3 * 60;
+    const localTime = new Date(today.getTime() + bucharestOffset * 60000);
+    const localTimeISOString = localTime.toISOString();
+    console.log(media);
     try {
       const response = await createPost(
         description,
-        localTimeWithOffset,
-        localTimeWithOffset,
+        localTimeISOString,
+        localTimeISOString,
         media
       );
       if (response.message) {
