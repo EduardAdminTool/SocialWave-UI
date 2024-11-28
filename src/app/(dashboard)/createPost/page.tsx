@@ -2,11 +2,12 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { createPost } from "@/services/posts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
+import imageCompression from "browser-image-compression";
+import { createPost } from "@/services/posts";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -17,11 +18,33 @@ export default function CreatePostPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = useCallback((file: File) => {
-    setMedia(file);
-    const fileURL = URL.createObjectURL(file);
+  const compressImage = async (
+    file: globalThis.File
+  ): Promise<globalThis.File> => {
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+
+    try {
+      return await imageCompression(file, options);
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      return file;
+    }
+  };
+
+  const handleFile = useCallback(async (file: File) => {
+    let processedFile = file;
+    if (file.type.startsWith("image/")) {
+      processedFile = await compressImage(file);
+    }
+    setMedia(processedFile);
+    const fileURL = URL.createObjectURL(processedFile);
     setPreview(fileURL);
   }, []);
 
@@ -60,19 +83,44 @@ export default function CreatePostPage() {
   const handleUpload = async () => {
     setError(null);
     setSuccess(null);
+    setIsUploading(true);
+
     if (!description.trim()) {
       setError("Please enter a description");
+      setIsUploading(false);
       return;
     }
+
+    if (!media) {
+      setError("Please select an image or video");
+      setIsUploading(false);
+      return;
+    }
+
+    setError(null);
+    console.log(media);
     const today = new Date();
+    const formData = new FormData();
+    formData.append("description", description);
+    formData.append("createdAt", today.toISOString());
+    formData.append("updatedAt", today.toISOString());
+    formData.append("images", media);
+
     try {
-      const response = await createPost(description, today, today);
+      const response = await createPost(
+        description,
+        today.toISOString(),
+        today.toISOString(),
+        media
+      );
       if (response.message) {
         setSuccess("Post created successfully");
         router.push("/");
       }
     } catch (err) {
       setError("Failed to create post. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -95,6 +143,7 @@ export default function CreatePostPage() {
             <Textarea
               placeholder="Write your caption..."
               className="h-32 w-full"
+              value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
@@ -149,8 +198,9 @@ export default function CreatePostPage() {
             <Button
               onClick={handleUpload}
               className="w-full max-w-xs bg-blue-600 hover:bg-blue-500 hover:scale-105"
+              disabled={isUploading}
             >
-              Publish
+              {isUploading ? "Publishing..." : "Publish"}
             </Button>
           </div>
         </CardContent>

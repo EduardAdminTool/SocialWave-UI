@@ -145,9 +145,12 @@ export default function Home() {
           </ScrollArea>
         </div>
         <div className="min-h-screen py-4 space-y-4">
-          {posts.map((item, index) => (
-            <PostCard key={item.postId} post={item} />
-          ))}
+          {/* {posts
+            .slice()
+            .reverse()
+            .map((item, index) => (
+              <PostCard key={item.postId} post={item} />
+            ))} */}
         </div>
       </div>
     </div>

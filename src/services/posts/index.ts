@@ -1,7 +1,7 @@
 const token = localStorage.getItem("authToken");
 
 export const getPosts = async () => {
-  const response = await fetch("http://localhost:3001/post", {
+  const response = await fetch("http://localhost:3001/post/20", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -18,12 +18,10 @@ export const getPosts = async () => {
 
 export const createPost = async (
   description: string,
-  createdAt: Date,
-  updatedAt: Date
+  createdAt: string,
+  updatedAt: string,
+  media: File
 ) => {
-  const createdAtString = createdAt.toISOString();
-  const updatedAtString = updatedAt.toISOString();
-
   const response = await fetch("http://localhost:3001/post", {
     method: "POST",
     headers: {
@@ -32,8 +30,9 @@ export const createPost = async (
     },
     body: JSON.stringify({
       description: description,
-      createdAt: createdAtString,
-      updatedAt: updatedAtString,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      images: media,
     }),
   });
 

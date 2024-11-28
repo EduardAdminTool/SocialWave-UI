@@ -88,7 +88,7 @@ export function PostCard({ post }: PostCardProps) {
       <CardHeader className="flex flex-row items-center space-x-4 pb-4">
         <Avatar className="h-12 w-12">
           <AvatarImage src={"/post.jpg"} />
-          <AvatarFallback>Matei</AvatarFallback>
+          <AvatarFallback>{post.userId}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">Matei</h3>
@@ -103,13 +103,22 @@ export function PostCard({ post }: PostCardProps) {
         </Button>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="relative aspect-square w-full">
-          <Image
-            src={"/post.jpg"}
-            alt="Post image"
-            layout="fill"
-            objectFit="cover"
-          />
+        {/* Scrollable Image Container */}
+        <div className="relative w-full overflow-x-auto flex items-center space-x-4 py-4">
+          {post.images?.map((imageUrl, index) => (
+            <div
+              key={index}
+              className="flex-shrink-0 w-full h-[500px] relative"
+            >
+              <Image
+                src={imageUrl.imageUrl}
+                alt={`Post image ${index + 1}`}
+                layout="fill"
+                objectFit="cover"
+                className="rounded-lg"
+              />
+            </div>
+          ))}
         </div>
         <div className="p-4">
           <p className="text-lg">{post.description}</p>
