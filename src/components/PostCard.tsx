@@ -34,10 +34,15 @@ export function PostCard({ post }: PostCardProps) {
     const diffMinutes = Math.floor(diffSeconds / 60);
     const diffHours = Math.floor(diffMinutes / 60);
 
+    if (diffSeconds < 60) {
+      return diffSeconds === 1 ? "1 second ago" : `${diffSeconds} seconds ago`;
+    }
+
+    if (diffMinutes < 60) {
+      return diffMinutes === 1 ? "1 minute ago" : `${diffMinutes} minutes ago`;
+    }
+
     if (diffHours < 24) {
-      if (diffMinutes < 60) {
-        return diffMinutes <= 1 ? "1 minute ago" : `${diffMinutes} minutes ago`;
-      }
       return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
     }
 
