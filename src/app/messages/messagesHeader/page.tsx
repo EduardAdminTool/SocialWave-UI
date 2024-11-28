@@ -33,7 +33,7 @@ export default function MessagesHeader() {
     setShowHistory(false);
   };
   return (
-    <div className="border-b border-b-black p-4 flex justify-between bg-blue-50 ">
+    <div className="border-b border-b-black py-3 px-2 flex justify-between bg-blue-50 ">
       <Link href={"/"}>
         <h1 className="text-3xl font-light text-blue-500 ">SocialWave</h1>
       </Link>

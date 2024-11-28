@@ -56,7 +56,7 @@ export default function OpenedStory({ isOpen, setIsOpen }: SignInProps) {
         </div>
         <div className="flex items-center justify-between">
           <input
-            placeholder="Trimite un mesaj.."
+            placeholder="Send a message.."
             className="border border-black w-[600px] text-center rounded-full h-[40px]"
           />
           <div onClick={handleLikeClick}>
