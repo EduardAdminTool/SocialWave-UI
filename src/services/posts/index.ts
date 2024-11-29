@@ -18,12 +18,10 @@ export const getPosts = async () => {
 
 export const createPost = async (
   description: string,
-  createdAt: Date,
-  updatedAt: Date
+  createdAt: string,
+  updatedAt: string,
+  media: File
 ) => {
-  const createdAtString = createdAt.toISOString();
-  const updatedAtString = updatedAt.toISOString();
-
   const response = await fetch("http://localhost:3001/post", {
     method: "POST",
     headers: {
@@ -32,8 +30,9 @@ export const createPost = async (
     },
     body: JSON.stringify({
       description: description,
-      createdAt: createdAtString,
-      updatedAt: updatedAtString,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      images: media,
     }),
   });
 
@@ -47,6 +46,22 @@ export const createPost = async (
 export const deletePost = async (postId: number) => {
   const response = await fetch(`http://localhost:3001/post/${postId}`, {
     method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const getPostsById = async (id: number) => {
+  const response = await fetch(`http://localhost:3001/post/${id}`, {
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",

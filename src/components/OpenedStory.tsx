@@ -1,82 +1,84 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Apple, Key } from "lucide-react";
-import { X } from "lucide-react";
-import { Heart } from "lucide-react";
-
+import { X, Heart, Send } from 'lucide-react';
 import { SignInProps } from "@/types/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { DialogClose } from "@radix-ui/react-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
 import Link from "next/link";
-import { FaLocationArrow } from "react-icons/fa";
 
 export default function OpenedStory({ isOpen, setIsOpen }: SignInProps) {
   const [isLiked, setIsLiked] = useState(false);
+  const [replyText, setReplyText] = useState("");
 
   const handleLikeClick = () => setIsLiked(!isLiked);
 
+  const handleReplyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setReplyText(e.target.value);
+  };
+
+  const handleSendReply = () => {
+    setReplyText("");
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[825px] bg-blue-200 text-black border-none h-auto">
-        <DialogHeader className="space-y-4">
-          <div className="relative w-full h-2 bg-gray-200 overflow-hidden">
-            <div className="absolute w-full h-full bg-blue-500 animate-loading-bar"></div>
-          </div>
-          <DialogTitle className="flex flex-row items-center space-x-4 pb-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={"/post.jpg"} className="rounded-full" />
-              <AvatarFallback>Matei</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold">Matei</h3>
+      <DialogContent className="sm:max-w-[500px] h-[100vh] p-0 bg-black text-white border-none rounded-none overflow-hidden">
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between p-4 z-10">
+            <div className="flex items-center space-x-2">
+              <Avatar className="h-8 w-8 ring-2 ring-white">
+                <AvatarImage src="/post.jpg" />
+                <AvatarFallback>M</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold text-sm">matei</p>
+                <p className="text-xs text-gray-400">2h</p>
+              </div>
             </div>
-          </DialogTitle>
-        </DialogHeader>
-        <div>
-          <div className="relative w-full h-[800px]">
+          </div>
+
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gray-700">
+             <div className="absolute w-full h-full bg-blue-500 animate-loading-bar"></div>
+          </div>
+
+          <div className="flex-grow relative">
             <Image
-              src={"/post.jpg"}
-              alt="Public Image"
+              src="/post.jpg"
+              alt="Story Image"
               layout="fill"
               objectFit="cover"
             />
           </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <input
-            placeholder="Send a message.."
-            className="border border-black w-[600px] text-center rounded-full h-[40px]"
-          />
-          <div onClick={handleLikeClick}>
-            <Heart
-              className={`h-10 w-10 ${
-                isLiked ? "fill-red-500 text-red-500" : ""
-              } hover:scale-110 cursor-pointer transition-colors duration-300 ease-in-out`}
-            />
-          </div>
 
-          <Link href="/messages" className="group">
-            <div className="transition-all duration-300 ease-in-out transform group-hover:scale-110">
-              <FaLocationArrow
-                size={36}
-                className="transition-colors duration-300 ease-in-out"
+          <div className="p-4 bg-transparent absolute bottom-0 left-0 right-0">
+            <div className="flex items-center space-x-2 bg-black bg-opacity-50 rounded-full p-1">
+              <Input
+                type="text"
+                placeholder="Send message"
+                className="flex-grow bg-transparent border-none text-white placeholder-gray-400 focus:outline-none focus:ring-0"
+                value={replyText}
+                onChange={handleReplyChange}
               />
+              <div className="flex items-center space-x-2">
+                <button onClick={handleLikeClick}>
+                  <Heart
+                    className={`h-6 w-6 ${
+                      isLiked ? "fill-red-500 text-red-500" : "text-white"
+                    }`}
+                  />
+                </button>
+                <button onClick={handleSendReply}>
+                  <Send className="h-6 w-6 text-white" />
+                </button>
+              </div>
             </div>
-          </Link>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
