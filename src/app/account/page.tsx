@@ -24,6 +24,7 @@ export default function AccountPage() {
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
   const [error, setError] = useState<string | null>("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activePostIndex, setActivePostIndex] = useState<number | null>(null); // Track which post is being viewed
 
   const story = [
     {
@@ -125,7 +126,6 @@ export default function AccountPage() {
     try {
       const fetchedAccount = await getAccountInfo();
       setAccountInfo(fetchedAccount);
-      console.log(fetchedAccount);
     } catch (err) {
       setError("Nu s-au putut obtine date");
     }
@@ -136,17 +136,20 @@ export default function AccountPage() {
   };
 
   const nextImage = () => {
-    if (
-      accountInfo?.posts &&
-      currentImageIndex < accountInfo?.posts.length - 1
-    ) {
-      setCurrentImageIndex(currentImageIndex + 1);
+    if (activePostIndex !== null && accountInfo?.posts) {
+      const images = accountInfo.posts[activePostIndex]?.images || [];
+      if (currentImageIndex < images.length - 1) {
+        setCurrentImageIndex(currentImageIndex + 1);
+      }
     }
   };
 
   const prevImage = () => {
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1);
+    if (activePostIndex !== null && accountInfo?.posts) {
+      const images = accountInfo.posts[activePostIndex]?.images || [];
+      if (currentImageIndex > 0) {
+        setCurrentImageIndex(currentImageIndex - 1);
+      }
     }
   };
 
@@ -196,15 +199,17 @@ export default function AccountPage() {
         </ScrollArea>
       </div>
 
-      {/* Image Cards Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 p-4 gap-4">
-        {accountInfo?.posts?.flatMap((item, postIndex) =>
+        {accountInfo?.posts?.map((item, postIndex) =>
           item.images?.length > 0 ? (
-            <Card className="w-auto col-span-1" key={`post-${postIndex}`}>
+            <Card
+              className="w-auto"
+              key={`post-${postIndex}`}
+              onClick={() => setActivePostIndex(postIndex)} // Set active post on click
+            >
               <CardContent className="p-0">
                 <div className="relative w-full h-[500px]">
                   <div className="flex justify-center items-center relative">
-                    {/* Left Scroll Button */}
                     <Button
                       variant="outline"
                       size="icon"
