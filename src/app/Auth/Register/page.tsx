@@ -260,6 +260,18 @@ export default function RegisterPage() {
                 type="date"
                 required
                 InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: new Date( // Sets min to 100 years ago
+                    new Date().setFullYear(new Date().getFullYear() - 100)
+                  )
+                    .toISOString()
+                    .split("T")[0],
+                  max: new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 16)
+                  )
+                    .toISOString()
+                    .split("T")[0], // Sets max to today's date minus 16 years
+                }}
               />
               <FormTextField
                 name="name"
