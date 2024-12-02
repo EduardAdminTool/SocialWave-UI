@@ -12,8 +12,8 @@ import { createPost } from "@/services/posts";
 export default function CreatePostPage() {
   const router = useRouter();
 
-  const [media, setMedia] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [media, setMedia] = useState<File[]>([]); // Handle multiple files
+  const [previews, setPreviews] = useState<string[]>([]); // Previews for each file
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -43,21 +43,27 @@ export default function CreatePostPage() {
     if (file.type.startsWith("image/")) {
       processedFile = await compressImage(file);
     }
-    setMedia(processedFile);
+
+    setMedia((prevFiles) => [...prevFiles, processedFile]); // Add file to the array
     const fileURL = URL.createObjectURL(processedFile);
-    setPreview(fileURL);
+    setPreviews((prevPreviews) => [...prevPreviews, fileURL]); // Add preview to the array
   }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (
-        file &&
-        (file.type.startsWith("image/") || file.type.startsWith("video/"))
-      ) {
-        handleFile(file);
+      const files = e.dataTransfer.files;
+      if (files) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (
+            file &&
+            (file.type.startsWith("image/") || file.type.startsWith("video/"))
+          ) {
+            handleFile(file);
+          }
+        }
       }
     },
     [handleFile]
@@ -74,9 +80,11 @@ export default function CreatePostPage() {
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFile(file);
+    const files = e.target.files;
+    if (files) {
+      Array.from(files).forEach((file) => {
+        handleFile(file);
+      });
     }
   };
 
@@ -91,8 +99,8 @@ export default function CreatePostPage() {
       return;
     }
 
-    if (!media) {
-      setError("Please select an image or video");
+    if (media.length === 0) {
+      setError("Please select at least one image or video");
       setIsUploading(false);
       return;
     }
@@ -125,10 +133,9 @@ export default function CreatePostPage() {
     }
   };
 
-  // Delete the media
-  const handleDeleteMedia = () => {
-    setMedia(null);
-    setPreview(null);
+  const handleDeleteMedia = (index: number) => {
+    setMedia((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setPreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
   };
 
   return (
@@ -158,7 +165,7 @@ export default function CreatePostPage() {
           >
             <Upload className="mx-auto h-12 w-12 text-gray-400" />
             <p className="mt-2 text-sm text-gray-600">
-              Drag and drop your file here, or click to select a file
+              Drag and drop your files here, or click to select files
             </p>
             <input
               ref={fileInputRef}
@@ -167,50 +174,42 @@ export default function CreatePostPage() {
               onChange={handleFileChange}
               className="hidden"
               id="file-upload"
+              multiple // Allow multiple files
             />
             <Button
               className="mt-4"
               variant="outline"
               onClick={handleSelectFileClick}
             >
-              Select File
+              Select Files
             </Button>
           </div>
-          {preview && (
-            <div className="relative flex justify-center">
-              {media?.type.startsWith("image/") ? (
-                <div>
-                  <img
-                    src={preview}
-                    alt="Uploaded preview"
-                    className="max-w-full max-h-64 rounded-lg shadow-md"
-                  />
-                  {/* Delete button positioned over the image */}
+          {previews.length > 0 && (
+            <div className="grid grid-cols-2 gap-4">
+              {previews.map((preview, index) => (
+                <div key={index} className="relative">
+                  {media[index]?.type.startsWith("image/") ? (
+                    <img
+                      src={preview}
+                      alt="Uploaded preview"
+                      className="max-w-full max-h-64 rounded-lg shadow-md"
+                    />
+                  ) : (
+                    <video
+                      src={preview}
+                      controls
+                      className="max-w-full max-h-64 rounded-lg shadow-md"
+                    />
+                  )}
                   <button
-                    onClick={handleDeleteMedia}
+                    onClick={() => handleDeleteMedia(index)}
                     className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
                     aria-label="Delete"
                   >
                     &times;
                   </button>
                 </div>
-              ) : (
-                <div>
-                  <video
-                    src={preview}
-                    controls
-                    className="max-w-full max-h-64 rounded-lg shadow-md"
-                  />
-                  {/* Delete button positioned over the video */}
-                  <button
-                    onClick={handleDeleteMedia}
-                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-                    aria-label="Delete"
-                  >
-                    &times;
-                  </button>
-                </div>
-              )}
+              ))}
             </div>
           )}
           {error && <p className="text-red-500 text-center">{error}</p>}

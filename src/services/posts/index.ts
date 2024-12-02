@@ -20,29 +20,23 @@ export const createPost = async (
   description: string,
   createdAt: string,
   updatedAt: string,
-  media: File
+  media: File[]
 ) => {
   const formData = new FormData();
   formData.append("description", description);
   formData.append("createdAt", createdAt);
   formData.append("updatedAt", updatedAt);
 
-  const mediaWithExtension = new File(
-    [media],
-    media.name.replace(/\.[^/.]+$/, "") + ".png",
-    {
-      type: media.type,
-    }
-  );
-
-  formData.append("images", mediaWithExtension);
+  media.forEach((file, index) => {
+    formData.append("images", file, `image_${index}.png`);
+  });
 
   const response = await fetch("http://localhost:3001/post", {
     method: "POST",
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
     },
-    body: formData,
+    body: formData, // Send FormData
   });
 
   if (!response.ok) {
