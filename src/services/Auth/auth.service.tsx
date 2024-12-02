@@ -3,7 +3,7 @@ import { ConfirmEmailDto } from "@/dtos/auth/confirm-email.dto";
 import { RegisterDataDto } from "@/dtos/auth/register-data.dto";
 import { ResetPasswordDto } from "@/dtos/auth/reset-password.dto";
 
-export const register = async (data: RegisterDataDto) => {
+export const register = async (data: FormData) => {
   return await api.post("/auth/register", data, {});
 };
 

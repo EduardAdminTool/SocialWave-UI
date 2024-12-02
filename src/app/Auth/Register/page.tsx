@@ -79,44 +79,85 @@ export default function RegisterPage() {
     if (!data.profilePicture) {
       setErrorMessage("Please select a profile picture");
       setOpenModal(true);
+      return;
     }
-    if (data.profilePicture) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.result) {
-          const base64Image = reader.result.toString(); // Base64 string
-          const payload = {
-            ...data,
-            profilePicture: base64Image, // Replace File object with Base64 string
-          };
 
-          register(payload) // Register request
-            .then(() => {
-              // If registration is successful, show the modal
-              setOpenModal(true);
-              setErrorMessage(null); // Clear any previous error message
-            })
-            .catch((error) => {
-              console.error("Registration failed:", error);
+    const file = data.profilePicture;
+    const reader = new FileReader();
 
-              // Check for error response from the server
-              const errorResponse = error?.response?.data; // Assuming the API returns error details in 'response.data'
+    reader.onload = () => {
+      if (reader.result) {
+        const img = new Image();
+        img.src = reader.result as string;
 
-              // Set specific error message
-              if (errorResponse?.message) {
-                setErrorMessage(errorResponse.message); // Display specific error message
-              } else {
-                setErrorMessage("Registration failed. Please try again.");
+        img.onload = async () => {
+          const canvas = document.createElement("canvas");
+          const maxWidth = 800; // Set the maximum width
+          const maxHeight = 800; // Set the maximum height
+          let { width, height } = img;
+
+          // Resize the image while maintaining the aspect ratio
+          if (width > maxWidth || height > maxHeight) {
+            if (width > height) {
+              height = (maxHeight / width) * height;
+              width = maxWidth;
+            } else {
+              width = (maxWidth / height) * width;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+          }
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                // Prepare the form data
+                const compressedFile = new File([blob], file.name, {
+                  type: file.type,
+                });
+                const formData = new FormData();
+                formData.append("profilePicture", compressedFile);
+                formData.append("email", data.email);
+                formData.append("password", data.password);
+                formData.append("birthdate", data.birthdate);
+                formData.append("name", data.name);
+                formData.append("bio", data.bio);
+
+                register(formData)
+                  .then(() => {
+                    setOpenModal(true);
+                    setErrorMessage(null); // Clear any previous error message
+                  })
+                  .catch((error) => {
+                    console.error("Registration failed:", error);
+
+                    const errorResponse = error?.response?.data;
+
+                    if (errorResponse?.message) {
+                      setErrorMessage(errorResponse.message);
+                    } else {
+                      setErrorMessage("Registration failed. Please try again.");
+                    }
+
+                    setOpenModal(true);
+                  });
               }
+            },
+            file.type, // Keep the original file type (e.g., image/png or image/jpeg)
+            0.7 // Compression quality (70%)
+          );
+        };
+      }
+    };
 
-              setOpenModal(true); // Close the success modal if registration failed
-            });
-        }
-      };
-      reader.readAsDataURL(data.profilePicture); // Convert image to Base64
-    } else {
-      console.error("No profile picture selected");
-    }
+    reader.readAsDataURL(file); // Load the image as a DataURL for processing
   };
 
   const handleImageSelected = (file: File) => {
