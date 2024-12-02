@@ -17,7 +17,7 @@ import { deletePost } from "@/services/posts";
 export function PostCard({ post }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Track the current image index
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleLikeClick = () => setIsLiked(!isLiked);
 
@@ -72,7 +72,6 @@ export function PostCard({ post }: PostCardProps) {
     };
   }, [post]);
 
-  // Handle changing images
   const nextImage = () => {
     if (post.images && currentImageIndex < post.images.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);

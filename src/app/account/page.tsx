@@ -1,7 +1,6 @@
 "use client";
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -19,11 +18,12 @@ import { Posts } from "@/types/posts/types";
 import { Account } from "@/types/account/types";
 import { getPostsById, getPosts } from "@/services/posts";
 import { getAccountInfo } from "@/services/account";
+
 export default function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
-
   const [error, setError] = useState<string | null>("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const story = [
     {
@@ -135,6 +135,21 @@ export default function AccountPage() {
     setIsFollowClicked(!followClicked);
   };
 
+  const nextImage = () => {
+    if (
+      accountInfo?.posts &&
+      currentImageIndex < accountInfo?.posts.length - 1
+    ) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
+  };
+
+  const prevImage = () => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
+  };
+
   return (
     <div className="py-2">
       {/* Account Info */}
@@ -181,26 +196,47 @@ export default function AccountPage() {
         </ScrollArea>
       </div>
 
+      {/* Image Cards Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 p-4 gap-4">
         {accountInfo?.posts?.flatMap((item, postIndex) =>
           item.images?.length > 0 ? (
-            item.images.map((image, imageIndex) => (
-              <Card
-                className="w-auto"
-                key={`post-${postIndex}-image-${imageIndex}`}
-              >
-                <CardContent className="p-0">
-                  <div className="relative w-full h-64">
-                    <Image
-                      src={image.imageUrl}
-                      alt={`Public Image ${postIndex}-${imageIndex}`}
-                      layout="fill"
-                      objectFit="cover"
-                    />
+            <Card className="w-auto col-span-1" key={`post-${postIndex}`}>
+              <CardContent className="p-0">
+                <div className="relative w-full h-[500px]">
+                  <div className="flex justify-center items-center relative">
+                    {/* Left Scroll Button */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={prevImage}
+                      className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full p-2 z-10"
+                    >
+                      &lt;
+                    </Button>
+
+                    <div className="relative w-full flex justify-center h-[500px] overflow-hidden">
+                      <Image
+                        src={item.images[currentImageIndex].imageUrl}
+                        alt={`Post image ${currentImageIndex + 1}`}
+                        width={800}
+                        height={500}
+                        objectFit="cover"
+                        className="rounded-lg"
+                      />
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={nextImage}
+                      className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full p-2 z-10"
+                    >
+                      &gt;
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             <Card className="w-auto" key={`post-${postIndex}-no-image`}>
               <CardContent className="p-4">
@@ -208,7 +244,7 @@ export default function AccountPage() {
               </CardContent>
             </Card>
           )
-        ) || <p>No posts available</p>}
+        )}
       </div>
     </div>
   );

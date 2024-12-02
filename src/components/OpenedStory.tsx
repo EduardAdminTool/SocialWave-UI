@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { X, Heart, Send } from 'lucide-react';
+import { X, Heart, Send } from "lucide-react";
 import { SignInProps } from "@/types/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
@@ -25,7 +25,8 @@ export default function OpenedStory({ isOpen, setIsOpen }: SignInProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[500px] h-[100vh] p-0 bg-black text-white border-none rounded-none overflow-hidden">
+      <DialogTitle></DialogTitle>
+      <DialogContent className="sm:max-w-[800px] h-[100vh] p-0 bg-black text-white border-none rounded-none overflow-hidden">
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 z-10">
             <div className="flex items-center space-x-2">
@@ -41,7 +42,7 @@ export default function OpenedStory({ isOpen, setIsOpen }: SignInProps) {
           </div>
 
           <div className="absolute top-0 left-0 right-0 h-1 bg-gray-700">
-             <div className="absolute w-full h-full bg-blue-500 animate-loading-bar"></div>
+            <div className="absolute w-full h-full bg-blue-500 animate-loading-bar"></div>
           </div>
 
           <div className="flex-grow relative">
@@ -81,4 +82,3 @@ export default function OpenedStory({ isOpen, setIsOpen }: SignInProps) {
     </Dialog>
   );
 }
-
