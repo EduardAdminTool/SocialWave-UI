@@ -28,12 +28,14 @@ export const createPost = async (
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",
     },
-    body: JSON.stringify({
-      description: description,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      images: media,
-    }),
+    body: JSON.stringify([
+      {
+        description: description,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        images: media,
+      },
+    ]),
   });
 
   if (!response.ok) {
