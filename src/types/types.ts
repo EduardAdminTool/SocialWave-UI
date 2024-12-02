@@ -13,6 +13,7 @@ interface PostVideo {
 export interface Posts {
   postId: number;
   userId: number;
+  profilePicture: string;
   description: string;
   createdAt: string;
   updatedAt: string;

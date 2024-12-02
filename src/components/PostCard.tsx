@@ -87,7 +87,7 @@ export function PostCard({ post }: PostCardProps) {
     <Card className="w-full max-w-4xl mx-auto mb-6">
       <CardHeader className="flex flex-row items-center space-x-4 pb-4">
         <Avatar className="h-12 w-12">
-          <AvatarImage src={"/post.jpg"} />
+          <AvatarImage src={post.profilePicture} />
           <AvatarFallback>{post.userId}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
@@ -104,7 +104,7 @@ export function PostCard({ post }: PostCardProps) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative w-full overflow-x-auto flex items-center space-x-4 py-4">
-          {/* {post.images?.map((imageUrl, index) => (
+          {post.images?.map((imageUrl, index) => (
             <div
               key={index}
               className="flex-shrink-0 w-full h-[500px] relative"
@@ -114,10 +114,10 @@ export function PostCard({ post }: PostCardProps) {
                 alt={`Post image ${index + 1}`}
                 layout="fill"
                 objectFit="cover"
-                className="rounded-lg"
+                className="rounded-lg p-4"
               />
             </div>
-          ))} */}
+          ))}
         </div>
         <div className="p-4">
           <p className="text-lg">{post.description}</p>

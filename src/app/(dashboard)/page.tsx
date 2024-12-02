@@ -15,22 +15,23 @@ import { getPosts, deletePost } from "@/services/posts";
 import { Posts } from "@/types/types";
 import { PostCard } from "@/components/PostCard";
 export default function Home() {
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>("");
   const [posts, setPosts] = useState<Posts[]>([]);
 
-  // useEffect(() => {
-  //   fetchPosts();
-  // }, []);
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-  // const fetchPosts = async () => {
-  // setError(null);
-  //   try {
-  //     const fetchedPosts = await getPosts();
-  //     setPosts(fetchedPosts);
-  //   } catch (err) {
-  //     setError("Nu s-au putut obtine postari");
-  //   }
-  // };
+  const fetchPosts = async () => {
+    setError(null);
+    try {
+      const fetchedPosts = await getPosts();
+      setPosts(fetchedPosts);
+      console.log(fetchedPosts);
+    } catch (err) {
+      setError("Nu s-au putut obtine postari");
+    }
+  };
 
   const story = [
     {
@@ -146,12 +147,12 @@ export default function Home() {
           </ScrollArea>
         </div>
         <div className="min-h-screen py-4 space-y-4">
-          {/* {posts
+          {posts
             .slice()
             .reverse()
             .map((item, index) => (
               <PostCard key={item.postId} post={item} />
-            ))} */}
+            ))}
         </div>
       </div>
     </div>
