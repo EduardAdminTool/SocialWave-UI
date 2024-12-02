@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { ShieldCheck as ShieldIcon } from "lucide-react";
-import { confirmEmail } from "@/services/Auth/auth.service";
+import { confirmEmail } from "@/services/auth/auth.service";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const theme = createTheme({

@@ -22,7 +22,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, WavesIcon as Wave } from "lucide-react";
 import { FormTextField } from "@/components/Input";
 import { ImagePicker } from "@/components/ImagePicker";
-import { register } from "@/services/Auth/auth.service";
+import { register } from "@/services/auth/auth.service";
 import { useRouter } from "next/navigation";
 
 type FormData = {

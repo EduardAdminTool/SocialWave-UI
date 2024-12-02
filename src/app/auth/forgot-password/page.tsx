@@ -20,7 +20,7 @@ import {
 import { motion } from "framer-motion";
 import { WavesIcon as Wave } from "lucide-react";
 import { FormTextField } from "@/components/Input";
-import { forgotPassword } from "@/services/Auth/auth.service";
+import { forgotPassword } from "@/services/auth/auth.service";
 import { useRouter } from "next/navigation";
 
 const theme = createTheme({
