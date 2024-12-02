@@ -109,7 +109,6 @@ export default function CreatePostPage() {
 
       await createPost(description, localTimeString, localTimeString, media);
 
-      console.log(media);
       setSuccess("Post created successfully");
       router.push("/");
     } catch (err) {
@@ -124,6 +123,12 @@ export default function CreatePostPage() {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
+  };
+
+  // Delete the media
+  const handleDeleteMedia = () => {
+    setMedia(null);
+    setPreview(null);
   };
 
   return (
@@ -172,19 +177,39 @@ export default function CreatePostPage() {
             </Button>
           </div>
           {preview && (
-            <div className="flex justify-center">
+            <div className="relative flex justify-center">
               {media?.type.startsWith("image/") ? (
-                <img
-                  src={preview}
-                  alt="Uploaded preview"
-                  className="max-w-full max-h-64 rounded-lg shadow-md"
-                />
+                <div>
+                  <img
+                    src={preview}
+                    alt="Uploaded preview"
+                    className="max-w-full max-h-64 rounded-lg shadow-md"
+                  />
+                  {/* Delete button positioned over the image */}
+                  <button
+                    onClick={handleDeleteMedia}
+                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                    aria-label="Delete"
+                  >
+                    &times;
+                  </button>
+                </div>
               ) : (
-                <video
-                  src={preview}
-                  controls
-                  className="max-w-full max-h-64 rounded-lg shadow-md"
-                />
+                <div>
+                  <video
+                    src={preview}
+                    controls
+                    className="max-w-full max-h-64 rounded-lg shadow-md"
+                  />
+                  {/* Delete button positioned over the video */}
+                  <button
+                    onClick={handleDeleteMedia}
+                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                    aria-label="Delete"
+                  >
+                    &times;
+                  </button>
+                </div>
               )}
             </div>
           )}
