@@ -15,11 +15,14 @@ import {
 } from "@/components/ui/card";
 import { StoryCarousel } from "@/components/StoryCarousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Posts } from "@/types/types";
+import { Posts } from "@/types/posts/types";
+import { Account } from "@/types/account/types";
 import { getPostsById, getPosts } from "@/services/posts";
+import { getAccountInfo } from "@/services/account";
 export default function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
-  const [posts, setPosts] = useState<Posts[]>([]);
+  const [accountInfo, setAccountInfo] = useState<Account | null>(null);
+
   const [error, setError] = useState<string | null>("");
 
   const story = [
@@ -114,33 +117,44 @@ export default function AccountPage() {
   ];
 
   useEffect(() => {
-    fetchPosts();
+    fetchAccount();
   }, []);
 
-  const fetchPosts = async () => {
+  const fetchAccount = async () => {
     setError(null);
     try {
-      const fetchedPosts = await getPosts();
-      setPosts(fetchedPosts);
+      const fetchedAccount = await getAccountInfo();
+      setAccountInfo(fetchedAccount);
+      console.log(fetchedAccount);
     } catch (err) {
-      setError("Nu s-au putut obtine postari");
+      setError("Nu s-au putut obtine date");
     }
   };
+
   const handleFollowButton = () => {
     setIsFollowClicked(!followClicked);
   };
+
   return (
     <div className="py-2">
+      {/* Account Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-md p-8">
         <div className="flex justify-center items-center">
           <Avatar className="w-64 h-64">
-            <AvatarImage src={"post.jpg"} alt="Profile picture" />
-            <AvatarFallback>AC</AvatarFallback>
+            <AvatarImage
+              src={accountInfo?.profilePicture || ""}
+              alt="Profile picture"
+            />
+            <AvatarFallback>
+              {accountInfo?.name?.charAt(0) || "?"}
+            </AvatarFallback>
           </Avatar>
         </div>
         <div className="flex flex-col justify-center space-y-6">
           <div className="flex items-center gap-4">
-            <h2 className="text-3xl font-semibold text-blue-800">Account</h2>
+            <h2 className="text-3xl font-semibold text-blue-800">
+              {accountInfo?.name || "Loading..."}
+            </h2>
             <Button
               variant={followClicked ? "outline" : "default"}
               className="w-24"
@@ -154,9 +168,10 @@ export default function AccountPage() {
             <span className="font-medium">12,521 Followers</span>
             <span className="font-medium">700 Following</span>
           </div>
-          <p className="text-xl text-gray-600">Descrierea contului</p>
+          <p className="text-xl text-gray-600">{accountInfo?.bio || ""}</p>
         </div>
       </div>
+
       <div className="border-b border-t border-black flex">
         <ScrollArea className="w-128 whitespace-nowrap">
           <div className="flex w-max">
@@ -165,21 +180,35 @@ export default function AccountPage() {
           <ScrollBar orientation="horizontal" className="opacity-0" />
         </ScrollArea>
       </div>
-      <div className="grid grid-cols-3 p-4 gap-4">
-        {posts.map((item, index) => (
-          <Card className="w-auto" key={index}>
-            <CardContent className="p-0">
-              <div className="relative w-full h-64">
-                <Image
-                  src={item.images[0].imageUrl}
-                  alt="Public Image"
-                  layout="fill"
-                  objectFit="cover"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 p-4 gap-4">
+        {accountInfo?.posts?.flatMap((item, postIndex) =>
+          item.images?.length > 0 ? (
+            item.images.map((image, imageIndex) => (
+              <Card
+                className="w-auto"
+                key={`post-${postIndex}-image-${imageIndex}`}
+              >
+                <CardContent className="p-0">
+                  <div className="relative w-full h-64">
+                    <Image
+                      src={image.imageUrl}
+                      alt={`Public Image ${postIndex}-${imageIndex}`}
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card className="w-auto" key={`post-${postIndex}-no-image`}>
+              <CardContent className="p-4">
+                <p>No images available for this post</p>
+              </CardContent>
+            </Card>
+          )
+        ) || <p>No posts available</p>}
       </div>
     </div>
   );

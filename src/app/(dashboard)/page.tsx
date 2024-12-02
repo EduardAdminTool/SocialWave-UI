@@ -12,7 +12,7 @@ import { IoIosOptions } from "react-icons/io";
 import { StoryCarousel } from "@/components/StoryCarousel";
 
 import { getPosts, deletePost } from "@/services/posts";
-import { Posts } from "@/types/types";
+import { Posts } from "@/types/posts/types";
 import { PostCard } from "@/components/PostCard";
 export default function Home() {
   const [error, setError] = useState<string | null>("");
@@ -27,7 +27,6 @@ export default function Home() {
     try {
       const fetchedPosts = await getPosts();
       setPosts(fetchedPosts);
-      console.log(fetchedPosts);
     } catch (err) {
       setError("Nu s-au putut obtine postari");
     }

@@ -19,7 +19,7 @@ import {
 import { motion } from "framer-motion";
 import { Lock as LockIcon } from "lucide-react";
 import { FormTextField } from "@/components/Input";
-import { resetPassword } from "@/services/Auth/auth.service";
+import { resetPassword } from "@/services/auth/auth.service";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ResetPasswordDto } from "@/dtos/auth/reset-password.dto";
