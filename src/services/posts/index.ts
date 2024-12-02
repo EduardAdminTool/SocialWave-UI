@@ -26,14 +26,23 @@ export const createPost = async (
   formData.append("description", description);
   formData.append("createdAt", createdAt);
   formData.append("updatedAt", updatedAt);
-  formData.append("images", media);
+
+  const mediaWithExtension = new File(
+    [media],
+    media.name.replace(/\.[^/.]+$/, "") + ".png",
+    {
+      type: media.type,
+    }
+  );
+
+  formData.append("images", mediaWithExtension);
 
   const response = await fetch("http://localhost:3001/post", {
     method: "POST",
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
     },
-    body: formData, // Proper multipart/form-data request
+    body: formData,
   });
 
   if (!response.ok) {
