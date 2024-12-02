@@ -22,20 +22,18 @@ export const createPost = async (
   updatedAt: string,
   media: File
 ) => {
+  const formData = new FormData();
+  formData.append("description", description);
+  formData.append("createdAt", createdAt);
+  formData.append("updatedAt", updatedAt);
+  formData.append("images", media);
+
   const response = await fetch("http://localhost:3001/post", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",
     },
-    body: JSON.stringify([
-      {
-        description: description,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        images: media,
-      },
-    ]),
+    body: formData, // Proper multipart/form-data request
   });
 
   if (!response.ok) {

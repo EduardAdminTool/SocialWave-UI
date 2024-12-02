@@ -19,6 +19,8 @@ export function PostCard({ post }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
 
+  console.log(post);
+
   const handleLikeClick = () => setIsLiked(!isLiked);
 
   const handleDeletePost = async (postId: number) => {
@@ -26,44 +28,35 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   const calculateDateDifference = (dateString: string) => {
-    const today = new Date();
-    const itemDate = new Date(dateString);
+    const now = new Date();
+    const postDate = new Date(dateString); // This is in UTC format.
 
-    const diffMs = today.getTime() - itemDate.getTime();
+    // Difference in milliseconds
+    const diffMs = now.getTime() - postDate.getTime();
+
+    if (diffMs < 0) return "just now"; // Handle future dates gracefully.
+
     const diffSeconds = Math.floor(diffMs / 1000);
+    if (diffSeconds < 60)
+      return `${diffSeconds} second${diffSeconds !== 1 ? "s" : ""} ago`;
+
     const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 60)
+      return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
+
     const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
 
-    if (diffSeconds < 60) {
-      return diffSeconds === 1 ? "1 second ago" : `${diffSeconds} seconds ago`;
-    }
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 30) return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
 
-    if (diffMinutes < 60) {
-      return diffMinutes === 1 ? "1 minute ago" : `${diffMinutes} minutes ago`;
-    }
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12)
+      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""} ago`;
 
-    if (diffHours < 24) {
-      return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
-    }
-
-    const differenceDays = Math.floor(diffHours / 24);
-    if (differenceDays < 30) {
-      return differenceDays === 1 ? "1 day ago" : `${differenceDays} days ago`;
-    }
-
-    const differenceMonths = Math.floor(differenceDays / 30);
-    if (differenceMonths >= 6) {
-      const options: Intl.DateTimeFormatOptions = {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      };
-      return itemDate.toLocaleDateString("en-US", options);
-    }
-
-    return differenceMonths === 1
-      ? "1 month ago"
-      : `${differenceMonths} months ago`;
+    const diffYears = Math.floor(diffMonths / 12);
+    return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
   };
 
   const updatePostTimes = () => {
