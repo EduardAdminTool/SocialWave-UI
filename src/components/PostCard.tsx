@@ -1,6 +1,7 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,17 +10,14 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
 import { PostCardProps } from "@/types/posts/types";
 import { deletePost } from "@/services/posts";
-import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
-import { Posts } from "@/types/types";
 
 export function PostCard({ post }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
-
-  console.log(post);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Track the current image index
 
   const handleLikeClick = () => setIsLiked(!isLiked);
 
@@ -29,12 +27,10 @@ export function PostCard({ post }: PostCardProps) {
 
   const calculateDateDifference = (dateString: string) => {
     const now = new Date();
-    const postDate = new Date(dateString); // This is in UTC format.
+    const postDate = new Date(dateString);
 
-    // Difference in milliseconds
     const diffMs = now.getTime() - postDate.getTime();
-
-    if (diffMs < 0) return "just now"; // Handle future dates gracefully.
+    if (diffMs < 0) return "just now";
 
     const diffSeconds = Math.floor(diffMs / 1000);
     if (diffSeconds < 60)
@@ -69,12 +65,25 @@ export function PostCard({ post }: PostCardProps) {
 
     const intervalId = setInterval(() => {
       updatePostTimes();
-    }, 1);
+    }, 1000);
 
     return () => {
       clearInterval(intervalId);
     };
   }, [post]);
+
+  // Handle changing images
+  const nextImage = () => {
+    if (post.images && currentImageIndex < post.images.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
+  };
+
+  const prevImage = () => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
+  };
 
   return (
     <Card className="w-full max-w-4xl mx-auto mb-6">
@@ -96,21 +105,52 @@ export function PostCard({ post }: PostCardProps) {
         </Button>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="relative w-full overflow-x-auto flex items-center space-x-4 py-4">
-          {post.images?.map((imageUrl, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 w-full h-[500px] relative"
-            >
+        <div className="relative w-full py-4">
+          {post.images?.length > 1 ? (
+            <div className="relative">
+              <div className="flex justify-center items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={prevImage}
+                  className="absolute left-0 top-1/2 transform -translate-y-1/2"
+                >
+                  &lt;
+                </Button>
+
+                <div className="relative w-[800px] flex justify-center h-[500px] overflow-hidden">
+                  <Image
+                    src={post.images[currentImageIndex].imageUrl}
+                    alt={`Post image ${currentImageIndex + 1}`}
+                    width={600}
+                    height={500}
+                    objectFit="cover"
+                    className="rounded-lg"
+                  />
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={nextImage}
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2"
+                >
+                  &gt;
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative w-full h-[500px]">
               <Image
-                src={imageUrl.imageUrl}
-                alt={`Post image ${index + 1}`}
-                layout="fill"
+                src={post.images[0].imageUrl}
+                alt="Post image"
+                width={600}
+                height={500}
                 objectFit="cover"
-                className="rounded-lg p-4"
+                className="rounded-lg"
               />
             </div>
-          ))}
+          )}
         </div>
         <div className="p-4">
           <p className="text-lg">{post.description}</p>
