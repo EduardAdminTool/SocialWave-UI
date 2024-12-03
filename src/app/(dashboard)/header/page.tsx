@@ -3,8 +3,8 @@
 import { FaCameraRetro, FaLocationArrow } from "react-icons/fa";
 import Link from "next/link";
 import { useState } from "react";
-
-export default function Header() {
+import withAuth from "@/utils/withAuth";
+function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -77,3 +77,5 @@ export default function Header() {
     </div>
   );
 }
+
+export default withAuth(Header);

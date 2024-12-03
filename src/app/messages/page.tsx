@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { BiMessageRoundedAdd } from "react-icons/bi";
 import { FaExclamationCircle } from "react-icons/fa";
-
-export default function Messages() {
+import withAuth from "@/utils/withAuth";
+function Messages() {
   const dm = [
     { logo: "L1", name: "name1", message: "message1" },
     { logo: "L2", name: "name2", message: "message2" },
@@ -81,3 +81,5 @@ export default function Messages() {
     </div>
   );
 }
+
+export default withAuth(Messages);

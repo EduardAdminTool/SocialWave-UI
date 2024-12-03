@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Home, Search, PlusSquare, Bell, User } from "lucide-react";
-
-export default function Footer() {
+import withAuth from "@/utils/withAuth";
+function Footer() {
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-blue-200 shadow-sm py-2">
       <div className="container mx-auto">
@@ -39,3 +41,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+export default withAuth(Footer);

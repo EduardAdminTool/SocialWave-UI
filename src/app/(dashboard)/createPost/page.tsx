@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
 import imageCompression from "browser-image-compression";
 import { createPost } from "@/services/posts";
-
-export default function CreatePostPage() {
+import withAuth from "@/utils/withAuth";
+function CreatePostPage() {
   const router = useRouter();
 
   const [media, setMedia] = useState<File[]>([]);
@@ -228,3 +228,5 @@ export default function CreatePostPage() {
     </div>
   );
 }
+
+export default withAuth(CreatePostPage);

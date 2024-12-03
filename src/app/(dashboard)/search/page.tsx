@@ -9,8 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
-
-export default function Search() {
+import withAuth from "@/utils/withAuth";
+function Search() {
   const posts = [
     {
       index: 1,
@@ -98,3 +98,5 @@ export default function Search() {
     </div>
   );
 }
+
+export default withAuth(Search);

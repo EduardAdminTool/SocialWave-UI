@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
 import { Button } from "@/components/ui/button";
-
-export default function Notifications() {
+import withAuth from "@/utils/withAuth";
+function Notifications() {
   const requests = [
     {
       name: "Matei",
@@ -123,3 +123,5 @@ export default function Notifications() {
     </div>
   );
 }
+
+export default withAuth(Notifications);

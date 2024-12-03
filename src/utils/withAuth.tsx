@@ -18,9 +18,8 @@ const withAuth = (WrappedComponent) => {
           }
         );
         const result = await response.json();
-        console.log("Token verification response:", result); // Debug response
+        console.log("Token verification response:", result);
 
-        // If the response is directly a boolean (true/false), return it directly
         return result;
       } catch (error) {
         console.error("Token verification failed:", error.message);
