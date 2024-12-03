@@ -28,7 +28,19 @@ export const createPost = async (
   formData.append("updatedAt", updatedAt);
 
   media.forEach((file, index) => {
-    formData.append("images", file, `image_${index}.png`);
+    if (file.type.startsWith("image/")) {
+      formData.append(
+        "images",
+        file,
+        `image_${index}.${file.name.split(".").pop()}`
+      );
+    } else if (file.type.startsWith("video/")) {
+      formData.append(
+        "videos",
+        file,
+        `video_${index}.${file.name.split(".").pop()}`
+      );
+    }
   });
 
   const response = await fetch("http://localhost:3001/post", {
@@ -36,7 +48,7 @@ export const createPost = async (
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
     },
-    body: formData, // Send FormData
+    body: formData,
   });
 
   if (!response.ok) {

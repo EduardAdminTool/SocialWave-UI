@@ -105,7 +105,17 @@ export function PostCard({ post }: PostCardProps) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative w-full py-4">
-          {post?.images?.length > 0 ? (
+          {post?.videos && post.videos.length > 0 ? (
+            <div className="relative w-full">
+              <video
+                controls
+                className="w-full h-[500px] object-cover rounded-lg"
+              >
+                <source src={post.videos[0].videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          ) : post?.images?.length > 0 ? (
             post.images.length > 1 ? (
               <div className="relative">
                 <div className="flex justify-center items-center">

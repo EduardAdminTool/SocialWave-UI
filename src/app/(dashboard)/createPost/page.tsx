@@ -194,13 +194,13 @@ export default function CreatePostPage() {
                       alt="Uploaded preview"
                       className="max-w-full max-h-64 rounded-lg shadow-md"
                     />
-                  ) : (
+                  ) : media[index]?.type.startsWith("video/") ? (
                     <video
                       src={preview}
                       controls
                       className="max-w-full max-h-64 rounded-lg shadow-md"
                     />
-                  )}
+                  ) : null}
                   <button
                     onClick={() => handleDeleteMedia(index)}
                     className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
