@@ -18,13 +18,13 @@ import { Posts } from "@/types/posts/types";
 import { Account } from "@/types/account/types";
 import { getPostsById, getPosts } from "@/services/posts";
 import { getAccountInfo } from "@/services/account";
-
+import { deletePost } from "@/services/posts";
 export default function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
   const [error, setError] = useState<string | null>("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [activePostIndex, setActivePostIndex] = useState<number | null>(null); // Track which post is being viewed
+  const [activePostIndex, setActivePostIndex] = useState<number | null>(null);
 
   const story = [
     {
@@ -117,6 +117,11 @@ export default function AccountPage() {
     },
   ];
 
+  const handleDeletePost = async (postId: number) => {
+    await deletePost(postId);
+    fetchAccount();
+  };
+
   useEffect(() => {
     fetchAccount();
   }, []);
@@ -155,7 +160,6 @@ export default function AccountPage() {
 
   return (
     <div className="py-2">
-      {/* Account Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-md p-8">
         <div className="flex justify-center items-center">
           <Avatar className="w-64 h-64">
@@ -205,16 +209,23 @@ export default function AccountPage() {
             <Card
               className="w-auto"
               key={`post-${postIndex}`}
-              onClick={() => setActivePostIndex(postIndex)} // Set active post on click
+              onClick={() => setActivePostIndex(postIndex)}
             >
               <CardContent className="p-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeletePost(item.postId)}
+                >
+                  Delete
+                </Button>
                 <div className="relative w-full h-[500px]">
                   <div className="flex justify-center items-center relative">
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={prevImage}
-                      className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full p-2 z-10"
+                      className="absolute left-0 top-1/2 transform -translate-y-1/2 shadow-lg rounded-full p-2 z-10"
                     >
                       &lt;
                     </Button>
@@ -234,7 +245,7 @@ export default function AccountPage() {
                       variant="outline"
                       size="icon"
                       onClick={nextImage}
-                      className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full p-2 z-10"
+                      className="absolute right-0 top-1/2 transform -translate-y-1/2 shadow-lg rounded-full p-2 z-10"
                     >
                       &gt;
                     </Button>

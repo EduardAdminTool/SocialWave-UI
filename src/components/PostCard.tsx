@@ -139,12 +139,13 @@ export function PostCard({ post }: PostCardProps) {
               </div>
             </div>
           ) : (
-            <div className="relative w-full h-[500px]">
+            <div className="w-full h-auto w-auto p-4">
               <Image
                 src={post.images[0].imageUrl}
                 alt="Post image"
-                width={600}
-                height={500}
+                width={1000}
+                height={600}
+                layout="responsive"
                 objectFit="cover"
                 className="rounded-lg"
               />
@@ -157,21 +158,21 @@ export function PostCard({ post }: PostCardProps) {
       </CardContent>
       <CardFooter className="flex justify-between items-center">
         <div className="flex space-x-4">
-          <Button variant="ghost" size="icon" onClick={handleLikeClick}>
+          <Button variant="ghost" onClick={handleLikeClick}>
             <Heart
               className={`h-6 w-6 ${
                 isLiked ? "fill-red-500 text-red-500" : ""
               }`}
             />
           </Button>
-          <Button variant="ghost" size="icon">
-            <MessageCircle className="h-6 w-6" />
+          <Button variant="ghost">
+            <MessageCircle className="h-12 w-12" />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost">
             <Send className="h-6 w-6" />
           </Button>
         </div>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost">
           <Bookmark className="h-6 w-6" />
         </Button>
       </CardFooter>
