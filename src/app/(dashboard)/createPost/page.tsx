@@ -12,8 +12,8 @@ import { createPost } from "@/services/posts";
 export default function CreatePostPage() {
   const router = useRouter();
 
-  const [media, setMedia] = useState<File[]>([]); // Handle multiple files
-  const [previews, setPreviews] = useState<string[]>([]); // Previews for each file
+  const [media, setMedia] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -44,9 +44,9 @@ export default function CreatePostPage() {
       processedFile = await compressImage(file);
     }
 
-    setMedia((prevFiles) => [...prevFiles, processedFile]); // Add file to the array
+    setMedia((prevFiles) => [...prevFiles, processedFile]);
     const fileURL = URL.createObjectURL(processedFile);
-    setPreviews((prevPreviews) => [...prevPreviews, fileURL]); // Add preview to the array
+    setPreviews((prevPreviews) => [...prevPreviews, fileURL]);
   }, []);
 
   const handleDrop = useCallback(
@@ -174,7 +174,7 @@ export default function CreatePostPage() {
               onChange={handleFileChange}
               className="hidden"
               id="file-upload"
-              multiple // Allow multiple files
+              multiple
             />
             <Button
               className="mt-4"

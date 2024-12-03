@@ -105,52 +105,55 @@ export function PostCard({ post }: PostCardProps) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative w-full py-4">
-          {post.images?.length > 1 ? (
-            <div className="relative">
-              <div className="flex justify-center items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={prevImage}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2"
-                >
-                  &lt;
-                </Button>
+          {post?.images?.length > 0 ? (
+            post.images.length > 1 ? (
+              <div className="relative">
+                <div className="flex justify-center items-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={prevImage}
+                    className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-0 bg-transparent"
+                  >
+                    &lt;
+                  </Button>
 
-                <div className="relative w-[800px] flex justify-center h-[500px] overflow-hidden">
-                  <Image
-                    src={post.images[currentImageIndex].imageUrl}
-                    alt={`Post image ${currentImageIndex + 1}`}
-                    width={600}
-                    height={500}
-                    objectFit="cover"
-                    className="rounded-lg"
-                  />
+                  <div className="relative w-[1000px] flex justify-center h-[600px] overflow-hidden p-4">
+                    <Image
+                      src={post.images[currentImageIndex].imageUrl}
+                      alt={`Post image ${currentImageIndex + 1}`}
+                      width={600}
+                      height={500}
+                      objectFit="cover"
+                      layout="responsive"
+                      className="rounded-lg"
+                    />
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={nextImage}
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-0 bg-transparent"
+                  >
+                    &gt;
+                  </Button>
                 </div>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={nextImage}
-                  className="absolute right-0 top-1/2 transform -translate-y-1/2"
-                >
-                  &gt;
-                </Button>
               </div>
-            </div>
-          ) : (
-            <div className="w-full h-auto w-auto p-4">
-              <Image
-                src={post.images[0].imageUrl}
-                alt="Post image"
-                width={1000}
-                height={600}
-                layout="responsive"
-                objectFit="cover"
-                className="rounded-lg"
-              />
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-auto w-auto p-4">
+                <Image
+                  src={post.images[0].imageUrl}
+                  alt="Post image"
+                  width={1000}
+                  height={600}
+                  layout="responsive"
+                  objectFit="cover"
+                  className="rounded-lg"
+                />
+              </div>
+            )
+          ) : null}
         </div>
         <div className="p-4">
           <p className="text-lg">{post.description}</p>
