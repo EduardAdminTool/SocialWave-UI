@@ -17,7 +17,7 @@ import { deletePost } from "@/services/posts";
 export function PostCard({ post }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   const handleLikeClick = () => setIsLiked(!isLiked);
 
@@ -72,15 +72,15 @@ export function PostCard({ post }: PostCardProps) {
     };
   }, [post]);
 
-  const nextImage = () => {
-    if (post.images && currentImageIndex < post.images.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
+  const nextMedia = () => {
+    if (post.images.length + post.videos.length > currentMediaIndex + 1) {
+      setCurrentMediaIndex(currentMediaIndex + 1);
     }
   };
 
-  const prevImage = () => {
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1);
+  const prevMedia = () => {
+    if (currentMediaIndex > 0) {
+      setCurrentMediaIndex(currentMediaIndex - 1);
     }
   };
 
@@ -92,7 +92,7 @@ export function PostCard({ post }: PostCardProps) {
           <AvatarFallback>{post.userId}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">Matei</h3>
+          <h3 className="text-lg font-semibold">{post.userId}</h3>
           <p className="text-sm text-gray-500">{postedAgo}</p>
         </div>
         <Button
@@ -105,66 +105,83 @@ export function PostCard({ post }: PostCardProps) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative w-full py-4">
-          {post?.videos && post.videos.length > 0 ? (
-            <div className="relative w-full">
-              <video
-                controls
-                className="w-full h-[500px] object-cover rounded-lg"
-              >
-                <source src={post.videos[0].videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+          {/* Media Display */}
+          {(post?.images.length > 0 || post?.videos.length > 0) && (
+            <div className="relative flex justify-center items-center">
+              {/* Previous Button */}
+              {currentMediaIndex > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={prevMedia}
+                  className="absolute left-4 z-10 p-0 bg-transparent"
+                >
+                  &lt;
+                </Button>
+              )}
+
+              {/* Media */}
+              <div className="flex justify-center">
+                {post?.images.length > 0 &&
+                currentMediaIndex < post.images.length ? (
+                  <Image
+                    src={post.images[currentMediaIndex].imageUrl}
+                    alt={`Post image ${currentMediaIndex + 1}`}
+                    width={800}
+                    height={500}
+                    objectFit="cover"
+                    className="rounded-lg"
+                  />
+                ) : (
+                  post?.videos.length > 0 && (
+                    <video
+                      controls
+                      className="w-full h-[500px] object-cover rounded-lg"
+                      onError={() => console.log("Video failed to load")}
+                    >
+                      <source
+                        src={
+                          post.videos[currentMediaIndex - post.images.length]
+                            .videoUrl
+                        }
+                        type="video/mp4"
+                      />
+                      <source
+                        src={
+                          post.videos[currentMediaIndex - post.images.length]
+                            .videoUrl
+                        }
+                        type="video/webm"
+                      />
+                      <source
+                        src={
+                          post.videos[currentMediaIndex - post.images.length]
+                            .videoUrl
+                        }
+                        type="video/ogg"
+                      />
+                      Your browser does not support the video tag.
+                    </video>
+                  )
+                )}
+              </div>
+
+              {/* Next Button */}
+              {currentMediaIndex <
+                post.images.length + post.videos.length - 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={nextMedia}
+                  className="absolute right-4 z-10 p-0 bg-transparent"
+                >
+                  &gt;
+                </Button>
+              )}
             </div>
-          ) : post?.images?.length > 0 ? (
-            post.images.length > 1 ? (
-              <div className="relative">
-                <div className="flex justify-center items-center">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={prevImage}
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-0 bg-transparent"
-                  >
-                    &lt;
-                  </Button>
-
-                  <div className="relative w-[1000px] flex justify-center h-[600px] overflow-hidden p-4">
-                    <Image
-                      src={post.images[currentImageIndex].imageUrl}
-                      alt={`Post image ${currentImageIndex + 1}`}
-                      width={600}
-                      height={500}
-                      objectFit="cover"
-                      layout="responsive"
-                      className="rounded-lg"
-                    />
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={nextImage}
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-0 bg-transparent"
-                  >
-                    &gt;
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full h-auto w-auto p-4">
-                <Image
-                  src={post.images[0].imageUrl}
-                  alt="Post image"
-                  width={1000}
-                  height={600}
-                  layout="responsive"
-                  objectFit="cover"
-                  className="rounded-lg"
-                />
-              </div>
-            )
-          ) : null}
+          )}
         </div>
+
         <div className="p-4">
           <p className="text-lg">{post.description}</p>
         </div>
@@ -179,7 +196,7 @@ export function PostCard({ post }: PostCardProps) {
             />
           </Button>
           <Button variant="ghost">
-            <MessageCircle className="h-12 w-12" />
+            <MessageCircle className="h-6 w-6" />
           </Button>
           <Button variant="ghost">
             <Send className="h-6 w-6" />
