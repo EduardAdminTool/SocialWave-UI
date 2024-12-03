@@ -257,9 +257,11 @@ export default function LoginPage() {
           <Button onClick={handleCloseModal} color="primary">
             {errorMessage ? "Go Back" : "Close"}
           </Button>
-          <Button onClick={() => setOpenResendModal(true)} color="primary">
-            Resend Email
-          </Button>
+          {!errorMessage?.toLowerCase().includes("invalid credentials") && (
+            <Button onClick={() => setOpenResendModal(true)} color="primary">
+              Resend Email
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
       <Dialog open={openResendModal} onClose={() => setOpenResendModal(false)}>

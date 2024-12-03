@@ -14,7 +14,8 @@ import { StoryCarousel } from "@/components/StoryCarousel";
 import { getPosts, deletePost } from "@/services/posts";
 import { Posts } from "@/types/posts/types";
 import { PostCard } from "@/components/PostCard";
-export default function Home() {
+import withAuth from "@/utils/withAuth";
+function Home() {
   const [error, setError] = useState<string | null>("");
   const [posts, setPosts] = useState<Posts[]>([]);
 
@@ -157,3 +158,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default withAuth(Home);

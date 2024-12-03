@@ -1,11 +1,10 @@
-// hoc/withAuth.js
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const withAuth = (WrappedComponent) => {
   return (props) => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true); // Add a loading state
     const router = useRouter();
 
     const verifyToken = async (token) => {
@@ -18,9 +17,11 @@ const withAuth = (WrappedComponent) => {
             body: JSON.stringify({ token }),
           }
         );
-
         const result = await response.json();
-        return result.valid;
+        console.log("Token verification response:", result); // Debug response
+
+        // If the response is directly a boolean (true/false), return it directly
+        return result;
       } catch (error) {
         console.error("Token verification failed:", error.message);
         return false;
@@ -30,6 +31,7 @@ const withAuth = (WrappedComponent) => {
     useEffect(() => {
       const checkAuth = async () => {
         const token = localStorage.getItem("authToken");
+        console.log("Token from localStorage:", token); // Debug token
         if (!token) {
           router.push("/auth/login");
           return;
@@ -38,13 +40,19 @@ const withAuth = (WrappedComponent) => {
         const isValidToken = await verifyToken(token);
         if (!isValidToken) {
           router.push("/auth/login");
+          return;
         }
+
+        setLoading(false); // Set loading to false if the token is valid
       };
 
       checkAuth();
     }, [router]);
 
-    // Return the wrapped component with the user data as props
+    if (loading) {
+      return <div>Loading...</div>; // Show a loader while verifying token
+    }
+
     return <WrappedComponent {...props} />;
   };
 };
