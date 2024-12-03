@@ -26,6 +26,8 @@ import { ImagePicker } from "@/components/ImagePicker";
 import { login, resendVerificationEmail } from "@/services/auth/auth.service";
 import { useRouter } from "next/navigation";
 import ForgotPassword from "@/components/ForgotPassword";
+import { cookies } from "next/headers";
+import { setCookie } from "cookies-next";
 
 type FormData = {
   email: string;
@@ -82,6 +84,7 @@ export default function LoginPage() {
       const response = await login(data); // Call the login API
       const { access_token } = response.data; // Adjust this line to match the API's response structure
       if (access_token) {
+        setCookie("authToken", access_token); // Save token in cookies
         localStorage.setItem("authToken", access_token); // Save token in localStorage
         console.log("Login successful, token saved:", access_token);
         router.push("/"); // Redirect after successful login

@@ -19,7 +19,8 @@ import { Account } from "@/types/account/types";
 import { getPostsById, getPosts } from "@/services/posts";
 import { getAccountInfo } from "@/services/account";
 import { deletePost } from "@/services/posts";
-export default function AccountPage() {
+import withAuth from "@/utils/withAuth";
+function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
   const [error, setError] = useState<string | null>("");
@@ -265,3 +266,4 @@ export default function AccountPage() {
     </div>
   );
 }
+export default withAuth(AccountPage);
