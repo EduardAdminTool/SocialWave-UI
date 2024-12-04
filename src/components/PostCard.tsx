@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -85,10 +86,29 @@ export function PostCard({ post }: PostCardProps) {
     }
   };
 
+  const renderDots = () => {
+    const totalMedia = post.images.length + post.videos.length;
+    return (
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+        {Array.from({ length: totalMedia }).map((_, index) => (
+          <button
+            key={index}
+            className={cn(
+              "w-2 h-2 rounded-full transition-all duration-300 focus:outline-none",
+              currentMediaIndex === index ? "bg-white" : "bg-white/50"
+            )}
+            onClick={() => setCurrentMediaIndex(index)}
+            aria-label={`Go to media ${index + 1}`}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Card className="w-full max-w-4xl mx-auto mb-6">
       <CardHeader className="flex flex-row items-center space-x-4 pb-4">
-        <Avatar className="h-12 w-12">
+        <Avatar className="h-20 w-20">
           <AvatarImage src={post.profilePicture} />
           <AvatarFallback>{post.userId}</AvatarFallback>
         </Avatar>
@@ -96,20 +116,11 @@ export function PostCard({ post }: PostCardProps) {
           <h3 className="text-lg font-semibold">{post.userId}</h3>
           <p className="text-sm text-gray-500">{postedAgo}</p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleDeletePost(post.postId)}
-        >
-          Delete
-        </Button>
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative w-full py-4">
-          {/* Media Display */}
           {(post?.images.length > 0 || post?.videos.length > 0) && (
             <div className="relative flex justify-center items-center overflow-hidden" style={{ height: '500px' }}>
-              {/* Previous Button */}
               {currentMediaIndex > 0 && (
                 <Button
                   variant="ghost"
@@ -121,7 +132,6 @@ export function PostCard({ post }: PostCardProps) {
                 </Button>
               )}
 
-              {/* Media */}
               <AnimatePresence initial={false}>
                 <motion.div
                   key={currentMediaIndex}
@@ -165,7 +175,6 @@ export function PostCard({ post }: PostCardProps) {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Next Button */}
               {currentMediaIndex < post.images.length + post.videos.length - 1 && (
                 <Button
                   variant="ghost"
@@ -176,6 +185,7 @@ export function PostCard({ post }: PostCardProps) {
                   &gt;
                 </Button>
               )}
+              {renderDots()}
             </div>
           )}
         </div>
