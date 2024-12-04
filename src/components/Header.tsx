@@ -41,31 +41,32 @@ function Header() {
       setSearchHistory((prev) => [searchQuery.trim(), ...prev.slice(0, 4)]);
     }
     setSearchQuery("");
+    router.push(`/${searchQuery.trim()}`);
     setShowHistory(false);
     setFetchedAccounts([]); 
   };
 
   const handleHistoryClick = (query: string) => {
     setSearchQuery(query);
-    router.push(`/${searchQuery.trim()}`);
+    router.push(`/${query}`);
     setShowHistory(false);
   };
 
   return (
-    <div className="bg-blue-50 h-[40px] w-full border-b border-b-black flex justify-between items-center text-blue-500 py-8 px-2">
+    <div className="bg-blue-50 h-[40px] w-full border-b border-b-black flex justify-between items-center text-blue-500 py-8 px-4">
       <Link href={"/"}>
-        <h1 className="text-3xl font-light">SocialWave</h1>
+        <h1 className="text-2xl font-light">SocialWave</h1>
       </Link>
-      <div className="relative w-[250px]">
+      <div className="relative">
         <input
           placeholder="Search"
           value={searchQuery}
-          className="border border-black text-center rounded-full h-[40px]"
+          className="border border-black px-4 rounded-full h-[40px] w-[200px]"
           onChange={handleInputChange}
           onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
         />
         {showHistory && (
-          <div className="absolute mt-1 w-full z-10 bg-white border border-gray-300 rounded-lg shadow-lg">
+          <div className="absolute mt-1 w-[200px] z-10 bg-white border rounded-md border-gray-300 shadow-lg">
             {fetchedAccounts.length > 0 ? (
               fetchedAccounts.map((account, index) => (
                 <div
