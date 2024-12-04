@@ -5,39 +5,49 @@ import Link from "next/link";
 import { useState } from "react";
 import withAuth from "@/utils/withAuth";
 import { useRouter } from "next/navigation"; 
+import { AccountSearchProps } from "@/types/types";
+import { getAccounts } from "@/services/account";
 
 function Header() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [fetchedAccounts, setFetchedAccounts] = useState<AccountSearchProps[]>([]); // To store API results
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
 
-    if (query) {
-      setShowHistory(true);
-    } else {
+    if (!query.trim()) {
       setShowHistory(false);
+      setFetchedAccounts([]); 
+      return;
+    }
+
+    try {
+      const fetchedData = await getAccounts(query);
+      setFetchedAccounts(fetchedData); 
+      setShowHistory(true);
+    } catch (err) {
+      setError("Nu s-au putut obtine postari");
+      setFetchedAccounts([]); 
     }
   };
 
   const handleSearchSubmit = () => {
     if (searchQuery.trim() && !searchHistory.includes(searchQuery.trim())) {
       setSearchHistory((prev) => [searchQuery.trim(), ...prev.slice(0, 4)]);
-      
     }
-
-    router.push(`/${searchQuery.trim()}`); 
-
-
-    setSearchQuery(""); 
+    setSearchQuery("");
     setShowHistory(false);
+    setFetchedAccounts([]); 
   };
 
   const handleHistoryClick = (query: string) => {
     setSearchQuery(query);
+    router.push(`/${searchQuery.trim()}`);
     setShowHistory(false);
   };
 
@@ -56,7 +66,17 @@ function Header() {
         />
         {showHistory && (
           <div className="absolute mt-1 w-full z-10 bg-white border border-gray-300 rounded-lg shadow-lg">
-            {searchHistory.length > 0 ? (
+            {fetchedAccounts.length > 0 ? (
+              fetchedAccounts.map((account, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleHistoryClick(account.name)}
+                >
+                  {account.name} {}
+                </div>
+              ))
+            ) : searchHistory.length > 0 ? (
               searchHistory.map((item, index) => (
                 <div
                   key={index}

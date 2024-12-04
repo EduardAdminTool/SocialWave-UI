@@ -5,4 +5,6 @@ export interface SignInProps {
 
 export interface AccountSearchProps{
   name: string
+  userId: number
+  profilePicture: string
 }

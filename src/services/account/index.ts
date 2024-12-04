@@ -15,3 +15,21 @@ export const getAccountInfo = async () => {
 
   return response.json();
 };
+
+export const getAccounts = async (name: string) => {
+  const response = await fetch(`http://localhost:3001/user/search?name=${name}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+
