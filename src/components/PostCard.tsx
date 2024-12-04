@@ -1,5 +1,6 @@
 "use client";
 
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -107,7 +108,7 @@ export function PostCard({ post }: PostCardProps) {
         <div className="relative w-full py-4">
           {/* Media Display */}
           {(post?.images.length > 0 || post?.videos.length > 0) && (
-            <div className="relative flex justify-center items-center">
+            <div className="relative flex justify-center items-center overflow-hidden" style={{ height: '500px' }}>
               {/* Previous Button */}
               {currentMediaIndex > 0 && (
                 <Button
@@ -121,54 +122,51 @@ export function PostCard({ post }: PostCardProps) {
               )}
 
               {/* Media */}
-              <div className="flex justify-center">
-                {post?.images.length > 0 &&
-                currentMediaIndex < post.images.length ? (
-                  <Image
-                    src={post.images[currentMediaIndex].imageUrl}
-                    alt={`Post image ${currentMediaIndex + 1}`}
-                    width={800}
-                    height={500}
-                    objectFit="cover"
-                    className="rounded-lg"
-                  />
-                ) : (
-                  post?.videos.length > 0 && (
-                    <video
-                      controls
-                      className="w-full h-[500px] object-cover rounded-lg"
-                      onError={() => console.log("Video failed to load")}
-                    >
-                      <source
-                        src={
-                          post.videos[currentMediaIndex - post.images.length]
-                            .videoUrl
-                        }
-                        type="video/mp4"
-                      />
-                      <source
-                        src={
-                          post.videos[currentMediaIndex - post.images.length]
-                            .videoUrl
-                        }
-                        type="video/webm"
-                      />
-                      <source
-                        src={
-                          post.videos[currentMediaIndex - post.images.length]
-                            .videoUrl
-                        }
-                        type="video/ogg"
-                      />
-                      Your browser does not support the video tag.
-                    </video>
-                  )
-                )}
-              </div>
+              <AnimatePresence initial={false}>
+                <motion.div
+                  key={currentMediaIndex}
+                  initial={{ opacity: 0, x: 300 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -300 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="absolute inset-0 flex justify-center items-center"
+                >
+                  {post?.images.length > 0 && currentMediaIndex < post.images.length ? (
+                    <Image
+                      src={post.images[currentMediaIndex].imageUrl}
+                      alt={`Post image ${currentMediaIndex + 1}`}
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-lg"
+                    />
+                  ) : (
+                    post?.videos.length > 0 && (
+                      <video
+                        controls
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={() => console.log("Video failed to load")}
+                      >
+                        <source
+                          src={post.videos[currentMediaIndex - post.images.length].videoUrl}
+                          type="video/mp4"
+                        />
+                        <source
+                          src={post.videos[currentMediaIndex - post.images.length].videoUrl}
+                          type="video/webm"
+                        />
+                        <source
+                          src={post.videos[currentMediaIndex - post.images.length].videoUrl}
+                          type="video/ogg"
+                        />
+                        Your browser does not support the video tag.
+                      </video>
+                    )
+                  )}
+                </motion.div>
+              </AnimatePresence>
 
               {/* Next Button */}
-              {currentMediaIndex <
-                post.images.length + post.videos.length - 1 && (
+              {currentMediaIndex < post.images.length + post.videos.length - 1 && (
                 <Button
                   variant="ghost"
                   size="icon"
