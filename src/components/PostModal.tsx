@@ -58,8 +58,7 @@ export function PostModal({ post, isOpen, onClose }: PostModalProps) {
           <div className="w-full md:w-2/3 relative h-[400px] md:h-[600px]">
             {(post.images.length > 0 || post.videos.length > 0) && (
               <div
-                className="relative flex justify-center items-center overflow-hidden"
-                style={{ height: "500px" }}
+                className="relative flex h-full justify-center items-center overflow-hidden"
               >
                 {currentMediaIndex > 0 && (
                   <Button
@@ -139,17 +138,17 @@ export function PostModal({ post, isOpen, onClose }: PostModalProps) {
             <div className="mt-4 space-y-2">
               <div className="flex justify-between">
                 <div className="flex space-x-2">
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost">
                     <Heart className="h-6 w-6" />
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" >
                     <MessageCircle className="h-6 w-6" />
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost">
                     <Send className="h-6 w-6" />
                   </Button>
                 </div>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost">
                   <Bookmark className="h-6 w-6" />
                 </Button>
               </div>

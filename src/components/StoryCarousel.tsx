@@ -39,7 +39,7 @@ export function StoryCarousel({ stories }: StoryCarouselProps) {
           className="opacity-0 transition-opacity hover:opacity-100"
         />
       </ScrollArea>
-      {isOpen ? <OpenedStory isOpen={isOpen} setIsOpen={setIsOpen} /> : ""}
+      <OpenedStory isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 }
