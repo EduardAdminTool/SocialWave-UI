@@ -1,103 +1,69 @@
-"use client";
+"use client"
 
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { StoryCarousel } from "@/components/StoryCarousel";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Posts } from "@/types/posts/types";
-import { Account } from "@/types/account/types";
-import { getPostsById, getPosts } from "@/services/posts";
-import { getAccountInfo } from "@/services/account";
-import { deletePost } from "@/services/posts";
-import withAuth from "@/utils/withAuth";
+import React, { useEffect, useState } from "react"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { StoryCarousel } from "@/components/StoryCarousel"
+import { Account } from "@/types/account/types"
+import { Post } from "@/types/posts/types"
+import { getAccountInfo } from "@/services/account"
+import { deletePost } from "@/services/posts"
+import withAuth from "@/utils/withAuth"
+import { Grid, MessageSquare, Bookmark } from 'lucide-react'
+import { PostModal } from "@/components/PostModal"
 function AccountPage() {
-  const [followClicked, setIsFollowClicked] = useState(false);
-  const [accountInfo, setAccountInfo] = useState<Account | null>(null);
-  const [error, setError] = useState<string | null>("");
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [activePostIndex, setActivePostIndex] = useState<number | null>(null);
+  const [followClicked, setIsFollowClicked] = useState(false)
+  const [accountInfo, setAccountInfo] = useState<Account | null>(null)
+  const [error, setError] = useState<string | null>("")
+  const [activePost, setActivePost] = useState<Post | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const story = [
-    {
-      image: "poza",
-      name: "Andrei",
-    },
-    {
-      image: "poza1",
-      name: "Matei1",
-    },
-  ];
+    { image: "poza", name: "Andrei" },
+    { image: "poza1", name: "Matei1" },
+  ]
 
   const handleDeletePost = async (postId: number) => {
-    await deletePost(postId);
-    fetchAccount();
-  };
+    await deletePost(postId)
+    fetchAccount()
+  }
 
   useEffect(() => {
-    fetchAccount();
-  }, []);
+    fetchAccount()
+  }, [])
 
   const fetchAccount = async () => {
-    setError(null);
+    setError(null)
     try {
-      const fetchedAccount = await getAccountInfo();
-      setAccountInfo(fetchedAccount);
+      const fetchedAccount = await getAccountInfo()
+      setAccountInfo(fetchedAccount)
     } catch (err) {
-      setError("Nu s-au putut obtine date");
+      setError("Nu s-au putut obtine date")
     }
-  };
+  }
 
   const handleFollowButton = () => {
-    setIsFollowClicked(!followClicked);
-  };
+    setIsFollowClicked(!followClicked)
+  }
 
-  const nextImage = () => {
-    if (activePostIndex !== null && accountInfo?.posts) {
-      const images = accountInfo.posts[activePostIndex]?.images || [];
-      if (currentImageIndex < images.length - 1) {
-        setCurrentImageIndex(currentImageIndex + 1);
-      }
-    }
-  };
-
-  const prevImage = () => {
-    if (activePostIndex !== null && accountInfo?.posts) {
-      const images = accountInfo.posts[activePostIndex]?.images || [];
-      if (currentImageIndex > 0) {
-        setCurrentImageIndex(currentImageIndex - 1);
-      }
-    }
-  };
+  const openPostModal = (post: Post) => {
+    setActivePost(post)
+    setIsModalOpen(true)
+  }
 
   return (
-    <div className="py-2">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-md p-8">
-        <div className="flex justify-center items-center">
-          <Avatar className="w-64 h-64">
-            <AvatarImage
-              src={accountInfo?.profilePicture || ""}
-              alt="Profile picture"
-            />
-            <AvatarFallback>
-              {accountInfo?.name?.charAt(0) || "?"}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-        <div className="flex flex-col justify-center space-y-6">
-          <div className="flex items-center gap-4">
-            <h2 className="text-3xl font-semibold text-blue-800">
-              {accountInfo?.name || "Loading..."}
-            </h2>
+    <div className="container mx-auto py-8">
+      <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8 mb-8">
+        <Avatar className="w-32 h-32 md:w-40 md:h-40">
+          <AvatarImage src={accountInfo?.profilePicture || ""} alt="Profile picture" />
+          <AvatarFallback>{accountInfo?.name?.charAt(0) || "?"}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col items-center md:items-start space-y-4">
+          <div className="flex items-center space-x-4">
+            <h2 className="text-2xl font-semibold">{accountInfo?.name || "Loading..."}</h2>
             <Button
               variant={followClicked ? "outline" : "default"}
               className="w-24"
@@ -106,84 +72,57 @@ function AccountPage() {
               {followClicked ? "Following" : "Follow"}
             </Button>
           </div>
-          <div className="flex gap-8 text-lg text-blue-600">
-            <span className="font-medium">12 Posts</span>
-            <span className="font-medium">12,521 Followers</span>
-            <span className="font-medium">700 Following</span>
+          <div className="flex space-x-8">
+            <span className="font-medium">{accountInfo?.posts?.length || 0} posts</span>
+            <span className="font-medium">12,521 followers</span>
+            <span className="font-medium">700 following</span>
           </div>
-          <p className="text-xl text-gray-600">{accountInfo?.bio || ""}</p>
+          <p className="text-center md:text-left max-w-md">{accountInfo?.bio || ""}</p>
         </div>
       </div>
 
-      <div className="border-b border-t border-black flex">
-        <ScrollArea className="w-128 whitespace-nowrap">
-          <div className="flex w-max">
-            <StoryCarousel stories={story} />
-          </div>
-          <ScrollBar orientation="horizontal" className="opacity-0" />
-        </ScrollArea>
+      <ScrollArea className="w-full whitespace-nowrap mb-8">
+        <div className="flex w-max space-x-4 p-4">
+          <StoryCarousel stories={story} />
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+
+      <div className="mb-4 flex justify-center space-x-4">
+        <Button variant="ghost" size="sm">
+          <Grid className="w-4 h-4 mr-2" /> Posts
+        </Button>
+        <Button variant="ghost" size="sm">
+          <Bookmark className="w-4 h-4 mr-2" /> Saved
+        </Button>
+        <Button variant="ghost" size="sm">
+          <MessageSquare className="w-4 h-4 mr-2" /> Tagged
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 p-4 gap-4">
-        {accountInfo?.posts?.map((item, postIndex) =>
-          item.images?.length > 0 ? (
-            <Card
-              className="w-auto"
-              key={`post-${postIndex}`}
-              onClick={() => setActivePostIndex(postIndex)}
-            >
-              <CardContent className="p-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeletePost(item.postId)}
-                >
-                  Delete
-                </Button>
-                <div className="relative w-full h-[500px]">
-                  <div className="flex justify-center items-center relative">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={prevImage}
-                      className="absolute left-0 top-1/2 transform -translate-y-1/2 shadow-lg rounded-full p-2 z-10"
-                    >
-                      &lt;
-                    </Button>
-
-                    <div className="relative w-full flex justify-center h-[500px] overflow-hidden">
-                      <Image
-                        src={item.images[currentImageIndex].imageUrl}
-                        alt={`Post image ${currentImageIndex + 1}`}
-                        width={800}
-                        height={500}
-                        objectFit="cover"
-                        className="rounded-lg"
-                      />
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={nextImage}
-                      className="absolute right-0 top-1/2 transform -translate-y-1/2 shadow-lg rounded-full p-2 z-10"
-                    >
-                      &gt;
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="w-auto" key={`post-${postIndex}-no-image`}>
-              <CardContent className="p-4">
-                <p>No images available for this post</p>
-              </CardContent>
-            </Card>
-          )
-        )}
+      <div className="grid grid-cols-3 gap-1 md:gap-4">
+        {accountInfo?.posts?.map((post, index) => (
+          <Card key={`post-${index}`} className="cursor-pointer" onClick={() => openPostModal(post)}>
+            <CardContent className="p-0 aspect-square relative">
+              {/* <Image
+                src={post.images[0].imageUrl}
+                alt={`Post ${index + 1}`}
+                layout="fill"
+                objectFit="cover"
+              /> */}
+            </CardContent>
+          </Card>
+        ))}
       </div>
+
+      <PostModal
+        post={activePost}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
-  );
+  )
 }
-export default withAuth(AccountPage);
+
+export default withAuth(AccountPage)
+

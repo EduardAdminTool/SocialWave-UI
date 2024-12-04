@@ -24,3 +24,17 @@ export interface Posts {
   images: PostImages[];
   videos: PostVideo[];
 }
+
+export interface Post {
+  postId: number;
+  images: PostImages[];
+  caption: string;
+  likes: number;
+  author: Author;
+  createdAt: string;
+}
+
+export interface Author {
+  name: string;
+  profilePicture: string;
+}

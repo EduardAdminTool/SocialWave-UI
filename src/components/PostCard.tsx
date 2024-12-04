@@ -89,13 +89,13 @@ export function PostCard({ post }: PostCardProps) {
   const renderDots = () => {
     const totalMedia = post.images.length + post.videos.length;
     return (
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 py-2 px-4 rounded-full">
         {Array.from({ length: totalMedia }).map((_, index) => (
           <button
             key={index}
             className={cn(
-              "w-2 h-2 rounded-full transition-all duration-300 focus:outline-none",
-              currentMediaIndex === index ? "bg-white" : "bg-white/50"
+              "w-3 h-3 rounded-full transition-all duration-300 focus:outline-none",
+              currentMediaIndex === index ? "bg-blue-600" : "bg-blue-300"
             )}
             onClick={() => setCurrentMediaIndex(index)}
             aria-label={`Go to media ${index + 1}`}
