@@ -4,8 +4,7 @@ import "../globals.css";
 
 import Image from "next/image";
 
-import MessagesHeader from "./messagesHeader/page";
-
+import Header from "@/components/Header";
 export default function MessagesLayout({
   children,
 }: Readonly<{
@@ -13,7 +12,7 @@ export default function MessagesLayout({
 }>) {
   return (
     <div className="flex flex-col min-h-screen messages-layout">
-      <MessagesHeader />
+      <Header />
       <main className="flex-1">{children}</main>
     </div>
   );

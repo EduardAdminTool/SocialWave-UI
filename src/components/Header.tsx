@@ -1,13 +1,16 @@
 "use client";
 
+import { FaCameraRetro, FaLocationArrow } from "react-icons/fa";
 import Link from "next/link";
 import { useState } from "react";
-import { VscAccount } from "react-icons/vsc";
 import withAuth from "@/utils/withAuth";
-function MessagesHeader() {
+import { useRouter } from "next/navigation"; 
+
+function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -23,8 +26,13 @@ function MessagesHeader() {
   const handleSearchSubmit = () => {
     if (searchQuery.trim() && !searchHistory.includes(searchQuery.trim())) {
       setSearchHistory((prev) => [searchQuery.trim(), ...prev.slice(0, 4)]);
+      
     }
-    setSearchQuery(""); // Clear input
+
+    router.push(`/${searchQuery.trim()}`); 
+
+
+    setSearchQuery(""); 
     setShowHistory(false);
   };
 
@@ -32,10 +40,11 @@ function MessagesHeader() {
     setSearchQuery(query);
     setShowHistory(false);
   };
+
   return (
-    <div className="border-b border-b-black py-3 px-2 flex justify-between bg-blue-50 ">
+    <div className="bg-blue-50 h-[40px] w-full border-b border-b-black flex justify-between items-center text-blue-500 py-8 px-2">
       <Link href={"/"}>
-        <h1 className="text-3xl font-light text-blue-500 ">SocialWave</h1>
+        <h1 className="text-3xl font-light">SocialWave</h1>
       </Link>
       <div className="relative w-[250px]">
         <input
@@ -46,7 +55,7 @@ function MessagesHeader() {
           onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
         />
         {showHistory && (
-          <div className="absolute mt-1 w-[200px] bg-white border border-gray-300 rounded-lg shadow-lg">
+          <div className="absolute mt-1 w-full z-10 bg-white border border-gray-300 rounded-lg shadow-lg">
             {searchHistory.length > 0 ? (
               searchHistory.map((item, index) => (
                 <div
@@ -58,17 +67,23 @@ function MessagesHeader() {
                 </div>
               ))
             ) : (
-              <div className="px-4 py-2 text-sm text-gray-500 z-10">
+              <div className="px-4 py-2 text-sm text-gray-500">
                 No recent searches
               </div>
             )}
           </div>
         )}
       </div>
-
-      <VscAccount size={36} />
+      <Link href="/messages" className="group">
+        <div className="transition-all duration-300 ease-in-out transform group-hover:scale-110">
+          <FaLocationArrow
+            size={36}
+            className="transition-colors duration-300 ease-in-out group-hover:text-blue-600"
+          />
+        </div>
+      </Link>
     </div>
   );
 }
 
-export default withAuth(MessagesHeader);
+export default withAuth(Header);

@@ -1,5 +1,6 @@
-"use client";
+"use client"
 
+import withAuth from "@/utils/withAuth"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -19,15 +20,15 @@ import { Account } from "@/types/account/types";
 import { getPostsById, getPosts } from "@/services/posts";
 import { getAccountInfo } from "@/services/account";
 import { deletePost } from "@/services/posts";
-import withAuth from "@/utils/withAuth";
-function AccountPage() {
-  const [followClicked, setIsFollowClicked] = useState(false);
-  const [accountInfo, setAccountInfo] = useState<Account | null>(null);
-  const [error, setError] = useState<string | null>("");
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [activePostIndex, setActivePostIndex] = useState<number | null>(null);
 
-  const story = [
+function Profiles(){
+const [followClicked, setIsFollowClicked] = useState(false);
+const [accountInfo, setAccountInfo] = useState<Account | null>(null);
+const [error, setError] = useState<string | null>("");
+const [currentImageIndex, setCurrentImageIndex] = useState(0);
+const [activePostIndex, setActivePostIndex] = useState<number | null>(null);
+
+const story = [
     {
       image: "poza",
       name: "Andrei",
@@ -36,18 +37,98 @@ function AccountPage() {
       image: "poza1",
       name: "Matei1",
     },
+    {
+      image: "poza1",
+      name: "Matei2",
+    },
+    {
+      image: "poza1",
+      name: "Matei3",
+    },
+    {
+      image: "poza1",
+      name: "Matei4",
+    },
+    {
+      image: "poza1",
+      name: "Matei5",
+    },
+    {
+      image: "poza1",
+      name: "Matei6",
+    },
+    {
+      image: "poza1",
+      name: "Matei7",
+    },
+    {
+      image: "poza1",
+      name: "Matei8",
+    },
+    {
+      image: "poza1",
+      name: "Matei9",
+    },
+    {
+      image: "poza1",
+      name: "Matei91",
+    },
+    {
+      image: "poza1",
+      name: "Matei92",
+    },
+    {
+      image: "poza1",
+      name: "Matei93",
+    },
+    {
+      image: "poza1",
+      name: "Matei94",
+    },
+    {
+      image: "poza1",
+      name: "Matei95",
+    },
+    {
+      image: "poza1",
+      name: "Matei96",
+    },
+    {
+      image: "poza1",
+      name: "Matei79",
+    },
+    {
+      image: "poza1",
+      name: "Matei97",
+    },
+    {
+      image: "poza1",
+      name: "Matei98",
+    },
+    {
+      image: "poza1",
+      name: "Matei99",
+    },
+    {
+      image: "poza1",
+      name: "Matei988",
+    },
+    {
+      image: "poza1",
+      name: "Matei932",
+    },
   ];
 
-  const handleDeletePost = async (postId: number) => {
+const handleDeletePost = async (postId: number) => {
     await deletePost(postId);
     fetchAccount();
   };
 
-  useEffect(() => {
+useEffect(() => {
     fetchAccount();
   }, []);
 
-  const fetchAccount = async () => {
+const fetchAccount = async () => {
     setError(null);
     try {
       const fetchedAccount = await getAccountInfo();
@@ -57,11 +138,11 @@ function AccountPage() {
     }
   };
 
-  const handleFollowButton = () => {
+const handleFollowButton = () => {
     setIsFollowClicked(!followClicked);
   };
 
-  const nextImage = () => {
+const nextImage = () => {
     if (activePostIndex !== null && accountInfo?.posts) {
       const images = accountInfo.posts[activePostIndex]?.images || [];
       if (currentImageIndex < images.length - 1) {
@@ -70,7 +151,7 @@ function AccountPage() {
     }
   };
 
-  const prevImage = () => {
+const prevImage = () => {
     if (activePostIndex !== null && accountInfo?.posts) {
       const images = accountInfo.posts[activePostIndex]?.images || [];
       if (currentImageIndex > 0) {
@@ -79,7 +160,7 @@ function AccountPage() {
     }
   };
 
-  return (
+return (
     <div className="py-2">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded-lg shadow-md p-8">
         <div className="flex justify-center items-center">
@@ -186,4 +267,5 @@ function AccountPage() {
     </div>
   );
 }
-export default withAuth(AccountPage);
+
+export default withAuth(Profiles)

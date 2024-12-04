@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import "../globals.css";
-import Header from "./header/page";
+import Header from "@/components/Header";
 import Footer from "./footer/page";
 
 export default function DashboardLayout({

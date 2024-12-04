@@ -3,9 +3,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 
 import Image from "next/image";
-
-import MessagesHeader from "../messages/messagesHeader/page";
-
+import Header from "@/components/Header";
 export default function AccountLayout({
   children,
 }: Readonly<{
@@ -13,7 +11,7 @@ export default function AccountLayout({
 }>) {
   return (
     <div className="flex flex-col min-h-screen messages-layout">
-      <MessagesHeader />
+      <Header />
       <main className="flex-1">{children}</main>
     </div>
   );
