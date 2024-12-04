@@ -28,13 +28,9 @@ export interface Posts {
 export interface Post {
   postId: number;
   images: PostImages[];
-  caption: string;
-  likes: number;
-  author: Author;
+  videos : PostVideo[];
+  description: string;
+  // likes: number;
+  // comments: string;
   createdAt: string;
-}
-
-export interface Author {
-  name: string;
-  profilePicture: string;
 }

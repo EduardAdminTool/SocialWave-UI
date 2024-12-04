@@ -10,7 +10,6 @@ import { StoryCarousel } from "@/components/StoryCarousel"
 import { Account } from "@/types/account/types"
 import { Post } from "@/types/posts/types"
 import { getAccountInfo } from "@/services/account"
-import { deletePost } from "@/services/posts"
 import withAuth from "@/utils/withAuth"
 import { Grid, MessageSquare, Bookmark } from 'lucide-react'
 import { PostModal } from "@/components/PostModal"
@@ -25,11 +24,6 @@ function AccountPage() {
     { image: "poza", name: "Andrei" },
     { image: "poza1", name: "Matei1" },
   ]
-
-  const handleDeletePost = async (postId: number) => {
-    await deletePost(postId)
-    fetchAccount()
-  }
 
   useEffect(() => {
     fetchAccount()
@@ -104,12 +98,20 @@ function AccountPage() {
         {accountInfo?.posts?.map((post, index) => (
           <Card key={`post-${index}`} className="cursor-pointer" onClick={() => openPostModal(post)}>
             <CardContent className="p-0 aspect-square relative">
-              {/* <Image
-                src={post.images[0].imageUrl}
-                alt={`Post ${index + 1}`}
-                layout="fill"
-                objectFit="cover"
-              /> */}
+              {post?.images.length > 0 ? (
+                <Image
+                  src={post.images[0].imageUrl}
+                  alt={`Post ${index + 1}`}
+                  layout="fill"
+                  objectFit="cover"
+                />
+              ) : (
+               <video
+                className="object-cover w-full h-full"
+                controls
+                src={post.videos[0].videoUrl}
+              />
+              )}
             </CardContent>
           </Card>
         ))}
