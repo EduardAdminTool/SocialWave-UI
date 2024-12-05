@@ -119,3 +119,20 @@ export const getUserFollow = async (userId: number) => {
 
   return response.json();
 };
+
+export const deleteRequest = async (followee: number) => {
+  const response = await fetch(`http://localhost:3001/follow/delete`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+    body: JSON.stringify({ followee }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};

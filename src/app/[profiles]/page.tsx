@@ -16,9 +16,9 @@ import { getUserAccount } from "@/services/account";
 import { useSearchParams } from "next/navigation";
 import { requestFollow } from "@/services/follow";
 import { getUserFollow } from "@/services/follow";
+import { deleteRequest } from "@/services/follow";
 function AccountPage() {
   const searchParams = useSearchParams();
-
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
   const [followRequest, setFollowRequest] = useState("");
@@ -54,8 +54,14 @@ function AccountPage() {
 
   const handleFollowButton = async () => {
     try {
-      const response = await requestFollow(Number(userId));
-      setFollowRequest(response.message);
+      if (followRequest === "Follow request already sent") {
+        console.log(followRequest);
+        await deleteRequest(Number(userId));
+        setFollowRequest("Follow");
+      } else {
+        const response = await requestFollow(Number(userId));
+        setFollowRequest("Follow request already sent");
+      }
     } catch (err) {
       console.error("Error requesting follow:", err);
     }
@@ -82,11 +88,7 @@ function AccountPage() {
             <h2 className="text-2xl font-semibold">
               {accountInfo?.name || "Loading..."}
             </h2>
-            <Button
-              variant={followClicked ? "outline" : "default"}
-              className="w-auto"
-              onClick={handleFollowButton}
-            >
+            <Button className="w-auto" onClick={handleFollowButton}>
               {followRequest}
             </Button>
           </div>
