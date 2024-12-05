@@ -125,7 +125,11 @@ function Notifications() {
       <div className="flex px-4 py-20 flex-col w-[600px]">
         <span className="text-3xl">People you might know</span>
       </div>
-      <NotificationModal isOpen={isOpen} setIsOpen={setIsOpen} />
+      <NotificationModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        fetchedAccount={FollowRequestNumber}
+      />
     </div>
   );
 }
