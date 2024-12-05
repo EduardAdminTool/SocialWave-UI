@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import withAuth from "@/utils/withAuth";
 import { getFollows } from "@/services/follow";
 import { FollowRequestsProps } from "@/types/types";
+import NotificationModal from "@/components/NotificationModal";
 function Notifications() {
   const [followClicked, setIsFollowClicked] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [FollowRequestNumber, setFollowRequestNumber] = useState<
     FollowRequestsProps[]
   >([]);
@@ -31,8 +33,11 @@ function Notifications() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 justify-center bg-blue-50">
-      <div className="flex items-center gap-4 p-2 w-[600px] justify-between hover:scale-95 cursor-pointer">
+    <div className="flex flex-col items-center gap-4 justify-center bg-blue-50 min-h-screen">
+      <div
+        className="flex items-center gap-4 p-2 w-[600px] justify-between hover:scale-95 cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         <div className="flex gap-4 py-4">
           <div className="relative w-12 h-12">
             <div className="absolute inset-0 top-2 flex justify-center items-center rounded-full bg-blue-600 w-10 h-10">
@@ -44,7 +49,6 @@ function Notifications() {
           </div>
           <div className="flex flex-col">
             <span className="text-2xl">Follow-up requests</span>
-
             <span className="text-xl">
               {FollowRequestNumber.length > 0
                 ? `${FollowRequestNumber[0].name || "Unknown User"} and ${
@@ -121,6 +125,7 @@ function Notifications() {
       <div className="flex px-4 py-20 flex-col w-[600px]">
         <span className="text-3xl">People you might know</span>
       </div>
+      <NotificationModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 }

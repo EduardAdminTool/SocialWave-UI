@@ -5,7 +5,13 @@ import { Heart, Send, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
 
-export default function OpenedStory({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (open: boolean) => void }) {
+export default function OpenedStory({
+  isOpen,
+  setIsOpen,
+}: {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}) {
   const [isLiked, setIsLiked] = useState(false);
   const [replyText, setReplyText] = useState("");
 
@@ -56,14 +62,8 @@ export default function OpenedStory({ isOpen, setIsOpen }: { isOpen: boolean; se
         </div>
 
         <div className="relative w-full h-full">
-          <Image
-            src="/post.jpg"
-            alt="Story"
-            fill
-            className="object-cover"
-          />
+          <Image src="/post.jpg" alt="Story" fill className="object-cover" />
 
-          {/* Input and Buttons Overlapping Image */}
           <div className="absolute bottom-4 left-0 right-0 px-4 z-50">
             <div className="flex items-center space-x-2 bg-black bg-opacity-60 rounded-full px-4 py-2">
               <input
