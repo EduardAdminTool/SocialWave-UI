@@ -14,12 +14,14 @@ import { Grid, MessageSquare, Bookmark } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
 import { getUserAccount } from "@/services/account";
 import { useSearchParams } from "next/navigation";
-
+import { requestFollow } from "@/services/follow";
+import { getUserFollow } from "@/services/follow";
 function AccountPage() {
   const searchParams = useSearchParams();
 
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
+  const [followRequest, setFollowRequest] = useState("");
   const [error, setError] = useState<string | null>("");
   const [activePost, setActivePost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,12 +41,24 @@ function AccountPage() {
     try {
       const fetchedAccount = await getUserAccount(Number(userId));
       setAccountInfo(fetchedAccount);
+      const response = await getUserFollow(Number(userId));
+      if (response.message === "Not following") setFollowRequest("Follow");
+      else {
+        setFollowRequest("Follow request already sent");
+      }
     } catch (err) {
       setError("Nu s-au putut obtine date");
+      setFollowRequest("Failed to Follow");
     }
   };
 
-  const handleFollowButton = () => {
+  const handleFollowButton = async () => {
+    try {
+      const response = await requestFollow(Number(userId));
+      setFollowRequest(response.message);
+    } catch (err) {
+      console.error("Error requesting follow:", err);
+    }
     setIsFollowClicked(!followClicked);
   };
 
@@ -64,16 +78,16 @@ function AccountPage() {
           <AvatarFallback>{accountInfo?.name?.charAt(0) || "?"}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col items-center md:items-start space-y-4">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <h2 className="text-2xl font-semibold">
               {accountInfo?.name || "Loading..."}
             </h2>
             <Button
               variant={followClicked ? "outline" : "default"}
-              className="w-24"
+              className="w-auto"
               onClick={handleFollowButton}
             >
-              {followClicked ? "Following" : "Follow"}
+              {followRequest}
             </Button>
           </div>
           <div className="flex space-x-8">

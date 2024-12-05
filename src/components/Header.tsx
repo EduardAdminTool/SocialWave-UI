@@ -40,11 +40,25 @@ function Header() {
   };
 
   const handleSearchSubmit = () => {
-    if (searchQuery.trim() && !searchHistory.includes(searchQuery.trim())) {
+    if (!searchQuery.trim()) return;
+
+    const matchedAccount = fetchedAccounts.find(
+      (account) => account.name === searchQuery.trim()
+    );
+
+    if (!matchedAccount) {
+      setError("User not found.");
+      return;
+    }
+
+    const { userId } = matchedAccount;
+
+    if (!searchHistory.includes(searchQuery.trim())) {
       setSearchHistory((prev) => [searchQuery.trim(), ...prev.slice(0, 4)]);
     }
+
+    router.push(`/${searchQuery.trim()}?userId=${userId}`);
     setSearchQuery("");
-    router.push(`/${searchQuery.trim()}`);
     setShowHistory(false);
     setFetchedAccounts([]);
   };
@@ -82,7 +96,7 @@ function Header() {
                     )
                   }
                 >
-                  {account.name} {}
+                  {account.name}
                 </div>
               ))
             ) : searchHistory.length > 0 ? (
@@ -91,7 +105,10 @@ function Header() {
                   key={index}
                   className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                   onClick={() =>
-                    handleHistoryClick(item, fetchedAccounts[index].userId)
+                    handleHistoryClick(
+                      item,
+                      fetchedAccounts[index]?.userId || 0
+                    )
                   }
                 >
                   {item}

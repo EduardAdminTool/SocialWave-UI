@@ -1,31 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import withAuth from "@/utils/withAuth";
+import { getFollows } from "@/services/follow";
+import { FollowRequestsProps } from "@/types/types";
 function Notifications() {
-  const requests = [
-    {
-      name: "Matei",
-    },
-    {
-      name: "Andrei",
-    },
-    {
-      name: "Edi",
-    },
-    {
-      name: "Ioana",
-    },
-    {
-      name: "Andreea",
-    },
-  ];
   const [followClicked, setIsFollowClicked] = useState(false);
+  const [FollowRequestNumber, setFollowRequestNumber] = useState<
+    FollowRequestsProps[]
+  >([]);
+  const [error, setError] = useState<string | null>(null);
   const handleFollowButton = () => {
     setIsFollowClicked(!followClicked);
   };
+
+  useEffect(() => {
+    fetchFollows();
+  }, []);
+
+  const fetchFollows = async () => {
+    setError(null);
+    try {
+      const fetchedAccount = await getFollows();
+      setFollowRequestNumber(fetchedAccount);
+    } catch (err) {
+      setError("Nu s-au putut obtine date");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-4 justify-center bg-blue-50">
       <div className="flex items-center gap-4 p-2 w-[600px] justify-between hover:scale-95 cursor-pointer">
@@ -40,17 +44,14 @@ function Notifications() {
           </div>
           <div className="flex flex-col">
             <span className="text-2xl">Follow-up requests</span>
-            {requests.map((item, index) => {
-              if (index === 0) {
-                const remainingCount = requests.length - 1;
-                return (
-                  <span key={item.name} className="text-xl">
-                    {item.name}{" "}
-                    {remainingCount > 0 && `+${remainingCount} more`}
-                  </span>
-                );
-              }
-            })}
+
+            <span className="text-xl">
+              {FollowRequestNumber.length > 0
+                ? `${FollowRequestNumber[0].name || "Unknown User"} and ${
+                    FollowRequestNumber.length - 1
+                  } others`
+                : "No follow requests"}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-4">
