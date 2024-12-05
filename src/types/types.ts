@@ -3,8 +3,8 @@ export interface SignInProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export interface AccountSearchProps{
-  name: string
-  userId: number
-  profilePicture: string
+export interface AccountSearchProps {
+  name: string;
+  userId: number;
+  profilePicture: string;
 }

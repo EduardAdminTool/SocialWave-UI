@@ -4,13 +4,15 @@ import { FaCameraRetro, FaLocationArrow } from "react-icons/fa";
 import Link from "next/link";
 import { useState } from "react";
 import withAuth from "@/utils/withAuth";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { AccountSearchProps } from "@/types/types";
-import { getAccounts } from "@/services/account";
+import { getAccountsName } from "@/services/account";
 
 function Header() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [fetchedAccounts, setFetchedAccounts] = useState<AccountSearchProps[]>([]); // To store API results
+  const [fetchedAccounts, setFetchedAccounts] = useState<AccountSearchProps[]>(
+    []
+  );
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,17 +24,18 @@ function Header() {
 
     if (!query.trim()) {
       setShowHistory(false);
-      setFetchedAccounts([]); 
+      setFetchedAccounts([]);
       return;
     }
 
     try {
-      const fetchedData = await getAccounts(query);
-      setFetchedAccounts(fetchedData); 
+      const fetchedData = await getAccountsName(query);
+      setFetchedAccounts(fetchedData);
+      console.log(fetchedData);
       setShowHistory(true);
     } catch (err) {
       setError("Nu s-au putut obtine postari");
-      setFetchedAccounts([]); 
+      setFetchedAccounts([]);
     }
   };
 
@@ -43,12 +46,12 @@ function Header() {
     setSearchQuery("");
     router.push(`/${searchQuery.trim()}`);
     setShowHistory(false);
-    setFetchedAccounts([]); 
+    setFetchedAccounts([]);
   };
 
-  const handleHistoryClick = (query: string) => {
+  const handleHistoryClick = (query: string, userId: number) => {
     setSearchQuery(query);
-    router.push(`/${query}`);
+    router.push(`/${query.trim()}?userId=${userId}`);
     setShowHistory(false);
   };
 
@@ -72,7 +75,12 @@ function Header() {
                 <div
                   key={index}
                   className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleHistoryClick(account.name)}
+                  onClick={() =>
+                    handleHistoryClick(
+                      account.name,
+                      fetchedAccounts[index].userId
+                    )
+                  }
                 >
                   {account.name} {}
                 </div>
@@ -82,7 +90,9 @@ function Header() {
                 <div
                   key={index}
                   className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleHistoryClick(item)}
+                  onClick={() =>
+                    handleHistoryClick(item, fetchedAccounts[index].userId)
+                  }
                 >
                   {item}
                 </div>
