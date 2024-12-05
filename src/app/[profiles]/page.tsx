@@ -17,6 +17,7 @@ import { useSearchParams } from "next/navigation";
 import { requestFollow } from "@/services/follow";
 import { getUserFollow } from "@/services/follow";
 import { deleteRequest } from "@/services/follow";
+import { unfollowFollow } from "@/services/follow";
 function AccountPage() {
   const searchParams = useSearchParams();
   const [followClicked, setIsFollowClicked] = useState(false);
@@ -42,8 +43,11 @@ function AccountPage() {
       const fetchedAccount = await getUserAccount(Number(userId));
       setAccountInfo(fetchedAccount);
       const response = await getUserFollow(Number(userId));
+
       if (response.message === "Not following") setFollowRequest("Follow");
-      else {
+      else if (response.message === "Following") {
+        setFollowRequest("Following");
+      } else {
         setFollowRequest("Follow request already sent");
       }
     } catch (err) {
@@ -57,6 +61,9 @@ function AccountPage() {
       if (followRequest === "Follow request already sent") {
         console.log(followRequest);
         await deleteRequest(Number(userId));
+        setFollowRequest("Follow");
+      } else if (followRequest === "Following") {
+        await unfollowFollow(Number(userId));
         setFollowRequest("Follow");
       } else {
         const response = await requestFollow(Number(userId));
