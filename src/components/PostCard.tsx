@@ -6,6 +6,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+
 import {
   Card,
   CardContent,
@@ -14,18 +16,14 @@ import {
 } from "@/components/ui/card";
 import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
 import { PostCardProps } from "@/types/posts/types";
-import { deletePost } from "@/services/posts";
 
 export function PostCard({ posts }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const router = useRouter();
 
   const handleLikeClick = () => setIsLiked(!isLiked);
-
-  const handleDeletePost = async (postId: number) => {
-    await deletePost(postId);
-  };
 
   const calculateDateDifference = (dateString: string) => {
     const now = new Date();
@@ -109,11 +107,20 @@ export function PostCard({ posts }: PostCardProps) {
     <Card className="w-full max-w-4xl mx-auto mb-6">
       <CardHeader className="flex flex-row items-center space-x-4 pb-4">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={posts.profilePicture} />
+          <AvatarImage
+            className="cursor-pointer"
+            src={posts.profilePicture}
+            onClick={() => router.push(`/${posts.name}?userId=${posts.userId}`)}
+          />
           <AvatarFallback>{posts.userId}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{posts.name}</h3>
+          <h3
+            className="text-lg font-semibold cursor-pointer"
+            onClick={() => router.push(`/${posts.name}?userId=${posts.userId}`)}
+          >
+            {posts.name}
+          </h3>
           <p className="text-sm text-gray-500">{postedAgo}</p>
         </div>
       </CardHeader>
