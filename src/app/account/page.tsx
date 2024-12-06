@@ -19,6 +19,7 @@ function AccountPage() {
   const [error, setError] = useState<string | null>("");
   const [activePost, setActivePost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPostDeleted, setIsPostDeleted] = useState(false);
 
   const story = [
     { image: "poza", name: "Andrei" },
@@ -29,6 +30,13 @@ function AccountPage() {
     fetchAccount();
   }, []);
 
+  useEffect(() => {
+    if (isPostDeleted) {
+      fetchAccount();
+      setIsPostDeleted(false);
+    }
+  }, [isPostDeleted]);
+
   const fetchAccount = async () => {
     setError(null);
     try {
@@ -37,10 +45,6 @@ function AccountPage() {
     } catch (err) {
       setError("Nu s-au putut obtine date");
     }
-  };
-
-  const handleFollowButton = () => {
-    setIsFollowClicked(!followClicked);
   };
 
   const openPostModal = (post: Post) => {
@@ -126,6 +130,7 @@ function AccountPage() {
       <PostModal
         post={activePost}
         isOpen={isModalOpen}
+        setDeletedPost={setIsPostDeleted}
         onClose={() => setIsModalOpen(false)}
       />
     </div>
