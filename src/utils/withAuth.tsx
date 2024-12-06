@@ -37,7 +37,9 @@ const withAuth = (WrappedComponent) => {
         }
 
         const isValidToken = await verifyToken(token);
-        if (!isValidToken) {
+        console.log("Is token valid?", isValidToken); // Debug token validity
+        if (isValidToken.message === "Invalid token") {
+          localStorage.removeItem("authToken");
           router.push("/auth/login");
           return;
         }
