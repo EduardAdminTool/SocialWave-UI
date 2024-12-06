@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BiMessageRoundedAdd } from "react-icons/bi";
 import { FaExclamationCircle } from "react-icons/fa";
 import withAuth from "@/utils/withAuth";
+import { io, Socket } from "socket.io-client";
+import { jwtDecode } from "jwt-decode";
+
 function Messages() {
   const dm = [
     { logo: "L1", name: "name1", message: "message1" },
@@ -15,17 +18,52 @@ function Messages() {
   ];
 
   const [selectedUser, setSelectedUser] = useState(dm[0]);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      const decodedToken = jwtDecode<{ id: string }>(token);
+      setUserId(decodedToken.id);
+    }
+  }, []);
+
+  useEffect(() => {
+    const socketConnection = io("ws://localhost:3001/chat");
+    socketConnection.on("joinChat", () => {
+      console.log("Connected to server");
+    });
+
+    socketConnection.emit("joinChat", 1);
+
+    socketConnection.emit("sendMessage", {
+      senderId: 1,
+      receiverId: 2,
+      text: "Hello, this is a test message from senderId 1 to receiverId 2!",
+    });
+
+    socketConnection.on("receiveMessage", (message) => {
+      console.log("Received message:", message);
+    });
+
+    socketConnection.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+
+    return () => {
+      socketConnection.disconnect();
+    };
+  }, []);
 
   return (
     <div className="grid grid-cols-2 px-8 py-12 bg-blue-50 h-screen gap-8">
-      {/* Sidebar */}
       <div className="flex flex-col bg-white rounded-lg shadow-lg h-full">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
           <span className="text-2xl font-semibold">Direct</span>
           <BiMessageRoundedAdd size={36} className="cursor-pointer" />
         </div>
-        {/* Contacts List */}
+
         <div className="flex flex-col py-4 gap-4 text-lg overflow-y-auto">
           {dm.map((item) => (
             <div
@@ -49,14 +87,12 @@ function Messages() {
         </div>
       </div>
 
-      {/* Chat Section */}
       <div className="flex flex-col bg-white rounded-lg shadow-lg h-full">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
           <span className="text-2xl font-semibold">{selectedUser.name}</span>
           <FaExclamationCircle size={36} className="cursor-pointer" />
         </div>
-        {/* Messages */}
+
         <div className="flex flex-col flex-1 p-6 gap-4 overflow-y-auto bg-gray-50">
           <div className="flex gap-4 items-start">
             <div className="bg-blue-500 rounded-full w-[50px] h-[50px] flex justify-center items-center text-white text-lg font-bold">
@@ -67,7 +103,7 @@ function Messages() {
             </div>
           </div>
         </div>
-        {/* Message Input */}
+
         <div className="flex items-center p-6 bg-gray-100 rounded-b-lg">
           <input
             placeholder="Type a message..."

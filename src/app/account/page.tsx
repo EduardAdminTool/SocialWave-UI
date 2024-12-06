@@ -52,6 +52,7 @@ function AccountPage() {
       console.log(err);
     }
   };
+
   const fetchAccount = async () => {
     setError(null);
     try {
@@ -145,7 +146,6 @@ function AccountPage() {
       <PostModal
         post={activePost}
         isOpen={isModalOpen}
-        setDeletedPost={setIsPostDeleted}
         onClose={() => setIsModalOpen(false)}
       />
     </div>

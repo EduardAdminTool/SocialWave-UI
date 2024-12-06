@@ -7,6 +7,7 @@ import withAuth from "@/utils/withAuth";
 import { getFollows } from "@/services/follow";
 import { FollowRequestsProps } from "@/types/types";
 import NotificationModal from "@/components/NotificationModal";
+import { getFollowers, getFollowing } from "@/services/follow";
 function Notifications() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +21,13 @@ function Notifications() {
 
   useEffect(() => {
     fetchFollows();
+    fetchFollowersFollowing();
   }, []);
+
+  const fetchFollowersFollowing = async () => {
+    const fetchedFollowers = await getFollowers();
+    const fetchedFollowing = await getFollowing();
+  };
 
   const fetchFollows = async () => {
     setError(null);

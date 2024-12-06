@@ -18,21 +18,15 @@ import { deletePost } from "@/services/posts";
 interface PostModalProps {
   post: Post | null;
   isOpen: boolean;
-  setDeletedPost: (deleted: any) => void;
+
   onClose: () => void;
 }
 
-export function PostModal({
-  post,
-  isOpen,
-  setDeletedPost,
-  onClose,
-}: PostModalProps) {
+export function PostModal({ post, isOpen, onClose }: PostModalProps) {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   const deletePostButton = async () => {
     await deletePost(Number(post?.postId));
-    setDeletedPost(true);
     onClose();
   };
 
