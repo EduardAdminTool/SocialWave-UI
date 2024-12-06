@@ -21,7 +21,7 @@ export function StoryCarousel({ stories }: StoryCarouselProps) {
                   onClick={() => setIsOpen(!isOpen)}
                 >
                   <Avatar className="h-16 w-16 border-2 border-white hover:scale-105 cursor-pointer">
-                    <AvatarImage src={story.image} alt={story.name} />
+                    {/* <AvatarImage src={story.image} alt={story.name} /> */}
                     <AvatarFallback className="bg-blue-300 text-blue-800">
                       {story.name.charAt(0)}
                     </AvatarFallback>

@@ -26,7 +26,8 @@ function AccountPage() {
   const [error, setError] = useState<string | null>("");
   const [activePost, setActivePost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const userId = searchParams.get("userId");
+  const [requestStatus, setRequestStatus] = useState<string | null>("");
+  const userId = searchParams?.get("userId");
 
   const story = [
     { image: "poza", name: "Andrei" },
@@ -36,6 +37,13 @@ function AccountPage() {
   useEffect(() => {
     fetchAccount();
   }, []);
+
+  useEffect(() => {
+    if (requestStatus) {
+      const timer = setTimeout(() => setRequestStatus(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [requestStatus]);
 
   const fetchAccount = async () => {
     setError(null);
@@ -47,6 +55,7 @@ function AccountPage() {
       if (response.message === "Not following") setFollowRequest("Follow");
       else if (response.message === "Following") {
         setFollowRequest("Following");
+        setRequestStatus(fetchedAccount.name + " has accepted your request");
       } else {
         setFollowRequest("Follow request already sent");
       }
@@ -59,7 +68,6 @@ function AccountPage() {
   const handleFollowButton = async () => {
     try {
       if (followRequest === "Follow request already sent") {
-        console.log(followRequest);
         await deleteRequest(Number(userId));
         setFollowRequest("Follow");
       } else if (followRequest === "Following") {
@@ -82,6 +90,11 @@ function AccountPage() {
 
   return (
     <div className="container mx-auto py-8">
+      {requestStatus && (
+        <div className="flex justify-center items-center text-xl">
+          {requestStatus}
+        </div>
+      )}
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8 mb-8">
         <Avatar className="w-32 h-32 md:w-40 md:h-40">
           <AvatarImage
