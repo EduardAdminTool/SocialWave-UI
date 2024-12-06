@@ -15,6 +15,15 @@ interface PostVideo {
   videoUrl: string;
 }
 
+export interface Comments {
+  commentId: number;
+  parentId: number;
+  postId: number;
+  userId: number;
+  text: string;
+  createAt: string;
+}
+
 export interface Posts {
   postId: number;
   userId: number;
@@ -25,6 +34,7 @@ export interface Posts {
   images: PostImages[];
   videos: PostVideo[];
   name?: string;
+  comments: Comments[];
 }
 
 export interface Post {
@@ -33,6 +43,6 @@ export interface Post {
   videos: PostVideo[];
   description: string;
   // likes: number;
-  // comments: string;
+  comments: Comments[];
   createdAt: string;
 }

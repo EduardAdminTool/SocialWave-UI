@@ -1,5 +1,5 @@
 import { Posts } from "./posts/types";
-
+import { Comments } from "./posts/types";
 export interface SignInProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -27,4 +27,5 @@ export interface FeedProps {
   description: string;
   images: string[];
   videos: string[];
+  comments: Comments[];
 }

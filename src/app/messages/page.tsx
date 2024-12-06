@@ -31,7 +31,7 @@ function Messages() {
     socketConnection.on("connect", () => {
       console.log("Connected to server");
       setIsConnected(true);
-      socketConnection.emit("joinChat", 1); // Example senderId for joining
+      socketConnection.emit("joinChat", 1);
     });
 
     socketConnection.on("receiveMessage", (message) => {
@@ -62,9 +62,8 @@ function Messages() {
         receiverId: selectedUser.id,
         text: messageText,
       };
-      socket.emit("sendMessage", message); // Send message to server
+      socket.emit("sendMessage", message);
 
-      // Add the message locally as sent
       setConversations((prev) => ({
         ...prev,
         [selectedUser.id]: [
@@ -73,15 +72,14 @@ function Messages() {
         ],
       }));
 
-      // Simulate server response (message echoed back)
       setTimeout(() => {
         socket.emit("receiveMessage", {
           senderId: selectedUser.id,
-          text: `Echo: ${messageText}`, // Mocked response text
+          text: `Echo: ${messageText}`,
         });
-      }, 500); // Simulate server delay
+      }, 500);
 
-      setMessageText(""); // Clear input field
+      setMessageText("");
     }
   };
 

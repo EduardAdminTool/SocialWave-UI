@@ -18,7 +18,6 @@ import { deletePost } from "@/services/posts";
 interface PostModalProps {
   post: Post | null;
   isOpen: boolean;
-
   onClose: () => void;
 }
 

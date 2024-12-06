@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-
+import { CommentModal } from "./Comments";
 import {
   Card,
   CardContent,
@@ -19,6 +19,7 @@ import { PostCardProps } from "@/types/posts/types";
 
 export function PostCard({ posts }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const router = useRouter();
@@ -101,6 +102,10 @@ export function PostCard({ posts }: PostCardProps) {
         ))}
       </div>
     );
+  };
+
+  const openComments = () => {
+    setIsCommentsOpen(!isCommentsOpen);
   };
 
   return (
@@ -228,7 +233,7 @@ export function PostCard({ posts }: PostCardProps) {
               }`}
             />
           </Button>
-          <Button variant="ghost">
+          <Button variant="ghost" onClick={openComments}>
             <MessageCircle className="h-6 w-6" />
           </Button>
           <Button variant="ghost">
@@ -239,6 +244,12 @@ export function PostCard({ posts }: PostCardProps) {
           <Bookmark className="h-6 w-6" />
         </Button>
       </CardFooter>
+      <CommentModal
+        isOpen={isCommentsOpen}
+        comments={posts.comments}
+        onClose={() => setIsCommentsOpen(false)}
+        // onAddComment={hand}
+      />
     </Card>
   );
 }
