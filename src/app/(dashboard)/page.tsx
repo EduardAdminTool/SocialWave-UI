@@ -11,13 +11,14 @@ import { FaLocationArrow, FaRegSave } from "react-icons/fa";
 import { IoIosOptions } from "react-icons/io";
 import { StoryCarousel } from "@/components/StoryCarousel";
 
-import { getPosts, deletePost } from "@/services/posts";
-import { Posts } from "@/types/posts/types";
+import { deletePost } from "@/services/posts";
+import { getFeed } from "@/services/feed";
+import { FeedProps } from "@/types/types";
 import { PostCard } from "@/components/PostCard";
 import withAuth from "@/utils/withAuth";
 function Home() {
   const [error, setError] = useState<string | null>("");
-  const [posts, setPosts] = useState<Posts[]>([]);
+  const [posts, setPosts] = useState<FeedProps[]>([]);
 
   useEffect(() => {
     fetchPosts();
@@ -26,7 +27,7 @@ function Home() {
   const fetchPosts = async () => {
     setError(null);
     try {
-      const fetchedPosts = await getPosts();
+      const fetchedPosts = await getFeed();
       setPosts(fetchedPosts);
     } catch (err) {
       setError("Nu s-au putut obtine postari");
@@ -151,7 +152,7 @@ function Home() {
             .slice()
             .reverse()
             .map((item, index) => (
-              <PostCard key={item.postId} post={item} />
+              <PostCard key={item.description} posts={item} />
             ))}
         </div>
       </div>

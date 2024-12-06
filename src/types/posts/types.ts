@@ -1,5 +1,6 @@
+import { FeedProps } from "../types";
 export interface PostCardProps {
-  post: Posts;
+  posts: FeedProps;
 }
 
 interface PostImages {
@@ -23,12 +24,13 @@ export interface Posts {
   updatedAt: string;
   images: PostImages[];
   videos: PostVideo[];
+  name?: string;
 }
 
 export interface Post {
   postId: number;
   images: PostImages[];
-  videos : PostVideo[];
+  videos: PostVideo[];
   description: string;
   // likes: number;
   // comments: string;

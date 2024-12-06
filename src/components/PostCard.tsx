@@ -16,7 +16,7 @@ import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
 import { PostCardProps } from "@/types/posts/types";
 import { deletePost } from "@/services/posts";
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ posts }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -58,7 +58,7 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   const updatePostTimes = () => {
-    const updatedPostedAgo = calculateDateDifference(post.createdAt);
+    const updatedPostedAgo = calculateDateDifference(posts.createdAt);
     setPostedAgo(updatedPostedAgo);
   };
 
@@ -72,10 +72,10 @@ export function PostCard({ post }: PostCardProps) {
     return () => {
       clearInterval(intervalId);
     };
-  }, [post]);
+  }, [posts]);
 
   const nextMedia = () => {
-    if (post.images.length + post.videos.length > currentMediaIndex + 1) {
+    if (posts.images.length + posts.videos.length > currentMediaIndex + 1) {
       setCurrentMediaIndex(currentMediaIndex + 1);
     }
   };
@@ -87,7 +87,7 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   const renderDots = () => {
-    const totalMedia = post.images.length + post.videos.length;
+    const totalMedia = posts.images.length + posts.videos.length;
     return (
       <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 py-2 px-4 rounded-full">
         {Array.from({ length: totalMedia }).map((_, index) => (
@@ -109,18 +109,22 @@ export function PostCard({ post }: PostCardProps) {
     <Card className="w-full max-w-4xl mx-auto mb-6">
       <CardHeader className="flex flex-row items-center space-x-4 pb-4">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={post.profilePicture} />
-          <AvatarFallback>{post.userId}</AvatarFallback>
+          <AvatarImage src={posts.profilePicture} />
+          <AvatarFallback>{posts.userId}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{post.userId}</h3>
+          <h3 className="text-lg font-semibold">{posts.name}</h3>
           <p className="text-sm text-gray-500">{postedAgo}</p>
         </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative w-full py-4">
-          {(post?.images.length > 0 || post?.videos.length > 0) && (
-            <div className="relative flex justify-center items-center overflow-hidden" style={{ height: '500px' }}>
+          {(posts?.images.length > 0 || posts?.videos.length > 0) && (
+            <div
+              key={posts.description}
+              className="relative flex justify-center items-center overflow-hidden"
+              style={{ height: "500px" }}
+            >
               {currentMediaIndex > 0 && (
                 <Button
                   variant="ghost"
@@ -141,31 +145,44 @@ export function PostCard({ post }: PostCardProps) {
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="absolute inset-0 flex justify-center items-center"
                 >
-                  {post?.images.length > 0 && currentMediaIndex < post.images.length ? (
+                  {posts?.images.length > 0 &&
+                  currentMediaIndex < posts.images.length ? (
                     <Image
-                      src={post.images[currentMediaIndex].imageUrl}
+                      src={posts.images[currentMediaIndex]}
                       alt={`Post image ${currentMediaIndex + 1}`}
                       layout="fill"
                       objectFit="cover"
                       className="rounded-lg"
                     />
                   ) : (
-                    post?.videos.length > 0 && (
+                    posts?.videos.length > 0 && (
                       <video
                         controls
                         className="w-full h-full object-cover rounded-lg"
                         onError={() => console.log("Video failed to load")}
                       >
                         <source
-                          src={post.videos[currentMediaIndex - post.images.length].videoUrl}
+                          src={
+                            posts.videos[
+                              currentMediaIndex - posts.images.length
+                            ]
+                          }
                           type="video/mp4"
                         />
                         <source
-                          src={post.videos[currentMediaIndex - post.images.length].videoUrl}
+                          src={
+                            posts.videos[
+                              currentMediaIndex - posts.images.length
+                            ]
+                          }
                           type="video/webm"
                         />
                         <source
-                          src={post.videos[currentMediaIndex - post.images.length].videoUrl}
+                          src={
+                            posts.videos[
+                              currentMediaIndex - posts.images.length
+                            ]
+                          }
                           type="video/ogg"
                         />
                         Your browser does not support the video tag.
@@ -175,7 +192,8 @@ export function PostCard({ post }: PostCardProps) {
                 </motion.div>
               </AnimatePresence>
 
-              {currentMediaIndex < post.images.length + post.videos.length - 1 && (
+              {currentMediaIndex <
+                posts.images.length + posts.videos.length - 1 && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -191,7 +209,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
 
         <div className="p-4">
-          <p className="text-lg">{post.description}</p>
+          <p className="text-lg">{posts.description}</p>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between items-center">
