@@ -30,14 +30,12 @@ const withAuth = (WrappedComponent) => {
     useEffect(() => {
       const checkAuth = async () => {
         const token = localStorage.getItem("authToken");
-        console.log("Token from localStorage:", token); // Debug token
         if (!token) {
           router.push("/auth/login");
           return;
         }
 
         const isValidToken = await verifyToken(token);
-        console.log("Is token valid?", isValidToken); // Debug token validity
         if (isValidToken.message === "Invalid token") {
           localStorage.removeItem("authToken");
           router.push("/auth/login");
@@ -51,7 +49,36 @@ const withAuth = (WrappedComponent) => {
     }, [router]);
 
     if (loading) {
-      return <div>Loading...</div>; // Show a loader while verifying token
+      return (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh", // Full page height
+            width: "100vw", // Full page width
+          }}
+        >
+          <div
+            style={{
+              border: "4px solid rgba(0, 0, 0, 0.1)",
+              width: "50px",
+              height: "50px",
+              borderRadius: "50%",
+              borderTop: "4px solid #3498db",
+              animation: "spin 1s linear infinite",
+            }}
+          ></div>
+          <style>
+            {`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}
+          </style>
+        </div>
+      );
     }
 
     return <WrappedComponent {...props} />;
