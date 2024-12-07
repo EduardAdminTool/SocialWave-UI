@@ -1,4 +1,5 @@
 import { FeedProps } from "../types";
+import { Comments } from "../types";
 export interface PostCardProps {
   posts: FeedProps;
 }
@@ -15,13 +16,13 @@ interface PostVideo {
   videoUrl: string;
 }
 
-export interface Comments {
-  commentId: number;
-  parentId: number;
+export interface CommentModalProps {
+  comments: Comments[];
+  profilePicture: string;
+  name: string;
+  isOpen: boolean;
+  onClose: () => void;
   postId: number;
-  userId: number;
-  text: string;
-  createAt: string;
 }
 
 export interface Posts {

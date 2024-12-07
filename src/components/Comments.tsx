@@ -8,24 +8,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Comments } from "@/types/posts/types";
-
-interface CommentModalProps {
-  comments: Comments[];
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function CommentModal({ comments, isOpen, onClose }: CommentModalProps) {
+import { CommentModalProps } from "@/types/posts/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { createComment } from "@/services/comments";
+export function CommentModal({ comments, isOpen, onClose, name, profilePicture, postId }: CommentModalProps) {
   const [newComment, setNewComment] = useState("");
 
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      setNewComment("");
-    }
+  const handleAddComment = async () => {
+    const response = await createComment(postId,newComment);
+    console.log(response);
+    
   };
 
   if (!isOpen) return null;
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -40,9 +36,14 @@ export function CommentModal({ comments, isOpen, onClose }: CommentModalProps) {
                 key={comment.commentId}
                 className="flex items-start space-x-2 mb-4 last:mb-0"
               >
-                <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0"></div>
+                <Avatar className="h-12 w-12">
+                  <AvatarImage
+                    src={profilePicture}
+                  />
+                  <AvatarFallback>{name}</AvatarFallback>
+              </Avatar>
                 <div>
-                  <p className="text-sm font-semibold">Username</p>
+                  <p className="text-sm font-semibold">{name}</p>
                   <p className="text-sm text-gray-700">{comment.text}</p>
                 </div>
               </div>

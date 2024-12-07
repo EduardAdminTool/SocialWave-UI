@@ -248,7 +248,9 @@ export function PostCard({ posts }: PostCardProps) {
         isOpen={isCommentsOpen}
         comments={posts.comments}
         onClose={() => setIsCommentsOpen(false)}
-        // onAddComment={hand}
+        profilePicture={posts.profilePicture}
+        name={posts.name}
+        postId={posts.postId}
       />
     </Card>
   );

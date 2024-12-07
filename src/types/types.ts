@@ -1,5 +1,5 @@
 import { Posts } from "./posts/types";
-import { Comments } from "./posts/types";
+
 export interface SignInProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -28,4 +28,14 @@ export interface FeedProps {
   images: string[];
   videos: string[];
   comments: Comments[];
+  postId: number;
+}
+
+export interface Comments {
+  commentId: number;
+  parentId: number;
+  postId: number;
+  userId: number;
+  text: string;
+  createAt: string;
 }
