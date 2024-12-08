@@ -24,15 +24,21 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editedCommentText, setEditedCommentText] = useState("");
-  const [userIdFromToken,setUserIdFromToken] = useState<number>(0);
+  const [userIdFromToken, setUserIdFromToken] = useState<number | null>(null);
+
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     
     if (token) {
       try {
         const decodedToken = jwt.decode(token);
-        console.log("Decoded Token:", decodedToken);
-        setUserIdFromToken(decodedToken?.sub);
+        const userIdFromToken = decodedToken?.sub;
+
+        if (userIdFromToken) {
+          setUserIdFromToken(Number(userIdFromToken)); 
+        } else {
+          console.error("No 'sub' claim in token or it's not a valid number");
+        }
       } catch (error) {
         console.error("Error decoding token:", error);
       }
@@ -113,23 +119,25 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
                     </>
                   )}
                 </div>
+                {comment.userId === userIdFromToken && (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Edit2 className="mr-2 h-4 w-4" />
-                      <span>Edit</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <Edit2 className="mr-2 h-4 w-4" />
+                    <span>Edit</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+                )}
               </div>
             ))
           ) : (
