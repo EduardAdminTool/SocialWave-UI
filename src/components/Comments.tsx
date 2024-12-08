@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +18,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import jwt from 'jsonwebtoken';
+
 export function CommentModal({ comments, isOpen, onClose, name, profilePicture, postId }: CommentModalProps) {
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editedCommentText, setEditedCommentText] = useState("");
+  const [userIdFromToken,setUserIdFromToken] = useState<number>(0);
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    
+    if (token) {
+      try {
+        const decodedToken = jwt.decode(token);
+        console.log("Decoded Token:", decodedToken);
+        setUserIdFromToken(decodedToken?.sub);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
 
   const handleAddComment = async () => {
     const response = await createComment(postId, newComment);
@@ -42,8 +58,7 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
     //   ));
     //   setEditingCommentId(null);
     //   setEditedCommentText("");
-    }
-  // };
+  };
 
   const handleDeleteComment = async (commentId: string) => {
     // Implement delete functionality here

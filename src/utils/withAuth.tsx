@@ -22,7 +22,7 @@ const withAuth = (WrappedComponent) => {
 
         return result;
       } catch (error) {
-        console.error("Token verification failed:", error.message);
+        console.error("Token verification failed:", error);
         return false;
       }
     };
