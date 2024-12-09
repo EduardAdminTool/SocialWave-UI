@@ -129,7 +129,7 @@ export function PostCard({ posts }: PostCardProps) {
           <p className="text-sm text-gray-500">{postedAgo}</p>
         </div>
       </CardHeader>
-      {/* <CardContent className="p-0">
+      <CardContent className="p-0">
         <div className="relative w-full py-4">
           {(posts?.images.length > 0 || posts?.videos.length > 0) && (
             <div
@@ -223,7 +223,7 @@ export function PostCard({ posts }: PostCardProps) {
         <div className="p-4">
           <p className="text-lg">{posts.description}</p>
         </div>
-      </CardContent> */}
+      </CardContent>
       <CardFooter className="flex justify-between items-center">
         <div className="flex space-x-4">
           <Button variant="ghost" onClick={handleLikeClick}>

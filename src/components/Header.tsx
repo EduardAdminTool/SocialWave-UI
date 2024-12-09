@@ -31,7 +31,6 @@ function Header() {
     try {
       const fetchedData = await getAccountsName(query);
       setFetchedAccounts(fetchedData);
-      console.log(fetchedData);
       setShowHistory(true);
     } catch (err) {
       setError("Nu s-au putut obtine postari");
