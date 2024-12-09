@@ -160,6 +160,7 @@ export default function LoginPage() {
                 control={control}
                 label="Email"
                 type="email"
+                defaultValue={""}
                 required
                 rules={{
                   pattern: {
@@ -173,6 +174,7 @@ export default function LoginPage() {
                 control={control}
                 label="Password"
                 type={showPassword ? "text" : "password"}
+                defaultValue={""}
                 required
                 rules={{
                   minLength: {
@@ -276,6 +278,7 @@ export default function LoginPage() {
             label="Email"
             type="email"
             required
+            defaultValue={""}
             rules={{
               pattern: {
                 value: /^\S+@\S+$/i,

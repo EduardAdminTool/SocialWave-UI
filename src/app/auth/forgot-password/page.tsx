@@ -144,6 +144,7 @@ export default function ForgotPasswordPage() {
                 control={control}
                 label="Email"
                 type="email"
+                defaultValue={""}
                 required
                 rules={{
                   pattern: {
@@ -169,7 +170,7 @@ export default function ForgotPasswordPage() {
               </motion.div>
 
               <Link
-                href="/"
+                href="#"
                 onClick={() => router.push("/auth/login")}
                 variant="body2"
                 sx={{ display: "block", textAlign: "center", mt: 2 }}

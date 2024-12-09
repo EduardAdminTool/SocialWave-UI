@@ -219,6 +219,7 @@ export default function RegisterPage() {
                 control={control}
                 label="Email"
                 type="email"
+                defaultValue={""}
                 required
                 rules={{
                   pattern: {
@@ -232,6 +233,7 @@ export default function RegisterPage() {
                 control={control}
                 label="Password"
                 type={showPassword ? "text" : "password"}
+                defaultValue={""}
                 required
                 rules={{
                   minLength: {
@@ -259,6 +261,7 @@ export default function RegisterPage() {
                 label="Birthdate"
                 type="date"
                 required
+                defaultValue={""}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{
                   min: new Date( // Sets min to 100 years ago
@@ -276,12 +279,14 @@ export default function RegisterPage() {
               <FormTextField
                 name="name"
                 control={control}
+                defaultValue={""}
                 label="Name"
                 required
               />
               <FormTextField
                 name="bio"
                 control={control}
+                defaultValue={""}
                 label="Bio"
                 multiline
                 rows={3}
