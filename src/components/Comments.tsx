@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import jwt from "jsonwebtoken";
 import { useRouter } from "next/navigation";
-
+import { deleteComment } from "@/services/comments";
 export function CommentModal({
   comments,
   isOpen,
@@ -74,10 +74,9 @@ export function CommentModal({
     //   setEditedCommentText("");
   };
 
-  const handleDeleteComment = async (commentId: string) => {
-    // Implement delete functionality here
-    // For now, we'll just remove it from the local state
-    // setComments(comments.filter(comment => comment.commentId !== commentId));
+  const handleDeleteComment = async (commentId: number) => {
+    const response = await deleteComment(commentId);
+    console.log(response);
   };
 
   if (!isOpen) return null;
@@ -155,7 +154,9 @@ export function CommentModal({
                         <Edit2 className="mr-2 h-4 w-4" />
                         <span>Edit</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDeleteComment(comment.commentId)}
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         <span>Delete</span>
                       </DropdownMenuItem>
