@@ -136,35 +136,3 @@ export const deleteRequest = async (followee: number) => {
 
   return response.json();
 };
-
-export const getFollowers = async () => {
-  const response = await fetch(`http://localhost:3001/follow/followers`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
-};
-
-export const getFollowing = async () => {
-  const response = await fetch(`http://localhost:3001/follow/following`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
-};

@@ -18,7 +18,11 @@ import { requestFollow } from "@/services/follow";
 import { getUserFollow } from "@/services/follow";
 import { deleteRequest } from "@/services/follow";
 import { unfollowFollow } from "@/services/follow";
+import { useRouter } from "next/navigation";
+
 function AccountPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
+
   const searchParams = useSearchParams();
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
@@ -78,6 +82,9 @@ function AccountPage({ params }: { params: { id: string } }) {
     setIsModalOpen(true);
   };
 
+  const goToMessage = (userId: number) => {
+    router.push(`/messages/${userId}`);
+  };
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8 mb-8">
@@ -96,13 +103,23 @@ function AccountPage({ params }: { params: { id: string } }) {
             <Button className="w-auto" onClick={handleFollowButton}>
               {followRequest}
             </Button>
+            <Button
+              className="bg-blue-500"
+              onClick={() => goToMessage(Number(accountInfo?.userId))}
+            >
+              Send a Message
+            </Button>
           </div>
           <div className="flex space-x-8">
             <span className="font-medium">
               {accountInfo?.posts?.length || 0} posts
             </span>
-            <span className="font-medium">12,521 followers</span>
-            <span className="font-medium">700 following</span>
+            <span className="font-medium">
+              {accountInfo?.followers.length} Followers
+            </span>
+            <span className="font-medium">
+              {accountInfo?.following.length} Following
+            </span>
           </div>
           <p className="text-center md:text-left max-w-md">
             {accountInfo?.bio || ""}

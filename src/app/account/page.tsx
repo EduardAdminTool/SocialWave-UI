@@ -13,7 +13,6 @@ import { getAccountInfo } from "@/services/account";
 import withAuth from "@/utils/withAuth";
 import { Grid, MessageSquare, Bookmark, MoreHorizontal } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
-import { getFollowers, getFollowing } from "@/services/follow";
 import { TbLogout } from "react-icons/tb";
 
 import {
@@ -27,9 +26,6 @@ function AccountPage() {
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
   const [error, setError] = useState<string | null>("");
   const [activePost, setActivePost] = useState<Post | null>(null);
-  const [followers, setFollowers] = useState<number | null>(0);
-  const [following, setFollowing] = useState<number | null>(0);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPostDeleted, setIsPostDeleted] = useState(false);
 
@@ -40,7 +36,6 @@ function AccountPage() {
 
   useEffect(() => {
     fetchAccount();
-    fetchFollowersFollowing();
   }, []);
 
   useEffect(() => {
@@ -49,17 +44,6 @@ function AccountPage() {
       setIsPostDeleted(false);
     }
   }, [isPostDeleted]);
-
-  const fetchFollowersFollowing = async () => {
-    try {
-      const fetchedFollowers = await getFollowers();
-      const fetchedFollowing = await getFollowing();
-      setFollowers(fetchedFollowers.length);
-      setFollowing(fetchedFollowing.length);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const fetchAccount = async () => {
     setError(null);
@@ -114,8 +98,12 @@ function AccountPage() {
             <span className="font-medium">
               {accountInfo?.posts?.length || 0} posts
             </span>
-            <span className="font-medium">{followers} Followers</span>
-            <span className="font-medium">{following} Following</span>
+            <span className="font-medium">
+              {accountInfo?.followers.length} Followers
+            </span>
+            <span className="font-medium">
+              {accountInfo?.following.length} Following
+            </span>
           </div>
           <p className="text-center md:text-left max-w-md">
             {accountInfo?.bio || ""}
