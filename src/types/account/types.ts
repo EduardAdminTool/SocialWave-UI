@@ -29,4 +29,5 @@ export interface FollowersFollowingProps {
   FollowersFollowing: FollowersFollowing[];
   isOpen: boolean;
   onClose: () => void;
+  type: string;
 }

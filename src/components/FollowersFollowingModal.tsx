@@ -24,6 +24,7 @@ export function FollowersFollowingModal({
   FollowersFollowing,
   isOpen,
   onClose,
+  type,
 }: FollowersFollowingProps) {
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
@@ -43,12 +44,33 @@ export function FollowersFollowingModal({
       <DialogContent className="p-0 max-w-md w-full rounded-lg overflow-hidden">
         <DialogHeader className="bg-white p-4 border-b border-gray-300">
           <DialogTitle className="text-base font-semibold text-center">
-            Followers
+            {type}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col h-[400px] overflow-y-auto bg-white">
-          {FollowersFollowing.map((item) => (
-            <span>{item.name}</span>
+          {FollowersFollowing.map((item, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-4 border-b border-gray-200"
+            >
+              <div className="flex items-center space-x-3">
+                <Avatar className="w-10 h-10">
+                  <AvatarImage
+                    src={item.profilePicture || ""}
+                    alt={item.name || "User"}
+                  />
+                  <AvatarFallback>
+                    {item.name?.charAt(0).toUpperCase() || "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">{item.name}</p>
+                  <p className="text-xs text-gray-500">
+                    {item.name || "No username"}
+                  </p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </DialogContent>

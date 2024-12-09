@@ -183,12 +183,14 @@ function AccountPage() {
 
       {modalType === "Followers" ? (
         <FollowersFollowingModal
+          type={"Followers"}
           FollowersFollowing={accountInfo?.followers || []}
           isOpen={isFollowersFollowingModalOpen}
           onClose={() => setIsFollowersFollowingModalOpen(false)}
         />
       ) : (
         <FollowersFollowingModal
+          type={"Following"}
           FollowersFollowing={accountInfo?.following || []}
           isOpen={isFollowersFollowingModalOpen}
           onClose={() => setIsFollowersFollowingModalOpen(false)}
