@@ -11,9 +11,17 @@ import { Account } from "@/types/account/types";
 import { Post } from "@/types/posts/types";
 import { getAccountInfo } from "@/services/account";
 import withAuth from "@/utils/withAuth";
-import { Grid, MessageSquare, Bookmark } from "lucide-react";
+import { Grid, MessageSquare, Bookmark, MoreHorizontal } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
 import { getFollowers, getFollowing } from "@/services/follow";
+import { TbLogout } from "react-icons/tb";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
@@ -68,6 +76,11 @@ function AccountPage() {
     setIsModalOpen(true);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    location.reload();
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8 mb-8">
@@ -83,6 +96,19 @@ function AccountPage() {
             <h2 className="text-2xl font-semibold">
               {accountInfo?.name || "Loading..."}
             </h2>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleLogout}>
+                  <TbLogout className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex space-x-8">
             <span className="font-medium">
