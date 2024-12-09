@@ -18,8 +18,6 @@ interface PostVideo {
 
 export interface CommentModalProps {
   comments: Comments[];
-  profilePicture: string;
-  name: string;
   isOpen: boolean;
   onClose: () => void;
   postId: number;

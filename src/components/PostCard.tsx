@@ -122,14 +122,14 @@ export function PostCard({ posts }: PostCardProps) {
         <div className="flex-1">
           <h3
             className="text-lg font-semibold cursor-pointer"
-            onClick={() => router.push(`/${posts.name}?userId=${posts.userId}`)}
+            onClick={() => router.push(`/account/${posts.userId}`)}
           >
             {posts.name}
           </h3>
           <p className="text-sm text-gray-500">{postedAgo}</p>
         </div>
       </CardHeader>
-      <CardContent className="p-0">
+      {/* <CardContent className="p-0">
         <div className="relative w-full py-4">
           {(posts?.images.length > 0 || posts?.videos.length > 0) && (
             <div
@@ -223,7 +223,7 @@ export function PostCard({ posts }: PostCardProps) {
         <div className="p-4">
           <p className="text-lg">{posts.description}</p>
         </div>
-      </CardContent>
+      </CardContent> */}
       <CardFooter className="flex justify-between items-center">
         <div className="flex space-x-4">
           <Button variant="ghost" onClick={handleLikeClick}>
@@ -248,8 +248,6 @@ export function PostCard({ posts }: PostCardProps) {
         isOpen={isCommentsOpen}
         comments={posts.comments}
         onClose={() => setIsCommentsOpen(false)}
-        profilePicture={posts.profilePicture}
-        name={posts.name}
         postId={posts.postId}
       />
     </Card>

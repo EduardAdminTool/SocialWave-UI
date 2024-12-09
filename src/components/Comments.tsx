@@ -20,20 +20,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import jwt from "jsonwebtoken";
 import { useRouter } from "next/navigation";
-import { deleteComment } from "@/services/comments";
+import { deleteComment, updateComment } from "@/services/comments";
 export function CommentModal({
   comments,
   isOpen,
   onClose,
-  name,
-  profilePicture,
   postId,
 }: CommentModalProps) {
   const [newComment, setNewComment] = useState("");
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editedCommentText, setEditedCommentText] = useState("");
   const [userIdFromToken, setUserIdFromToken] = useState<number | null>(null);
   const router = useRouter();
+
   useEffect(() => {
     const token = localStorage.getItem("authToken");
 
@@ -59,19 +58,19 @@ export function CommentModal({
     setNewComment("");
   };
 
-  const handleEditComment = (commentId: string, text: string) => {
+  const handleEditComment = (commentId: number, text: string) => {
     setEditingCommentId(commentId);
     setEditedCommentText(text);
   };
 
-  const handleUpdateComment = async (commentId: string) => {
-    // const response = await updateComment(commentId, editedCommentText);
-    // if (response.success) {
-    //   setComments(comments.map(comment =>
-    //     comment.commentId === commentId ? { ...comment, text: editedCommentText } : comment
-    //   ));
-    //   setEditingCommentId(null);
-    //   setEditedCommentText("");
+  const handleUpdateComment = async (commentId: number) => {
+    const response = await updateComment(
+      commentId,
+      editedCommentText,
+      Number(userIdFromToken)
+    );
+    console.log(response);
+    setEditingCommentId(null);
   };
 
   const handleDeleteComment = async (commentId: number) => {
@@ -105,42 +104,29 @@ export function CommentModal({
                   onClick={() => router.push(`/account/${comment.userId}`)}
                   className="h-8 w-8"
                 >
-                  <AvatarImage src={profilePicture} />
-                  <AvatarFallback>{name[0]}</AvatarFallback>
+                  <AvatarImage src={comment.profilePicture} />
+                  <AvatarFallback>{comment.name}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  {editingCommentId === comment.commentId ? (
-                    <div className="flex items-center space-x-2">
+                  <p className="text-sm">
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => router.push(`/account/${comment.userId}`)}
+                      className="font-semibold mr-2"
+                    >
+                      {comment.name}
+                    </span>
+                    {editingCommentId === comment.commentId ? (
                       <input
                         type="text"
                         value={editedCommentText}
                         onChange={(e) => setEditedCommentText(e.target.value)}
-                        className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
+                        className="text-sm w-full border rounded-md p-1"
                       />
-                      <Button
-                        // onClick={() => handleUpdateComment(comment.commentId)}
-                        className="text-blue-500 font-semibold text-sm bg-transparent hover:bg-transparent p-0"
-                      >
-                        Update
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-sm">
-                        <span
-                          style={{ cursor: "pointer" }}
-                          onClick={() =>
-                            router.push(`/account/${comment.userId}`)
-                          }
-                          className="font-semibold mr-2"
-                        >
-                          {name}
-                        </span>
-                        {comment.text}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">2h</p>
-                    </>
-                  )}
+                    ) : (
+                      comment.text
+                    )}
+                  </p>
                 </div>
                 {comment.userId === userIdFromToken && (
                   <DropdownMenu>
@@ -150,7 +136,11 @@ export function CommentModal({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleEditComment(comment.commentId, comment.text)
+                        }
+                      >
                         <Edit2 className="mr-2 h-4 w-4" />
                         <span>Edit</span>
                       </DropdownMenuItem>
@@ -163,6 +153,17 @@ export function CommentModal({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
+                {editingCommentId === comment.commentId && (
+                  <Button
+                    onClick={() =>
+                      handleUpdateComment(Number(comment.commentId))
+                    }
+                    className="mt-2 text-blue-500 font-semibold text-sm"
+                    disabled={!editedCommentText.trim()}
+                  >
+                    Save
+                  </Button>
+                )}
               </div>
             ))
           ) : (
@@ -173,10 +174,6 @@ export function CommentModal({
         </div>
         <div className="p-3 border-t border-gray-300 bg-white">
           <div className="flex items-center space-x-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={profilePicture} />
-              <AvatarFallback>{name[0]}</AvatarFallback>
-            </Avatar>
             <input
               type="text"
               placeholder="Add a comment..."
