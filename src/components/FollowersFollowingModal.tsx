@@ -39,6 +39,10 @@ export function FollowersFollowingModal({
 
   if (!isOpen) return null;
 
+  const goToUser = (userId: number) => {
+    router.push(`/account/${userId}`);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="p-0 max-w-md w-full rounded-lg overflow-hidden">
@@ -54,7 +58,10 @@ export function FollowersFollowingModal({
               className="flex items-center justify-between p-4 border-b border-gray-200"
             >
               <div className="flex items-center space-x-3">
-                <Avatar className="w-10 h-10">
+                <Avatar
+                  className="w-10 h-10 cursor-pointer"
+                  onClick={() => goToUser(item.userId)}
+                >
                   <AvatarImage
                     src={item.profilePicture || ""}
                     alt={item.name || "User"}
@@ -63,7 +70,10 @@ export function FollowersFollowingModal({
                     {item.name?.charAt(0).toUpperCase() || "?"}
                   </AvatarFallback>
                 </Avatar>
-                <div>
+                <div
+                  onClick={() => goToUser(item.userId)}
+                  className="cursor-pointer"
+                >
                   <p className="text-sm font-medium">{item.name}</p>
                   <p className="text-xs text-gray-500">
                     {item.name || "No username"}
