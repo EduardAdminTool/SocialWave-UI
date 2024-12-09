@@ -11,11 +11,11 @@ export interface Account {
   coverPicture: string;
   birthdate: string;
   posts: Posts[];
-  followers: FollowersFollowingProps[];
-  following: FollowersFollowingProps[];
+  followers: FollowersFollowing[];
+  following: FollowersFollowing[];
 }
 
-interface FollowersFollowingProps {
+interface FollowersFollowing {
   userId: number;
   name: string;
   email: string;
@@ -23,4 +23,10 @@ interface FollowersFollowingProps {
   createdAt: string;
   updatedAt: string;
   isAccepted: boolean;
+}
+
+export interface FollowersFollowingProps {
+  FollowersFollowing: FollowersFollowing[];
+  isOpen: boolean;
+  onClose: () => void;
 }

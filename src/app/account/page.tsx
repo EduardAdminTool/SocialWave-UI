@@ -14,20 +14,23 @@ import withAuth from "@/utils/withAuth";
 import { Grid, MessageSquare, Bookmark, MoreHorizontal } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
 import { TbLogout } from "react-icons/tb";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FollowersFollowingModal } from "@/components/FollowersFollowingModal";
 function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
   const [error, setError] = useState<string | null>("");
   const [activePost, setActivePost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFollowersFollowingModalOpen, setIsFollowersFollowingModalOpen] =
+    useState(false);
   const [isPostDeleted, setIsPostDeleted] = useState(false);
+  const [modalType, setModalType] = useState<string | null>("");
 
   const story = [
     { image: "poza", name: "Andrei" },
@@ -58,6 +61,15 @@ function AccountPage() {
   const openPostModal = (post: Post) => {
     setActivePost(post);
     setIsModalOpen(true);
+  };
+
+  const openFollowersFollowingModal = (type: string) => {
+    if (type === "Followers") {
+      setModalType("Followers");
+    } else if (type === "Following") {
+      setModalType("Following");
+    }
+    setIsFollowersFollowingModalOpen(true);
   };
 
   const handleLogout = () => {
@@ -98,10 +110,16 @@ function AccountPage() {
             <span className="font-medium">
               {accountInfo?.posts?.length || 0} posts
             </span>
-            <span className="font-medium">
+            <span
+              className="font-medium cursor-pointer"
+              onClick={() => openFollowersFollowingModal("Followers")}
+            >
               {accountInfo?.followers.length} Followers
             </span>
-            <span className="font-medium">
+            <span
+              className="font-medium cursor-pointer"
+              onClick={() => openFollowersFollowingModal("Following")}
+            >
               {accountInfo?.following.length} Following
             </span>
           </div>
@@ -162,6 +180,20 @@ function AccountPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+
+      {modalType === "Followers" ? (
+        <FollowersFollowingModal
+          FollowersFollowing={accountInfo?.followers || []}
+          isOpen={isFollowersFollowingModalOpen}
+          onClose={() => setIsFollowersFollowingModalOpen(false)}
+        />
+      ) : (
+        <FollowersFollowingModal
+          FollowersFollowing={accountInfo?.following || []}
+          isOpen={isFollowersFollowingModalOpen}
+          onClose={() => setIsFollowersFollowingModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
