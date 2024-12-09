@@ -42,7 +42,7 @@ export function CommentModal({
 
   useEffect(() => {
     fetchAccount();
-  });
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -76,12 +76,11 @@ export function CommentModal({
   const handleAddComment = async () => {
     try {
       const response = await createComment(postId, newComment);
-      console.log(response);
 
-      const commentId = response.commentId || Date.now();
+      const commentId = response[0].commentId;
 
       const newCommentObj: Comments = {
-        commentId,
+        commentId: commentId,
         parentId: 0,
         postId,
         userId: userIdFromToken!,
