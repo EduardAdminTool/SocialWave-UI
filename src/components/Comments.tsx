@@ -152,6 +152,12 @@ export function CommentModal({
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && newComment.trim()) {
+      handleAddComment();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -255,12 +261,13 @@ export function CommentModal({
               type="text"
               placeholder="Add a comment..."
               value={newComment}
+              onKeyDown={handleKeyPress}
               onChange={(e) => setNewComment(e.target.value)}
               className="flex-1 text-sm focus:outline-none"
             />
             <Button
               onClick={handleAddComment}
-              className="text-blue-500 font-semibold text-sm bg-transparent hover:bg-transparent p-0"
+              className="text-blue-500 font-semibold text-sm bg-transparent hover:bg-transparent p-0 cursor-pointer"
               disabled={!newComment.trim()}
             >
               Post
