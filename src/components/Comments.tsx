@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,7 @@ export function CommentModal({
   const [userIdFromToken, setUserIdFromToken] = useState<number | null>(null);
   const [updatedComments, setUpdatedComments] = useState<Comments[]>(comments);
   const [error, setError] = useState<string | null>("");
+  const lastCommentRef = useRef<HTMLDivElement | null>(null);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const router = useRouter();
 
@@ -62,6 +63,15 @@ export function CommentModal({
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (lastCommentRef.current) {
+      lastCommentRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [updatedComments]);
 
   const fetchAccount = async () => {
     setError(null);
@@ -157,6 +167,9 @@ export function CommentModal({
             updatedComments.map((comment, index) => (
               <div
                 key={comment.commentId}
+                ref={
+                  index === updatedComments.length - 1 ? lastCommentRef : null
+                }
                 className={`flex items-start space-x-3 p-4 ${
                   index !== updatedComments.length - 1
                     ? "border-b border-gray-300"
