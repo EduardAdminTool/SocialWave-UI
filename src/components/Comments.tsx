@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CommentModalProps } from "@/types/posts/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createComment } from "@/services/comments";
-import { Edit2, MoreHorizontal, Send, Trash2 } from "lucide-react";
+import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +21,9 @@ import {
 import jwt from "jsonwebtoken";
 import { useRouter } from "next/navigation";
 import { deleteComment, updateComment } from "@/services/comments";
+import { Comments } from "@/types/types";
+import { getAccountInfo } from "@/services/account";
+import { Account } from "@/types/account/types";
 export function CommentModal({
   comments,
   isOpen,
@@ -30,8 +33,16 @@ export function CommentModal({
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editedCommentText, setEditedCommentText] = useState("");
+  const [accountInfo, setAccountInfo] = useState<Account | null>(null);
   const [userIdFromToken, setUserIdFromToken] = useState<number | null>(null);
+  const [updatedComments, setUpdatedComments] = useState<Comments[]>(comments);
+  const [error, setError] = useState<string | null>("");
+
   const router = useRouter();
+
+  useEffect(() => {
+    fetchAccount();
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -52,10 +63,41 @@ export function CommentModal({
     }
   }, []);
 
+  const fetchAccount = async () => {
+    setError(null);
+    try {
+      const fetchedAccount = await getAccountInfo();
+      setAccountInfo(fetchedAccount);
+    } catch (err) {
+      setError("Nu s-au putut obtine date");
+    }
+  };
+
   const handleAddComment = async () => {
-    const response = await createComment(postId, newComment);
-    console.log(response);
-    setNewComment("");
+    try {
+      const response = await createComment(postId, newComment);
+      console.log(response);
+
+      const commentId = response.commentId || Date.now();
+
+      const newCommentObj: Comments = {
+        commentId,
+        parentId: 0,
+        postId,
+        userId: userIdFromToken!,
+        text: newComment,
+        createAt: new Date().toISOString(),
+        name: String(accountInfo?.name),
+        profilePicture: String(accountInfo?.profilePicture),
+      };
+
+      setUpdatedComments((prevComments) => [...prevComments, newCommentObj]);
+
+      setNewComment("");
+    } catch (error) {
+      setError("Failed to add comment");
+      console.error(error);
+    }
   };
 
   const handleEditComment = (commentId: number, text: string) => {
@@ -64,18 +106,39 @@ export function CommentModal({
   };
 
   const handleUpdateComment = async (commentId: number) => {
-    const response = await updateComment(
-      commentId,
-      editedCommentText,
-      Number(userIdFromToken)
-    );
-    console.log(response);
-    setEditingCommentId(null);
+    try {
+      const response = await updateComment(
+        commentId,
+        editedCommentText,
+        Number(userIdFromToken)
+      );
+
+      setUpdatedComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.commentId === commentId
+            ? { ...comment, text: editedCommentText }
+            : comment
+        )
+      );
+
+      setEditingCommentId(null);
+    } catch (error) {
+      setError("Failed to update comment");
+      console.error(error);
+    }
   };
 
   const handleDeleteComment = async (commentId: number) => {
-    const response = await deleteComment(commentId);
-    console.log(response);
+    try {
+      const response = await deleteComment(commentId);
+
+      setUpdatedComments((prevComments) =>
+        prevComments.filter((comment) => comment.commentId !== commentId)
+      );
+    } catch (error) {
+      setError("Failed to delete comment");
+      console.error(error);
+    }
   };
 
   if (!isOpen) return null;
@@ -89,12 +152,12 @@ export function CommentModal({
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col h-[400px] overflow-y-auto bg-white">
-          {comments.length > 0 ? (
-            comments.map((comment, index) => (
+          {updatedComments.length > 0 ? (
+            updatedComments.map((comment, index) => (
               <div
                 key={comment.commentId}
                 className={`flex items-start space-x-3 p-4 ${
-                  index !== comments.length - 1
+                  index !== updatedComments.length - 1
                     ? "border-b border-gray-300"
                     : ""
                 }`}
