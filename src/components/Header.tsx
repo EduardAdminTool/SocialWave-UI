@@ -57,7 +57,7 @@ function Header() {
       setSearchHistory((prev) => [searchQuery.trim(), ...prev.slice(0, 4)]);
     }
 
-    router.push(`/${searchQuery.trim()}?userId=${userId}`);
+    router.push(`/account/${userId}`);
     setSearchQuery("");
     setShowHistory(false);
     setFetchedAccounts([]);
@@ -65,7 +65,7 @@ function Header() {
 
   const handleHistoryClick = (query: string, userId: number) => {
     setSearchQuery(query);
-    router.push(`/${query.trim()}?userId=${userId}`);
+    router.push(`/account/${userId}`);
     setShowHistory(false);
   };
 
