@@ -9,24 +9,25 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryCarousel } from "@/components/StoryCarousel";
 import { Account } from "@/types/account/types";
 import { Post } from "@/types/posts/types";
-import { getAccountInfo, getAccountInfoById } from "@/services/account";
 import withAuth from "@/utils/withAuth";
 import { Grid, MessageSquare, Bookmark } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
-import { getFollowers, getFollowing } from "@/services/follow";
-import { useRouter } from "next/navigation";
+import { getUserAccount } from "@/services/account";
+import { useSearchParams } from "next/navigation";
+import { requestFollow } from "@/services/follow";
+import { getUserFollow } from "@/services/follow";
+import { deleteRequest } from "@/services/follow";
+import { unfollowFollow } from "@/services/follow";
 function AccountPage({ params }: { params: { id: string } }) {
+  const searchParams = useSearchParams();
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
+  const [followRequest, setFollowRequest] = useState("");
   const [error, setError] = useState<string | null>("");
   const [activePost, setActivePost] = useState<Post | null>(null);
-  const [followers, setFollowers] = useState<number | null>(0);
-  const [following, setFollowing] = useState<number | null>(0);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPostDeleted, setIsPostDeleted] = useState(false);
+  const [requestStatus, setRequestStatus] = useState<string | null>("");
 
-  const router = useRouter();
   const story = [
     { image: "poza", name: "Andrei" },
     { image: "poza1", name: "Matei1" },
@@ -34,36 +35,51 @@ function AccountPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchAccount();
-    fetchFollowersFollowing();
   }, []);
 
   useEffect(() => {
-    if (isPostDeleted) {
-      fetchAccount();
-      setIsPostDeleted(false);
+    if (requestStatus) {
+      const timer = setTimeout(() => setRequestStatus(null), 2000);
+      return () => clearTimeout(timer);
     }
-  }, [isPostDeleted]);
-
-  const fetchFollowersFollowing = async () => {
-    try {
-      const fetchedFollowers = await getFollowers();
-      const fetchedFollowing = await getFollowing();
-      setFollowers(fetchedFollowers.length);
-      setFollowing(fetchedFollowing.length);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  }, [requestStatus]);
 
   const fetchAccount = async () => {
     setError(null);
     try {
-      const fetchedAccount = await getAccountInfoById(Number(params.id));
+      const fetchedAccount = await getUserAccount(Number(params.id));
       setAccountInfo(fetchedAccount);
+      const response = await getUserFollow(Number(params.id));
+
+      if (response.message === "Not following") setFollowRequest("Follow");
+      else if (response.message === "Following") {
+        setFollowRequest("Following");
+        setRequestStatus(fetchedAccount.name + " has accepted your request");
+      } else {
+        setFollowRequest("Follow request already sent");
+      }
     } catch (err) {
       setError("Nu s-au putut obtine date");
-      router.push("/account");
+      setFollowRequest("Failed to Follow");
     }
+  };
+
+  const handleFollowButton = async () => {
+    try {
+      if (followRequest === "Follow request already sent") {
+        await deleteRequest(Number(params.id));
+        setFollowRequest("Follow");
+      } else if (followRequest === "Following") {
+        await unfollowFollow(Number(params.id));
+        setFollowRequest("Follow");
+      } else {
+        const response = await requestFollow(Number(params.id));
+        setFollowRequest("Follow request already sent");
+      }
+    } catch (err) {
+      console.error("Error requesting follow:", err);
+    }
+    setIsFollowClicked(!followClicked);
   };
 
   const openPostModal = (post: Post) => {
@@ -73,6 +89,11 @@ function AccountPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="container mx-auto py-8">
+      {requestStatus && (
+        <div className="flex justify-center items-center text-xl">
+          {requestStatus}
+        </div>
+      )}
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8 mb-8">
         <Avatar className="w-32 h-32 md:w-40 md:h-40">
           <AvatarImage
@@ -82,17 +103,20 @@ function AccountPage({ params }: { params: { id: string } }) {
           <AvatarFallback>{accountInfo?.name?.charAt(0) || "?"}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col items-center md:items-start space-y-4">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <h2 className="text-2xl font-semibold">
               {accountInfo?.name || "Loading..."}
             </h2>
+            <Button className="w-auto" onClick={handleFollowButton}>
+              {followRequest}
+            </Button>
           </div>
           <div className="flex space-x-8">
             <span className="font-medium">
               {accountInfo?.posts?.length || 0} posts
             </span>
-            <span className="font-medium">{followers} Followers</span>
-            <span className="font-medium">{following} Following</span>
+            <span className="font-medium">12,521 followers</span>
+            <span className="font-medium">700 following</span>
           </div>
           <p className="text-center md:text-left max-w-md">
             {accountInfo?.bio || ""}
