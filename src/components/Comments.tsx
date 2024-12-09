@@ -37,7 +37,7 @@ export function CommentModal({
   const [userIdFromToken, setUserIdFromToken] = useState<number | null>(null);
   const [updatedComments, setUpdatedComments] = useState<Comments[]>(comments);
   const [error, setError] = useState<string | null>("");
-
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -103,6 +103,7 @@ export function CommentModal({
   const handleEditComment = (commentId: number, text: string) => {
     setEditingCommentId(commentId);
     setEditedCommentText(text);
+    setIsUpdateOpen(true);
   };
 
   const handleUpdateComment = async (commentId: number) => {
@@ -122,6 +123,7 @@ export function CommentModal({
       );
 
       setEditingCommentId(null);
+      setIsUpdateOpen(false);
     } catch (error) {
       setError("Failed to update comment");
       console.error(error);
@@ -191,7 +193,7 @@ export function CommentModal({
                     )}
                   </p>
                 </div>
-                {comment.userId === userIdFromToken && (
+                {comment.userId === userIdFromToken && !isUpdateOpen && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
