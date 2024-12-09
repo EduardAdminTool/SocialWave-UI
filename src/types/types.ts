@@ -38,4 +38,6 @@ export interface Comments {
   userId: number;
   text: string;
   createAt: string;
+  name: string;
+  profilePicture: string;
 }

@@ -11,31 +11,39 @@ import { Button } from "@/components/ui/button";
 import { CommentModalProps } from "@/types/posts/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createComment } from "@/services/comments";
-import { Edit2, MoreHorizontal, Send, Trash2 } from 'lucide-react';
+import { Edit2, MoreHorizontal, Send, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
+import { useRouter } from "next/navigation";
 
-export function CommentModal({ comments, isOpen, onClose, name, profilePicture, postId }: CommentModalProps) {
+export function CommentModal({
+  comments,
+  isOpen,
+  onClose,
+  name,
+  profilePicture,
+  postId,
+}: CommentModalProps) {
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editedCommentText, setEditedCommentText] = useState("");
   const [userIdFromToken, setUserIdFromToken] = useState<number | null>(null);
-
+  const router = useRouter();
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    
+    const token = localStorage.getItem("authToken");
+
     if (token) {
       try {
         const decodedToken = jwt.decode(token);
         const userIdFromToken = decodedToken?.sub;
 
         if (userIdFromToken) {
-          setUserIdFromToken(Number(userIdFromToken)); 
+          setUserIdFromToken(Number(userIdFromToken));
         } else {
           console.error("No 'sub' claim in token or it's not a valid number");
         }
@@ -48,7 +56,7 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
   const handleAddComment = async () => {
     const response = await createComment(postId, newComment);
     console.log(response);
-    setNewComment(""); 
+    setNewComment("");
   };
 
   const handleEditComment = (commentId: string, text: string) => {
@@ -59,7 +67,7 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
   const handleUpdateComment = async (commentId: string) => {
     // const response = await updateComment(commentId, editedCommentText);
     // if (response.success) {
-    //   setComments(comments.map(comment => 
+    //   setComments(comments.map(comment =>
     //     comment.commentId === commentId ? { ...comment, text: editedCommentText } : comment
     //   ));
     //   setEditingCommentId(null);
@@ -78,7 +86,9 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="p-0 max-w-md w-full rounded-lg overflow-hidden">
         <DialogHeader className="bg-white p-4 border-b border-gray-300">
-          <DialogTitle className="text-base font-semibold text-center">Comments</DialogTitle>
+          <DialogTitle className="text-base font-semibold text-center">
+            Comments
+          </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col h-[400px] overflow-y-auto bg-white">
           {comments.length > 0 ? (
@@ -86,10 +96,16 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
               <div
                 key={comment.commentId}
                 className={`flex items-start space-x-3 p-4 ${
-                  index !== comments.length - 1 ? 'border-b border-gray-300' : ''
+                  index !== comments.length - 1
+                    ? "border-b border-gray-300"
+                    : ""
                 }`}
               >
-                <Avatar className="h-8 w-8">
+                <Avatar
+                  style={{ cursor: "pointer" }}
+                  onClick={() => router.push(`/account/${comment.userId}`)}
+                  className="h-8 w-8"
+                >
                   <AvatarImage src={profilePicture} />
                   <AvatarFallback>{name[0]}</AvatarFallback>
                 </Avatar>
@@ -112,7 +128,15 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
                   ) : (
                     <>
                       <p className="text-sm">
-                        <span className="font-semibold mr-2">{name}</span>
+                        <span
+                          style={{ cursor: "pointer" }}
+                          onClick={() =>
+                            router.push(`/account/${comment.userId}`)
+                          }
+                          className="font-semibold mr-2"
+                        >
+                          {name}
+                        </span>
                         {comment.text}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">2h</p>
@@ -120,23 +144,23 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
                   )}
                 </div>
                 {comment.userId === userIdFromToken && (
-                <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Edit2 className="mr-2 h-4 w-4" />
-                    <span>Edit</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>Delete</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Edit2 className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </div>
             ))
@@ -172,4 +196,3 @@ export function CommentModal({ comments, isOpen, onClose, name, profilePicture, 
     </Dialog>
   );
 }
-
