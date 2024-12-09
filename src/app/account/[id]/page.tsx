@@ -14,6 +14,7 @@ import withAuth from "@/utils/withAuth";
 import { Grid, MessageSquare, Bookmark } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
 import { getFollowers, getFollowing } from "@/services/follow";
+import { useRouter } from "next/navigation";
 function AccountPage({ params }: { params: { id: string } }) {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
@@ -25,6 +26,7 @@ function AccountPage({ params }: { params: { id: string } }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPostDeleted, setIsPostDeleted] = useState(false);
 
+  const router = useRouter();
   const story = [
     { image: "poza", name: "Andrei" },
     { image: "poza1", name: "Matei1" },
@@ -60,6 +62,7 @@ function AccountPage({ params }: { params: { id: string } }) {
       setAccountInfo(fetchedAccount);
     } catch (err) {
       setError("Nu s-au putut obtine date");
+      router.push("/account");
     }
   };
 
