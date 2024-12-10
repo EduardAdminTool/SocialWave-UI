@@ -109,7 +109,7 @@ export function PostCard({ posts }: PostCardProps) {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto mb-6">
+    <Card className="w-full max-w-4xl mx-auto mb-4">
       <CardHeader className="flex flex-row items-center space-x-4 pb-4">
         <Avatar className="h-20 w-20">
           <AvatarImage
