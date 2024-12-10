@@ -15,12 +15,36 @@ function Home() {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
 
+  useEffect(() => {
+    fetchPosts();
+  }, [page]);
+
+  const fetchPosts = async () => {
+    if (isLoading || !hasMore) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const fetchedPosts = await getFeed(page);
+
+      if (fetchedPosts.length === 0) {
+        setHasMore(false);
+      } else {
+        setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
+      }
+    } catch (err) {
+      setError("Nu s-au putut obtine postari");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const story = [
     { image: "poza", name: "Andrei" },
     { image: "poza1", name: "Matei1" },
   ];
 
-  // Scroll handler to trigger loading of more posts when user scrolls to the bottom
   const handleScroll = () => {
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
@@ -34,38 +58,19 @@ function Home() {
   };
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      if (isLoading || !hasMore) return;
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const fetchedPosts = await getFeed(page);
-        if (fetchedPosts.length === 0) {
-          setHasMore(false);
-        } else {
-          setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
-        }
-      } catch (err) {
-        setError("Nu s-au putut obtine postari");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPosts();
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMore, isLoading, page]); // Re-run when hasMore, isLoading or page changes
+  }, [hasMore, isLoading]);
 
   return (
     <div>
       <div className="text-blue-500 min-h-screen">
         <div className="h-[120px] flex items-center bg-gradient-to-b from-blue-100 to-white border rounded-md">
           <div className="flex flex-col justify-start px-8 space-y-2">
-            <div className="h-16 w-16 flex justify-center items-center rounded-full bg-blue-200">
+            <div
+              className="h-16 w-16 flex justify-center items-center rounded-full 
+              bg-blue-200"
+            >
               Poza
             </div>
             <div className="text-xs font-medium text-blue-800 truncate w-16 text-center">
@@ -84,11 +89,13 @@ function Home() {
           {posts.length > 0 ? (
             posts.map((item, index) => <PostCard key={index} posts={item} />)
           ) : (
-            <div></div> // Display when no posts are available
+            <div></div>
           )}
           {isLoading && <div className="text-center">Loading...</div>}
           {!hasMore && posts.length > 0 && (
-            <div className="text-center text-gray-500"></div>
+            <div className="text-center text-gray-500">
+              No more posts to load
+            </div>
           )}
           {error && <div className="text-center text-red-500">{error}</div>}
         </div>
