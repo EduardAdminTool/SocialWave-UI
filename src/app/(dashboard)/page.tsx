@@ -14,6 +14,7 @@ function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
+  const [firstFetch, setFirstFetch] = useState<boolean>(true); // Track if it's the first fetch
 
   useEffect(() => {
     fetchPosts();
@@ -37,6 +38,11 @@ function Home() {
       } else {
         setPosts((prevPosts) => [...prevPosts, ...newPosts]);
       }
+
+      // After the first fetch, set firstFetch to false
+      if (firstFetch) {
+        setFirstFetch(false);
+      }
     } catch (err) {
       setError("Nu s-au putut obtine postari");
     } finally {
@@ -57,7 +63,7 @@ function Home() {
       hasMore &&
       !isLoading
     ) {
-      setPage((prevPage) => prevPage + 1); // Increment page number when near bottom
+      setPage((prevPage) => prevPage + 1);
     }
   };
 
@@ -93,10 +99,10 @@ function Home() {
           {posts.length > 0 ? (
             posts.map((item) => <PostCard key={item.postId} posts={item} />)
           ) : (
-            <div>No posts available</div>
+            <div></div>
           )}
           {isLoading && <div className="text-center">Loading...</div>}
-          {!hasMore && (
+          {!hasMore && !firstFetch && (
             <div className="text-center text-gray-500">
               No more posts to load
             </div>
