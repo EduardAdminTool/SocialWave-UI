@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +15,37 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { MdDelete } from "react-icons/md";
 import { deletePost } from "@/services/posts";
+import { Likes } from "@/types/types";
+import { createLike, deleteLike } from "@/services/feed";
 interface PostModalProps {
   post: Post | null;
   isOpen: boolean;
   onClose: () => void;
+  userId: number;
+  name: string;
+  profilePicture: string;
 }
-export function PostModal({ post, isOpen, onClose }: PostModalProps) {
+export function PostModal({
+  post,
+  isOpen,
+  onClose,
+  userId,
+  name,
+  profilePicture,
+}: PostModalProps) {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesArray, setLikesArray] = useState<Likes[]>(post?.likes || []);
+
+  useEffect(() => {
+    if (post) {
+      const userHasLiked = post.likes.some((like) => like.userId === userId);
+      if (userHasLiked) {
+        setIsLiked(true);
+      }
+      setLikesArray(post.likes);
+    }
+  }, [post, userId]);
 
   const deletePostButton = async () => {
     await deletePost(Number(post?.postId));
@@ -61,6 +85,34 @@ export function PostModal({ post, isOpen, onClose }: PostModalProps) {
         ))}
       </div>
     );
+  };
+
+  const handleLikeClick = async () => {
+    try {
+      if (!isLiked) {
+        const response = await createLike(post?.postId!);
+        if (response) {
+          setLikesArray([
+            ...likesArray,
+            {
+              userId: userId,
+              postId: post?.postId!,
+              name: name,
+              profilePicture: profilePicture,
+            },
+          ]);
+        }
+        setIsLiked(true);
+      } else {
+        const response = await deleteLike(post?.postId!);
+        if (response) {
+          setIsLiked(false);
+          setLikesArray(likesArray.filter((like) => like.userId !== userId));
+        }
+      }
+    } catch (error) {
+      console.error("Error handling like:", error);
+    }
   };
 
   if (!post) return null;
@@ -164,8 +216,12 @@ export function PostModal({ post, isOpen, onClose }: PostModalProps) {
             <div className="mt-4 space-y-2">
               <div className="flex justify-between">
                 <div className="flex space-x-2">
-                  <Button variant="ghost">
-                    <Heart className="h-6 w-6" />
+                  <Button variant="ghost" onClick={handleLikeClick}>
+                    <Heart
+                      className={`h-6 w-6 ${
+                        isLiked ? "fill-red-500 text-red-500" : ""
+                      }`}
+                    />
                   </Button>
                   <Button variant="ghost">
                     <MessageCircle className="h-6 w-6" />
@@ -181,7 +237,7 @@ export function PostModal({ post, isOpen, onClose }: PostModalProps) {
                   <MdDelete className="h-6 w-6" />
                 </Button>
               </div>
-              <p className="font-bold">{post.likes.length} Likes</p>
+              <p className="font-bold">{likesArray.length} Likes</p>
               <p className="text-xs text-gray-500">
                 {new Date(post.createdAt).toLocaleDateString()}
               </p>

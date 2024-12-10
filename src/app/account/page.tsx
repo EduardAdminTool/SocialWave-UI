@@ -179,6 +179,9 @@ function AccountPage() {
         post={activePost}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        userId={accountInfo?.userId!}
+        name={accountInfo?.name!}
+        profilePicture={accountInfo?.profilePicture!}
       />
 
       {modalType === "Followers" ? (
