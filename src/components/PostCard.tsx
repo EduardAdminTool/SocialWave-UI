@@ -54,7 +54,7 @@ export function PostCard({ posts }: PostCardProps) {
         console.error("Error decoding token:", error);
       }
     }
-  }, [likesArray]);
+  }, []);
 
   const handleLikeClick = async () => {
     const token = localStorage.getItem("authToken");
@@ -83,12 +83,12 @@ export function PostCard({ posts }: PostCardProps) {
               profilePicture: accountInfo!.profilePicture,
             },
           ]);
-          setIsLiked(true);
         }
+        setIsLiked(true);
       } else {
-        setIsLiked(!isLiked);
         const response = await deleteLike(posts.postId);
         if (response) {
+          setIsLiked(false);
           setLikesArray(
             likesArray.filter((like) => like.userId !== Number(userIdFromToken))
           );
