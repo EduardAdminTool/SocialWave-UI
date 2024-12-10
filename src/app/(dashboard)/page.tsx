@@ -12,22 +12,29 @@ function Home() {
   const [posts, setPosts] = useState<FeedProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const observer = useRef<IntersectionObserver | null>(null);
-  const firstLoadRef = useRef(true); // Ensure only one fetch on the first render
+  const fetchedPagesRef = useRef<Set<number>>(new Set());
+  const firstLoadRef = useRef(true);
 
   const fetchPosts = useCallback(
-    async (currentPage: number) => {
-      if (isLoading || !hasMore) return; // Prevent multiple fetches simultaneously
+    async (page: number) => {
+      // Prevent refetching the same page
+      if (isLoading || fetchedPagesRef.current.has(page) || !hasMore) return;
+      
       setIsLoading(true);
       setError(null);
+      
       try {
-        const fetchedPosts = await getFeed(currentPage);
+        const fetchedPosts = await getFeed(page);
+        
         if (fetchedPosts.length === 0) {
           setHasMore(false);
         } else {
           setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
+          // Mark this page as fetched
+          fetchedPagesRef.current.add(page);
         }
       } catch (err) {
         setError("Failed to fetch posts");
@@ -41,34 +48,46 @@ function Home() {
 
   const lastPostRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (isLoading || !hasMore) return;
+      // Disconnect previous observer
       if (observer.current) observer.current.disconnect();
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-          setPage((prevPage) => prevPage + 1);
+      // Create new intersection observer
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          // Only trigger fetch when the last post is visible, not loading, and more posts exist
+          if (
+            entries[0].isIntersecting && 
+            !isLoading && 
+            hasMore && 
+            !fetchedPagesRef.current.has(currentPage + 1)
+          ) {
+            // Increment page and trigger fetch
+            setCurrentPage((prevPage) => prevPage + 1);
+          }
+        },
+        { 
+          rootMargin: "200px" 
         }
-      });
+      );
 
+      // Observe the new last post element
       if (node) observer.current.observe(node);
     },
-    [isLoading, hasMore]
+    [isLoading, hasMore, currentPage]
   );
 
   useEffect(() => {
-    // Fetch the first page once on the first render
     if (firstLoadRef.current) {
       firstLoadRef.current = false;
-      fetchPosts(1); // Explicitly fetch the first page
+      fetchPosts(1);
     }
   }, [fetchPosts]);
 
   useEffect(() => {
-    // Fetch posts for subsequent pages when the page number changes
-    if (page > 1) {
-      fetchPosts(page);
+    if (currentPage > 1 && !fetchedPagesRef.current.has(currentPage)) {
+      fetchPosts(currentPage);
     }
-  }, [fetchPosts, page]);
+  }, [currentPage, fetchPosts]);
 
   const story = [
     { image: "poza", name: "Andrei" },
@@ -79,9 +98,7 @@ function Home() {
     <div className="text-blue-500 min-h-screen">
       <div className="h-[120px] flex items-center bg-gradient-to-b from-blue-100 to-white border rounded-md">
         <div className="flex flex-col justify-start px-8 space-y-2">
-          <div
-            className="h-16 w-16 flex justify-center items-center rounded-full bg-blue-200"
-          >
+          <div className="h-16 w-16 flex justify-center items-center rounded-full bg-blue-200">
             Poza
           </div>
           <div className="text-xs font-medium text-blue-800 truncate w-16 text-center">
@@ -99,12 +116,12 @@ function Home() {
         {posts.map((item, index) => {
           if (index === posts.length - 1) {
             return (
-              <div ref={lastPostRef} key={index}>
+              <div ref={lastPostRef} key={`${index}`}>
                 <PostCard posts={item} />
               </div>
             );
           }
-          return <PostCard key={index} posts={item} />;
+          return <PostCard key={`${index}`} posts={item} />;
         })}
         {isLoading && (
           <div className="text-center text-blue-500">Loading more posts...</div>
@@ -117,9 +134,10 @@ function Home() {
             {error}
             <button
               onClick={() => {
-                setPage(1);
+                setCurrentPage(1);
                 setPosts([]);
                 setHasMore(true);
+                fetchedPagesRef.current.clear();
                 fetchPosts(1);
               }}
               className="ml-2 text-blue-500 underline"
