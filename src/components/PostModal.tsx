@@ -96,7 +96,7 @@ export function PostModal({ post, isOpen, onClose }: PostModalProps) {
                     {post.images.length > 0 &&
                     currentMediaIndex < post.images.length ? (
                       <Image
-                        src={post.images[currentMediaIndex].imageUrl}
+                        src={String(post.images[currentMediaIndex])}
                         alt={`Post image ${currentMediaIndex + 1}`}
                         fill
                         style={{ objectFit: "cover" }}
@@ -110,27 +110,27 @@ export function PostModal({ post, isOpen, onClose }: PostModalProps) {
                           onError={() => console.log("Video failed to load")}
                         >
                           <source
-                            src={
+                            src={String(
                               post.videos[
                                 currentMediaIndex - post.images.length
-                              ].videoUrl
-                            }
+                              ]
+                            )}
                             type="video/mp4"
                           />
                           <source
-                            src={
+                            src={String(
                               post.videos[
                                 currentMediaIndex - post.images.length
-                              ].videoUrl
-                            }
+                              ]
+                            )}
                             type="video/webm"
                           />
                           <source
-                            src={
+                            src={String(
                               post.videos[
                                 currentMediaIndex - post.images.length
-                              ].videoUrl
-                            }
+                              ]
+                            )}
                             type="video/ogg"
                           />
                           Your browser does not support the video tag.
@@ -182,7 +182,7 @@ export function PostModal({ post, isOpen, onClose }: PostModalProps) {
                   <MdDelete className="h-6 w-6" />
                 </Button>
               </div>
-              <p className="font-bold">150mock likes</p>
+              <p className="font-bold">{post.likes.length} Likes</p>
               <p className="text-xs text-gray-500">
                 {new Date(post.createdAt).toLocaleDateString()}
               </p>

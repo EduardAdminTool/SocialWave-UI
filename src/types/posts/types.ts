@@ -41,6 +41,7 @@ export interface Posts {
   videos: PostVideo[];
   name?: string;
   comments: Comments[];
+  likes: Likes[];
 }
 
 export interface Post {
@@ -48,7 +49,7 @@ export interface Post {
   images: PostImages[];
   videos: PostVideo[];
   description: string;
-  // likes: number;
   comments: Comments[];
   createdAt: string;
+  likes: Likes[];
 }

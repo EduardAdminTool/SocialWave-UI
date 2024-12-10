@@ -158,7 +158,7 @@ function AccountPage() {
             <CardContent className="p-0 aspect-square relative">
               {post?.images.length > 0 ? (
                 <Image
-                  src={post.images[0].imageUrl}
+                  src={String(post.images[0])}
                   alt={`Post ${index + 1}`}
                   layout="fill"
                   objectFit="cover"
@@ -167,7 +167,7 @@ function AccountPage() {
                 <video
                   className="object-cover w-full h-full"
                   controls
-                  src={post.videos[0].videoUrl}
+                  src={String(post.videos[0])}
                 />
               )}
             </CardContent>
