@@ -17,6 +17,7 @@ import { MdDelete } from "react-icons/md";
 import { deletePost } from "@/services/posts";
 import { Likes } from "@/types/types";
 import { createLike, deleteLike } from "@/services/feed";
+import { LikesModal } from "./LikesModal";
 interface PostModalProps {
   post: Post | null;
   isOpen: boolean;
@@ -35,6 +36,7 @@ export function PostModal({
 }: PostModalProps) {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [isLikesOpen, setIsLikesOpen] = useState(false);
   const [likesArray, setLikesArray] = useState<Likes[]>(post?.likes || []);
 
   useEffect(() => {
@@ -85,6 +87,10 @@ export function PostModal({
         ))}
       </div>
     );
+  };
+
+  const openLikes = () => {
+    setIsLikesOpen(!isLikesOpen);
   };
 
   const handleLikeClick = async () => {
@@ -237,7 +243,9 @@ export function PostModal({
                   <MdDelete className="h-6 w-6" />
                 </Button>
               </div>
-              <p className="font-bold">{likesArray.length} Likes</p>
+              <p className="font-bold cursor-pointer" onClick={openLikes}>
+                {likesArray.length} Likes
+              </p>
               <p className="text-xs text-gray-500">
                 {new Date(post.createdAt).toLocaleDateString()}
               </p>
@@ -245,6 +253,12 @@ export function PostModal({
           </div>
         </div>
       </DialogContent>
+
+      <LikesModal
+        isOpen={isLikesOpen}
+        likes={likesArray}
+        onClose={() => setIsLikesOpen(false)}
+      />
     </Dialog>
   );
 }
