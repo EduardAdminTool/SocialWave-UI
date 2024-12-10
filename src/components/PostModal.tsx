@@ -40,6 +40,7 @@ export function PostModal({
   const [likesArray, setLikesArray] = useState<Likes[]>(post?.likes || []);
 
   useEffect(() => {
+    setIsLiked(false);
     if (post) {
       const userHasLiked = post.likes.some((like) => like.userId === userId);
       if (userHasLiked) {
