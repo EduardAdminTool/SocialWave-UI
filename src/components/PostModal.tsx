@@ -20,7 +20,6 @@ interface PostModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
 export function PostModal({ post, isOpen, onClose }: PostModalProps) {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
