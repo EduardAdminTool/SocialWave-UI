@@ -1,7 +1,7 @@
 const token = localStorage.getItem("authToken");
 
-export const getFeed = async () => {
-  const response = await fetch(`http://localhost:3001/feed/page`, {
+export const getFeed = async (page: number) => {
+  const response = await fetch(`http://localhost:3001/feed/page=${page}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
