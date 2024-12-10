@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryCarousel } from "@/components/StoryCarousel";
 import { getFeed } from "@/services/feed";
@@ -16,12 +15,11 @@ function Home() {
   const [page, setPage] = useState<number>(1);
 
   const fetchPosts = useCallback(async () => {
+    if (isLoading || !hasMore) return;
     setIsLoading(true);
     setError(null);
-
     try {
       const fetchedPosts = await getFeed(page);
-
       if (fetchedPosts.length === 0) {
         setHasMore(false);
       } else {
@@ -33,28 +31,37 @@ function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [page]);
+  }, [page, isLoading, hasMore]);
+
+  const firstLoadRef = useRef(true);
 
   useEffect(() => {
-    if (!isLoading && hasMore) {
+    if (firstLoadRef.current) {
+      firstLoadRef.current = false;
       fetchPosts();
     }
-  }, [page]);
+  }, [fetchPosts]);
 
   const handleScroll = useCallback(() => {
     if (
       window.innerHeight + document.documentElement.scrollTop + 100 >=
-        document.documentElement.offsetHeight &&
-      !isLoading &&
-      hasMore
+      document.documentElement.offsetHeight
     ) {
       setPage((prevPage) => prevPage + 1);
     }
-  }, [hasMore, isLoading]);
+  }, []);
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchPosts();
+    }
+  }, [page, fetchPosts]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [handleScroll]);
 
   const story = [
@@ -67,8 +74,7 @@ function Home() {
       <div className="h-[120px] flex items-center bg-gradient-to-b from-blue-100 to-white border rounded-md">
         <div className="flex flex-col justify-start px-8 space-y-2">
           <div
-            className="h-16 w-16 flex justify-center items-center rounded-full 
-            bg-blue-200"
+            className="h-16 w-16 flex justify-center items-center rounded-full bg-blue-200"
           >
             Poza
           </div>
@@ -83,20 +89,16 @@ function Home() {
           <ScrollBar orientation="horizontal" className="opacity-0" />
         </ScrollArea>
       </div>
-
       <div className="min-h-screen py-4 space-y-4">
         {posts.map((item, index) => (
-          <PostCard key={`${item.id}-${index}`} posts={item} />
+          <PostCard key={index} posts={item} />
         ))}
-
         {isLoading && (
           <div className="text-center text-blue-500">Loading more posts...</div>
         )}
-
         {!hasMore && posts.length > 0 && (
           <div className="text-center text-gray-500">No more posts to load</div>
         )}
-
         {error && (
           <div className="text-center text-red-500">
             {error}
