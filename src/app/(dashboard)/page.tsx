@@ -14,7 +14,8 @@ function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [firstFetch, setFirstFetch] = useState<boolean>(true); // Track if it's the first fetch
+  const [firstFetch, setFirstFetch] = useState<boolean>(true);
+  const [previousPosts, setPreviousPosts] = useState<FeedProps[]>([]);
 
   useEffect(() => {
     fetchPosts();
@@ -29,17 +30,23 @@ function Home() {
     try {
       const fetchedPosts = await getFeed(page);
 
-      const newPosts = fetchedPosts.filter(
-        (post: FeedProps) =>
-          !posts.some((existingPost) => existingPost.postId === post.postId)
-      );
-      if (newPosts.length === 0) {
-        setHasMore(false);
+      if (page === 1) {
+        setPosts(fetchedPosts);
       } else {
-        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        const newPosts = fetchedPosts.filter(
+          (post: FeedProps) =>
+            !posts.some((existingPost) => existingPost.postId === post.postId)
+        );
+
+        if (newPosts.length === 0) {
+          setHasMore(false);
+        } else {
+          setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        }
       }
 
-      // After the first fetch, set firstFetch to false
+      setPreviousPosts(fetchedPosts);
+
       if (firstFetch) {
         setFirstFetch(false);
       }
