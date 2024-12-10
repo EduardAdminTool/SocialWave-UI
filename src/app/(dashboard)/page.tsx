@@ -14,8 +14,6 @@ function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [firstFetch, setFirstFetch] = useState<boolean>(true);
-  const [previousPosts, setPreviousPosts] = useState<FeedProps[]>([]);
 
   useEffect(() => {
     fetchPosts();
@@ -30,25 +28,10 @@ function Home() {
     try {
       const fetchedPosts = await getFeed(page);
 
-      if (page === 1) {
-        setPosts(fetchedPosts);
+      if (fetchedPosts.length === 0) {
+        setHasMore(false);
       } else {
-        const newPosts = fetchedPosts.filter(
-          (post: FeedProps) =>
-            !posts.some((existingPost) => existingPost.postId === post.postId)
-        );
-
-        if (newPosts.length === 0) {
-          setHasMore(false);
-        } else {
-          setPosts((prevPosts) => [...prevPosts, ...newPosts]);
-        }
-      }
-
-      setPreviousPosts(fetchedPosts);
-
-      if (firstFetch) {
-        setFirstFetch(false);
+        setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
       }
     } catch (err) {
       setError("Nu s-au putut obtine postari");
@@ -76,7 +59,7 @@ function Home() {
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll); // Cleanup
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, isLoading]);
 
   return (
@@ -104,16 +87,17 @@ function Home() {
 
         <div className="min-h-screen py-4 space-y-4">
           {posts.length > 0 ? (
-            posts.map((item) => <PostCard key={item.postId} posts={item} />)
+            posts.map((item, index) => <PostCard key={index} posts={item} />)
           ) : (
             <div></div>
           )}
           {isLoading && <div className="text-center">Loading...</div>}
-          {!hasMore && !firstFetch && (
+          {!hasMore && posts.length > 0 && (
             <div className="text-center text-gray-500">
               No more posts to load
             </div>
           )}
+          {error && <div className="text-center text-red-500">{error}</div>}
         </div>
       </div>
     </div>
