@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { FaComments } from "react-icons/fa";
@@ -17,23 +17,65 @@ import { FeedProps } from "@/types/types";
 import { PostCard } from "@/components/PostCard";
 import withAuth from "@/utils/withAuth";
 function Home() {
-  const [error, setError] = useState<string | null>("");
   const [posts, setPosts] = useState<FeedProps[]>([]);
+  const [page, setPage] = useState(1); // Current page
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [hasMore, setHasMore] = useState(true); // Whether more posts are available
+  const [error, setError] = useState<string | null>(null);
+  const observerRef = useRef<HTMLDivElement | null>(null); // Ref for infinite scroll trigger
+  // Fetch posts function
+  const fetchPosts = useCallback(async () => {
+    if (isLoading || !hasMore) return; // Prevent duplicate requests
+    setIsLoading(true);
 
+    try {
+      const fetchedPosts = await getFeed(page); // Fetch posts for the current page
+      if (fetchedPosts.length > 0) {
+        setPosts((prevPosts) => {
+          const uniquePosts = [...prevPosts, ...fetchedPosts].filter(
+            (post, index, self) =>
+              index === self.findIndex((p) => p.postId === post.postId)
+          );
+          return uniquePosts;
+        });
+        setPage((prevPage) => prevPage + 1); // Increment page for next fetch
+      } else {
+        setHasMore(false); // No more posts to fetch
+      }
+    } catch (err) {
+      setError("Failed to fetch posts");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, isLoading, hasMore]);
+
+  // Initial fetch
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, []); // Run on mount
 
-  const fetchPosts = async () => {
-    setError(null);
-    try {
-      const fetchedPosts = await getFeed();
-      setPosts(fetchedPosts);
-    } catch (err) {
-      setError("Nu s-au putut obtine postari");
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && hasMore && !isLoading) {
+          fetchPosts(); // Fetch next page when the target is visible
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
     }
-  };
 
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [fetchPosts, hasMore, isLoading]);
   const story = [
     {
       image: "poza",
@@ -148,12 +190,12 @@ function Home() {
           </ScrollArea>
         </div>
         <div className="min-h-screen py-4 space-y-4">
-          {posts
-            .slice()
-            .reverse()
-            .map((item, index) => (
-              <PostCard key={item.description} posts={item} />
-            ))}
+          {posts.map((item) => (
+            <PostCard key={item.postId} posts={item} />
+          ))}
+          <div ref={observerRef} className="h-4" />
+          {isLoading && <p>Loading...</p>}
+          {error && <p>{error}</p>}
         </div>
       </div>
     </div>
