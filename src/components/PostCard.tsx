@@ -350,7 +350,7 @@ export function PostCard({ posts }: PostCardProps) {
 
       <LikesModal
         isOpen={isLikesOpen}
-        likes={posts.likes}
+        likes={likesArray}
         onClose={() => setIsLikesOpen(false)}
       />
     </Card>
