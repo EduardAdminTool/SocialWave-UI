@@ -81,8 +81,8 @@ export function PostCard({ posts }: PostCardProps) {
             {
               userId: Number(userIdFromToken),
               postId: posts.postId,
-              name: accountInfo!.name,
-              profilePicture: accountInfo!.profilePicture,
+              name: accountInfo?.name || "Unknown",
+              profilePicture: accountInfo?.profilePicture || "", //
             },
           ]);
         }
