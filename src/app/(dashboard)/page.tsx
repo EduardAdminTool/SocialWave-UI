@@ -14,55 +14,61 @@ function Home() {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
 
-  const fetchPosts = useCallback(async () => {
-    if (isLoading || !hasMore) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const fetchedPosts = await getFeed(page);
-      if (fetchedPosts.length === 0) {
-        setHasMore(false);
-      } else {
-        setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
-      }
-    } catch (err) {
-      setError("Failed to fetch posts");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, isLoading, hasMore]);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const firstLoadRef = useRef(true); // Ensure only one fetch on the first render
 
-  const firstLoadRef = useRef(true);
+  const fetchPosts = useCallback(
+    async (currentPage: number) => {
+      if (isLoading || !hasMore) return; // Prevent multiple fetches simultaneously
+      setIsLoading(true);
+      setError(null);
+      try {
+        const fetchedPosts = await getFeed(currentPage);
+        if (fetchedPosts.length === 0) {
+          setHasMore(false);
+        } else {
+          setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
+        }
+      } catch (err) {
+        setError("Failed to fetch posts");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, hasMore]
+  );
+
+  const lastPostRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isLoading || !hasMore) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, hasMore]
+  );
 
   useEffect(() => {
+    // Fetch the first page once on the first render
     if (firstLoadRef.current) {
       firstLoadRef.current = false;
-      fetchPosts();
+      fetchPosts(1); // Explicitly fetch the first page
     }
   }, [fetchPosts]);
 
-  const handleScroll = useCallback(() => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop + 100 >=
-      document.documentElement.offsetHeight
-    ) {
-      setPage((prevPage) => prevPage + 1);
-    }
-  }, []);
-
   useEffect(() => {
+    // Fetch posts for subsequent pages when the page number changes
     if (page > 1) {
-      fetchPosts();
+      fetchPosts(page);
     }
-  }, [page, fetchPosts]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [handleScroll]);
+  }, [fetchPosts, page]);
 
   const story = [
     { image: "poza", name: "Andrei" },
@@ -90,9 +96,16 @@ function Home() {
         </ScrollArea>
       </div>
       <div className="min-h-screen py-4 space-y-4">
-        {posts.map((item, index) => (
-          <PostCard key={index} posts={item} />
-        ))}
+        {posts.map((item, index) => {
+          if (index === posts.length - 1) {
+            return (
+              <div ref={lastPostRef} key={index}>
+                <PostCard posts={item} />
+              </div>
+            );
+          }
+          return <PostCard key={index} posts={item} />;
+        })}
         {isLoading && (
           <div className="text-center text-blue-500">Loading more posts...</div>
         )}
@@ -107,7 +120,7 @@ function Home() {
                 setPage(1);
                 setPosts([]);
                 setHasMore(true);
-                fetchPosts();
+                fetchPosts(1);
               }}
               className="ml-2 text-blue-500 underline"
             >
