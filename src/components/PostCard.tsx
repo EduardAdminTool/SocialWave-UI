@@ -14,17 +14,100 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import jwt from "jsonwebtoken";
 import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
 import { PostCardProps } from "@/types/posts/types";
-
+import { createLike, deleteLike } from "@/services/feed";
+import { Likes } from "@/types/types";
+import { getAccountInfo } from "@/services/account";
+import { Account } from "@/types/account/types";
 export function PostCard({ posts }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [likesArray, setLikesArray] = useState<Likes[]>(posts.likes);
+  const [accountInfo, setAccountInfo] = useState<Account | null>(null);
+  const [error, setError] = useState<string | null>("");
   const router = useRouter();
 
-  const handleLikeClick = () => setIsLiked(!isLiked);
+  useEffect(() => {
+    fetchAccount();
+    const token = localStorage.getItem("authToken");
+
+    if (token) {
+      try {
+        const decodedToken = jwt.decode(token);
+        const userIdFromToken = decodedToken?.sub;
+        if (userIdFromToken) {
+          const userHasLiked = posts.likes.some(
+            (like) => like.userId === Number(userIdFromToken)
+          );
+
+          if (userHasLiked) {
+            setIsLiked(!isLiked);
+          }
+        } else {
+          console.error("No 'sub' claim in token or it's not a valid number");
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, [likesArray]);
+
+  const handleLikeClick = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.error("No auth token found");
+      return;
+    }
+
+    try {
+      const decodedToken = jwt.decode(token);
+      const userIdFromToken = decodedToken?.sub;
+      if (!userIdFromToken) {
+        console.error("Invalid user ID");
+        return;
+      }
+
+      if (!isLiked) {
+        const response = await createLike(posts.postId);
+        if (response) {
+          setLikesArray([
+            ...likesArray,
+            {
+              userId: Number(userIdFromToken),
+              postId: posts.postId,
+              name: accountInfo!.name,
+              profilePicture: accountInfo!.profilePicture,
+            },
+          ]);
+          setIsLiked(true);
+        }
+      } else {
+        setIsLiked(!isLiked);
+        const response = await deleteLike(posts.postId);
+        if (response) {
+          setLikesArray(
+            likesArray.filter((like) => like.userId !== Number(userIdFromToken))
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error handling like:", error);
+    }
+  };
+
+  const fetchAccount = async () => {
+    setError(null);
+    try {
+      const fetchedAccount = await getAccountInfo();
+      setAccountInfo(fetchedAccount);
+    } catch (err) {
+      setError("Nu s-au putut obtine date");
+    }
+  };
 
   const calculateDateDifference = (dateString: string) => {
     const now = new Date();
@@ -131,7 +214,7 @@ export function PostCard({ posts }: PostCardProps) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="relative w-full py-4">
-          {(posts?.images.length > 0 || posts?.videos.length > 0) && (
+          {/* {(posts?.images.length > 0 || posts?.videos.length > 0) && (
             <div
               key={posts.description}
               className="relative flex justify-center items-center overflow-hidden"
@@ -217,32 +300,38 @@ export function PostCard({ posts }: PostCardProps) {
               )}
               {renderDots()}
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="p-4">
           <p className="text-lg">{posts.description}</p>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center">
-        <div className="flex space-x-4">
-          <Button variant="ghost" onClick={handleLikeClick}>
-            <Heart
-              className={`h-6 w-6 ${
-                isLiked ? "fill-red-500 text-red-500" : ""
-              }`}
-            />
-          </Button>
-          <Button variant="ghost" onClick={openComments}>
-            <MessageCircle className="h-6 w-6" />
-          </Button>
+      <CardFooter className="flex flex-col items-center">
+        <div className="flex justify-between space-x-4 w-full">
+          <div className="flex space-x-4">
+            <Button variant="ghost" onClick={handleLikeClick}>
+              <Heart
+                className={`h-6 w-6 ${
+                  isLiked ? "fill-red-500 text-red-500" : ""
+                }`}
+              />
+            </Button>
+            <Button variant="ghost" onClick={openComments}>
+              <MessageCircle className="h-6 w-6" />
+            </Button>
+            <Button variant="ghost">
+              <Send className="h-6 w-6" />
+            </Button>
+          </div>
+
           <Button variant="ghost">
-            <Send className="h-6 w-6" />
+            <Bookmark className="h-6 w-6" />
           </Button>
         </div>
-        <Button variant="ghost">
-          <Bookmark className="h-6 w-6" />
-        </Button>
+        <div className="flex justify-between w-full py-4 px-2">
+          <span className="cursor-pointer">{likesArray.length} Likes</span>
+        </div>
       </CardFooter>
       <CommentModal
         isOpen={isCommentsOpen}

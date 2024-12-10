@@ -29,7 +29,7 @@ export interface FeedProps {
   videos: string[];
   comments: Comments[];
   postId: number;
-  // like:
+  likes: Likes[];
 }
 
 export interface Comments {
@@ -43,4 +43,9 @@ export interface Comments {
   profilePicture: string;
 }
 
-interface Likes {}
+export interface Likes {
+  userId: number;
+  postId: number;
+  name: string;
+  profilePicture: string;
+}
