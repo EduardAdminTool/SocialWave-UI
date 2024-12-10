@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { CommentModal } from "./Comments";
+import { LikesModal } from "./LikesModal";
 import {
   Card,
   CardContent,
@@ -24,6 +25,7 @@ import { Account } from "@/types/account/types";
 export function PostCard({ posts }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [isLikesOpen, setIsLikesOpen] = useState(false);
   const [postedAgo, setPostedAgo] = useState<string>("");
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [likesArray, setLikesArray] = useState<Likes[]>(posts.likes);
@@ -191,6 +193,10 @@ export function PostCard({ posts }: PostCardProps) {
     setIsCommentsOpen(!isCommentsOpen);
   };
 
+  const openLikes = () => {
+    setIsLikesOpen(!isLikesOpen);
+  };
+
   return (
     <Card className="w-full max-w-4xl mx-auto mb-4">
       <CardHeader className="flex flex-row items-center space-x-4 pb-4">
@@ -330,7 +336,9 @@ export function PostCard({ posts }: PostCardProps) {
           </Button>
         </div>
         <div className="flex justify-between w-full py-4 px-2">
-          <span className="cursor-pointer">{likesArray.length} Likes</span>
+          <span className="cursor-pointer" onClick={openLikes}>
+            {likesArray.length} Likes
+          </span>
         </div>
       </CardFooter>
       <CommentModal
@@ -338,6 +346,12 @@ export function PostCard({ posts }: PostCardProps) {
         comments={posts.comments}
         onClose={() => setIsCommentsOpen(false)}
         postId={posts.postId}
+      />
+
+      <LikesModal
+        isOpen={isLikesOpen}
+        likes={posts.likes}
+        onClose={() => setIsLikesOpen(false)}
       />
     </Card>
   );

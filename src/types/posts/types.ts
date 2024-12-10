@@ -1,5 +1,6 @@
 import { FeedProps } from "../types";
 import { Comments } from "../types";
+import { Likes } from "../types";
 export interface PostCardProps {
   posts: FeedProps;
 }
@@ -21,6 +22,12 @@ export interface CommentModalProps {
   isOpen: boolean;
   onClose: () => void;
   postId: number;
+}
+
+export interface LikesModalProps {
+  likes: Likes[];
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export interface Posts {
