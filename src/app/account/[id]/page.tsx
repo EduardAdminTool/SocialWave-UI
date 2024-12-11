@@ -177,6 +177,9 @@ function AccountPage({ params }: { params: { id: string } }) {
         post={activePost}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        userId={accountInfo?.userId!}
+        name={accountInfo?.name!}
+        profilePicture={accountInfo?.profilePicture!}
       />
     </div>
   );
