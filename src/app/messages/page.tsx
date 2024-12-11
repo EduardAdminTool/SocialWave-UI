@@ -177,7 +177,7 @@ function Messages() {
       ]);
 
       setMessageText("");
-      setIsTyping(false);
+      stopTyping();
     }
   };
 
