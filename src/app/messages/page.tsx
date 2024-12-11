@@ -8,31 +8,9 @@ import { io, Socket } from "socket.io-client";
 import { getChat } from "@/services/chat";
 import jwt from "jsonwebtoken";
 import { Chat } from "@/types/chat/types";
+
 function Messages() {
   const [dm, setDm] = useState<Chat[]>([]);
-
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        const response = await getChat();
-        setDm(response);
-        const token = localStorage.getItem("authToken");
-        if (token) {
-          try {
-            const decodedToken = jwt.decode(token);
-            const userIdFromToken = decodedToken?.sub;
-          } catch (error) {
-            console.error("Error decoding token:", error);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching chats:", error);
-      }
-    };
-
-    fetchChats();
-  }, []);
-
   const [selectedUser, setSelectedUser] = useState<{
     profilePicture: string;
     name: string;
@@ -44,13 +22,41 @@ function Messages() {
   }>({});
   const [messageText, setMessageText] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [chat, setChat] = useState<number | null>(null);
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await getChat();
+        setDm(response);
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+      }
+
+      const token = localStorage.getItem("authToken");
+
+      if (token) {
+        try {
+          const decodedToken = jwt.decode(token);
+          const userIdFromToken = decodedToken?.sub || null;
+          setToken(userIdFromToken);
+        } catch (error) {
+          console.error("Error decoding token:", error);
+        }
+      } else {
+        setToken(null);
+      }
+    };
+
+    fetchChats();
+  }, []);
 
   useEffect(() => {
     const socketConnection = io("ws://localhost:3001/chat");
     setSocket(socketConnection);
 
     socketConnection.on("connect", () => {
-      console.log("Connected to server");
+      console.log("Connected to serverrrrrrrrrr");
       setIsConnected(true);
     });
 
@@ -75,23 +81,24 @@ function Messages() {
     };
   }, []);
 
-  const joinConversation = (user: {
-    profilePicture: string;
-    name: string;
-    userId: number;
-  }) => {
+  const joinConversation = (
+    user: { profilePicture: string; name: string; userId: number },
+    chatId: number
+  ) => {
     if (socket) {
-      socket.emit("joinChat", user.userId);
-      console.log(`Joined chat with user ID: ${user.userId}`);
+      socket.emit("joinChat", { chatId, token });
     }
     setSelectedUser(user);
+    setChat(chatId);
   };
 
   const handleSendMessage = () => {
+    console.log(chat);
     if (socket && messageText.trim() && selectedUser) {
       const message = {
-        senderId: 1,
+        senderId: token,
         receiverId: selectedUser.userId,
+        chatId: chat,
         text: messageText,
       };
       socket.emit("sendMessage", message);
@@ -103,13 +110,6 @@ function Messages() {
           { sender: "me", text: messageText },
         ],
       }));
-
-      setTimeout(() => {
-        socket.emit("receiveMessage", {
-          senderId: selectedUser.userId,
-          text: `Echo: ${messageText}`,
-        });
-      }, 500);
 
       setMessageText("");
     }
@@ -123,7 +123,7 @@ function Messages() {
           <BiMessageRoundedAdd size={36} className="cursor-pointer" />
         </div>
 
-        <div className="flex flex-col py-4 gap-4 text-lg overflow-y-auto">
+        <div className="flex flex-col py-4 gap-4 text-lg overflow-y-auto px-4">
           {dm.map((item, index) => (
             <div
               key={index}
@@ -132,7 +132,7 @@ function Messages() {
                   ? "bg-blue-100 shadow-inner"
                   : "bg-white"
               }`}
-              onClick={() => joinConversation(item.otherUser)}
+              onClick={() => joinConversation(item.otherUser, item.chatId)}
             >
               <div className="w-[60px] h-[60px]">
                 <img
