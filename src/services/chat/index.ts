@@ -16,7 +16,7 @@ export const getChat = async () => {
   return response.json();
 };
 
-export const createChat = async (user1Id: number, user2Id: number) => {
+export const createChat = async (userId: number) => {
   try {
     const createdAt = new Date().toISOString();
 
@@ -26,7 +26,7 @@ export const createChat = async (user1Id: number, user2Id: number) => {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ user1Id, user2Id, createdAt }),
+      body: JSON.stringify({ userId }),
     });
 
     if (!response.ok) {
