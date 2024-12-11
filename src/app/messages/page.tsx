@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, MutableRefObject } from "react";
 import { BiMessageRoundedAdd } from "react-icons/bi";
 import { FaExclamationCircle } from "react-icons/fa";
 import withAuth from "@/utils/withAuth";
@@ -9,6 +9,7 @@ import { getChat } from "@/services/chat";
 import jwt from "jsonwebtoken";
 import { Chat } from "@/types/chat/types";
 import { calculateDateDifference } from "@/utils/calculateDate";
+
 function Messages() {
   const [dm, setDm] = useState<Chat[]>([]);
   const [selectedUser, setSelectedUser] = useState<{
@@ -25,6 +26,7 @@ function Messages() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [chat, setChat] = useState<number | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -79,10 +81,10 @@ function Messages() {
       socketConnection.disconnect();
     };
   }, [token]);
+
   useEffect(() => {
     if (socket) {
       socket.on("receiveTyping", (data) => {
-        // Only show "is typing" if the sender is not the current user
         if (data.senderId !== token) {
           console.log(`${data.senderId} is typing...`);
           setIsTyping(true);
@@ -90,7 +92,6 @@ function Messages() {
       });
 
       socket.on("receiveStopTyping", (data) => {
-        // Stop showing "is typing" only if the sender is not the current user
         if (data.senderId !== token) {
           console.log(`${data.senderId} stopped typing.`);
           setIsTyping(false);
@@ -105,6 +106,12 @@ function Messages() {
       }
     };
   }, [socket, token]);
+
+  useEffect(() => {
+    if (conversations.length > 0) {
+      scrollToBottom();
+    }
+  }, [conversations]);
 
   const sendTyping = () => {
     if (socket && selectedUser) {
@@ -152,7 +159,8 @@ function Messages() {
     setSelectedUser(user);
     setChat(chatId);
   };
-  const handleMessageTextChange = (e) => {
+
+  const handleMessageTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageText(e.target.value);
     if (e.target.value) {
       sendTyping();
@@ -160,6 +168,7 @@ function Messages() {
       stopTyping();
     }
   };
+
   const handleSendMessage = () => {
     if (socket && messageText.trim() && selectedUser) {
       const message = {
@@ -181,7 +190,7 @@ function Messages() {
     }
   };
 
-  const handleTyping = (e) => {
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageText(e.target.value);
 
     if (e.target.value) {
@@ -191,15 +200,22 @@ function Messages() {
     }
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  };
+
   return (
     <div className="grid grid-cols-2 px-8 py-12 bg-blue-50 h-screen gap-8">
-      <div className="flex flex-col bg-white rounded-lg shadow-lg h-[90%]">
+      <div className="flex flex-col bg-white rounded-lg shadow-lg h-[90vh]">
         <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
           <span className="text-2xl font-semibold">Direct</span>
           <BiMessageRoundedAdd size={36} className="cursor-pointer" />
         </div>
 
-        <div className="flex flex-col py-4 gap-4 text-lg overflow-y-auto px-4">
+        <div className="flex-1 flex flex-col py-4 gap-4 text-lg overflow-y-auto px-4">
           {dm.map((item, index) => (
             <div
               key={index}
@@ -209,10 +225,6 @@ function Messages() {
                   : "bg-white"
               } hover:bg-blue-50`}
               onClick={() => joinConversation(item.otherUser, item.chatId)}
-              style={{
-                transform: "none",
-                boxSizing: "border-box",
-              }}
             >
               <div className="w-[60px] h-[60px] flex-shrink-0">
                 <img
@@ -249,7 +261,7 @@ function Messages() {
         </div>
       </div>
 
-      <div className="flex flex-col bg-white rounded-lg shadow-lg h-[90%]">
+      <div className="flex flex-col bg-white rounded-lg shadow-lg h-[90vh]">
         {selectedUser ? (
           <>
             <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
@@ -259,7 +271,7 @@ function Messages() {
               <FaExclamationCircle size={36} className="cursor-pointer" />
             </div>
 
-            <div className="flex flex-col flex-1 p-6 gap-4 overflow-y-auto bg-gray-50">
+            <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
               {conversations.map((msg, index) => (
                 <div
                   key={index}
@@ -268,9 +280,7 @@ function Messages() {
                   }`}
                 >
                   {msg.sender === "me" && (
-                    <div
-                      className={`px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white`}
-                    >
+                    <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                       {msg.text}
                     </div>
                   )}
@@ -286,15 +296,14 @@ function Messages() {
                           className="rounded-full w-full h-full object-cover"
                         />
                       </div>
-                      <div
-                        className={`px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black"`}
-                      >
+                      <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
                         {msg.text}
                       </div>
                     </div>
                   )}
                 </div>
               ))}
+              <div ref={messagesEndRef} />
 
               {isTyping && (
                 <div className="text-gray-500 text-sm italic">
