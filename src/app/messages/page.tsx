@@ -20,7 +20,7 @@ function Messages() {
   const [conversations, setConversations] = useState<
     { sender: string; text: string; senderVerify: string }[]
   >([]);
-
+  const [isTyping, setIsTyping] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -58,7 +58,9 @@ function Messages() {
     socketConnection.on("connect", () => {
       setIsConnected(true);
     });
-
+    socketConnection.on("receiveMessages", (messages) => {
+      setConversations(messages);
+    });
     socketConnection.on("receiveMessage", (message) => {
       if (message[0].senderId !== token) {
         setConversations((prev) => [
@@ -77,6 +79,68 @@ function Messages() {
       socketConnection.disconnect();
     };
   }, [token]);
+  useEffect(() => {
+    if (socket) {
+      socket.on("receiveTyping", (data) => {
+        // Only show "is typing" if the sender is not the current user
+        if (data.senderId !== token) {
+          console.log(`${data.senderId} is typing...`);
+          setIsTyping(true);
+        }
+      });
+
+      socket.on("receiveStopTyping", (data) => {
+        // Stop showing "is typing" only if the sender is not the current user
+        if (data.senderId !== token) {
+          console.log(`${data.senderId} stopped typing.`);
+          setIsTyping(false);
+        }
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off("receiveTyping");
+        socket.off("receiveStopTyping");
+      }
+    };
+  }, [socket, token]);
+
+  const sendTyping = () => {
+    if (socket && selectedUser) {
+      socket.emit("typing", {
+        senderId: token,
+        receiverId: selectedUser.userId,
+        chatId: chat,
+      });
+    }
+  };
+
+  const stopTyping = () => {
+    if (socket && selectedUser) {
+      socket.emit("stopTyping", {
+        senderId: token,
+        receiverId: selectedUser.userId,
+        chatId: chat,
+      });
+    }
+  };
+
+  const receiveTyping = () => {
+    if (socket) {
+      socket.on("receiveTyping", (data) => {
+        console.log(data);
+      });
+    }
+  };
+
+  const receiveStopTyping = () => {
+    if (socket) {
+      socket.on("receiveStopTyping", (data) => {
+        console.log(data);
+      });
+    }
+  };
 
   const joinConversation = (
     user: { profilePicture: string; name: string; userId: number },
@@ -88,7 +152,14 @@ function Messages() {
     setSelectedUser(user);
     setChat(chatId);
   };
-
+  const handleMessageTextChange = (e) => {
+    setMessageText(e.target.value);
+    if (e.target.value) {
+      sendTyping();
+    } else {
+      stopTyping();
+    }
+  };
   const handleSendMessage = () => {
     if (socket && messageText.trim() && selectedUser) {
       const message = {
@@ -106,6 +177,16 @@ function Messages() {
       ]);
 
       setMessageText("");
+    }
+  };
+
+  const handleTyping = (e) => {
+    setMessageText(e.target.value);
+
+    if (e.target.value) {
+      sendTyping();
+    } else {
+      stopTyping();
     }
   };
 
@@ -201,6 +282,12 @@ function Messages() {
                   )}
                 </div>
               ))}
+
+              {isTyping && (
+                <div className="text-gray-500 text-sm italic">
+                  {selectedUser?.name} is typing...
+                </div>
+              )}
             </div>
 
             <div className="flex items-center p-6 bg-gray-100 rounded-b-lg">
@@ -208,7 +295,7 @@ function Messages() {
                 placeholder="Type a message..."
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-blue-300"
                 value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
+                onChange={handleTyping}
               />
               <button
                 className="ml-4 bg-blue-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:bg-blue-600 transition"
