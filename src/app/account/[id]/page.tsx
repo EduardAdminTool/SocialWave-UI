@@ -101,7 +101,7 @@ function AccountPage({ params }: { params: { id: string } }) {
   const goToMessage = async (userId: number) => {
     if (token) {
       if (token) {
-        const response = await createChat(Number(token), userId);
+        const response = await createChat(userId);
         router.push(`/messages/${userId}`);
       } else {
         console.error("Invalid token or missing user ID in token");
