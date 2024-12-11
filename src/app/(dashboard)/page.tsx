@@ -13,7 +13,6 @@ function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
-
   const observer = useRef<IntersectionObserver | null>(null);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
   const firstLoadRef = useRef(true);
@@ -21,10 +20,8 @@ function Home() {
   const fetchPosts = useCallback(
     async (page: number) => {
       if (isLoading || fetchedPagesRef.current.has(page) || !hasMore) return;
-
       setIsLoading(true);
       setError(null);
-
       try {
         const fetchedPosts = await getFeed(page);
 

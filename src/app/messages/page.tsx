@@ -17,13 +17,15 @@ function Messages() {
     userId: number;
   } | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [conversations, setConversations] = useState<{
-    [key: number]: { sender: string; text: string }[];
-  }>({});
+  const [conversations, setConversations] = useState<
+    { sender: string; text: string; senderVerify: string }[]
+  >([]);
+
   const [messageText, setMessageText] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [chat, setChat] = useState<number | null>(null);
+
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -32,9 +34,7 @@ function Messages() {
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
-
       const token = localStorage.getItem("authToken");
-
       if (token) {
         try {
           const decodedToken = jwt.decode(token);
@@ -56,19 +56,16 @@ function Messages() {
     setSocket(socketConnection);
 
     socketConnection.on("connect", () => {
-      console.log("Connected to serverrrrrrrrrr");
       setIsConnected(true);
     });
 
     socketConnection.on("receiveMessage", (message) => {
-      console.log("Received message:", message);
-      setConversations((prev) => ({
-        ...prev,
-        [message.senderId]: [
-          ...(prev[message.senderId] || []),
-          { sender: "other", text: message.text },
-        ],
-      }));
+      if (message[0].senderId !== token) {
+        setConversations((prev) => [
+          ...prev,
+          { sender: "other", text: message[0].text, senderVerify: "other" },
+        ]);
+      }
     });
 
     socketConnection.on("disconnect", () => {
@@ -79,7 +76,7 @@ function Messages() {
     return () => {
       socketConnection.disconnect();
     };
-  }, []);
+  }, [token]);
 
   const joinConversation = (
     user: { profilePicture: string; name: string; userId: number },
@@ -93,7 +90,6 @@ function Messages() {
   };
 
   const handleSendMessage = () => {
-    console.log(chat);
     if (socket && messageText.trim() && selectedUser) {
       const message = {
         senderId: token,
@@ -101,15 +97,13 @@ function Messages() {
         chatId: chat,
         text: messageText,
       };
+
       socket.emit("sendMessage", message);
 
-      setConversations((prev) => ({
+      setConversations((prev) => [
         ...prev,
-        [selectedUser.userId]: [
-          ...(prev[selectedUser.userId] || []),
-          { sender: "me", text: messageText },
-        ],
-      }));
+        { sender: "me", text: messageText, senderVerify: "sendByMe" },
+      ]);
 
       setMessageText("");
     }
@@ -160,22 +154,39 @@ function Messages() {
             </div>
 
             <div className="flex flex-col flex-1 p-6 gap-4 overflow-y-auto bg-gray-50">
-              {(conversations[selectedUser.userId] || []).map((msg, index) => (
+              {conversations.map((msg, index) => (
                 <div
                   key={index}
                   className={`flex ${
                     msg.sender === "me" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div
-                    className={`px-4 py-3 rounded-lg shadow-sm ${
-                      msg.sender === "me"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200"
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
+                  {msg.sender === "me" && (
+                    <div
+                      className={`px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white`}
+                    >
+                      {msg.text}
+                    </div>
+                  )}
+
+                  {msg.sender === "other" && (
+                    <div className="flex gap-2">
+                      <div className="w-[40px] h-[40px] ml-3">
+                        <img
+                          src={
+                            selectedUser.profilePicture || "/default-avatar.png"
+                          }
+                          alt={`${selectedUser.name}'s avatar`}
+                          className="rounded-full w-full h-full object-cover"
+                        />
+                      </div>
+                      <div
+                        className={`px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black"`}
+                      >
+                        {msg.text}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
