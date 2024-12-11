@@ -102,7 +102,8 @@ function AccountPage({ params }: { params: { id: string } }) {
     if (token) {
       if (token) {
         const response = await createChat(userId);
-        router.push(`/messages/${userId}`);
+
+        router.push(`/messages/${response.chatId}`);
       } else {
         console.error("Invalid token or missing user ID in token");
       }

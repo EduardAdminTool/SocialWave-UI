@@ -233,14 +233,14 @@ function Messages() {
               <div className="flex flex-col">
                 <span className="font-medium">{item.otherUser.name}</span>
                 <span className="text-sm text-gray-500">
-                  {item.lastMessage.text}
+                  {item.lastMessage?.text}
                   <span className="text-xs text-gray-400">
                     {" "}
-                    - {calculateDateDifference(item.lastMessage.createdAt)}
+                    - {calculateDateDifference(item.lastMessage?.createdAt)}
                   </span>
                 </span>
                 <span className="text-xs text-gray-400">
-                  {item.lastMessage.senderId === item.otherUser.userId
+                  {item.lastMessage?.senderId === item.otherUser.userId
                     ? "Received"
                     : "Sent"}
                 </span>
