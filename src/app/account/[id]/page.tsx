@@ -10,6 +10,7 @@ import { StoryCarousel } from "@/components/StoryCarousel";
 import { Account } from "@/types/account/types";
 import { Post } from "@/types/posts/types";
 import withAuth from "@/utils/withAuth";
+import jwt from "jsonwebtoken";
 import { Grid, MessageSquare, Bookmark } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
 import { getUserAccount } from "@/services/account";
@@ -19,7 +20,7 @@ import { getUserFollow } from "@/services/follow";
 import { deleteRequest } from "@/services/follow";
 import { unfollowFollow } from "@/services/follow";
 import { useRouter } from "next/navigation";
-
+import { createChat } from "@/services/chat";
 function AccountPage({ params }: { params: { id: string } }) {
   const router = useRouter();
 
@@ -30,11 +31,26 @@ function AccountPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>("");
   const [activePost, setActivePost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
   const story = [
     { image: "poza", name: "Andrei" },
     { image: "poza1", name: "Matei1" },
   ];
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+
+    if (token) {
+      try {
+        const decodedToken = jwt.decode(token);
+        const userIdFromToken = decodedToken?.sub || null;
+        setToken(userIdFromToken);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     fetchAccount();
@@ -82,9 +98,19 @@ function AccountPage({ params }: { params: { id: string } }) {
     setIsModalOpen(true);
   };
 
-  const goToMessage = (userId: number) => {
-    router.push(`/messages/${userId}`);
+  const goToMessage = async (userId: number) => {
+    if (token) {
+      if (token) {
+        const response = await createChat(Number(token), userId);
+        router.push(`/messages/${userId}`);
+      } else {
+        console.error("Invalid token or missing user ID in token");
+      }
+    } else {
+      console.error("No token available");
+    }
   };
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8 mb-8">
