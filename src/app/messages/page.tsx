@@ -193,7 +193,7 @@ function Messages() {
 
   return (
     <div className="grid grid-cols-2 px-8 py-12 bg-blue-50 h-screen gap-8">
-      <div className="flex flex-col bg-white rounded-lg shadow-lg h-full">
+      <div className="flex flex-col bg-white rounded-lg shadow-lg h-[90%]">
         <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
           <span className="text-2xl font-semibold">Direct</span>
           <BiMessageRoundedAdd size={36} className="cursor-pointer" />
@@ -203,21 +203,25 @@ function Messages() {
           {dm.map((item, index) => (
             <div
               key={index}
-              className={`flex items-center gap-4 p-4 rounded-lg transition-transform transform hover:scale-95 cursor-pointer ${
+              className={`flex items-center gap-4 p-4 rounded-lg transition-all cursor-pointer ${
                 selectedUser?.userId === item.otherUser.userId
-                  ? "bg-blue-100 shadow-inner"
+                  ? "bg-blue-100 shadow-inner border-2 border-blue-500"
                   : "bg-white"
-              }`}
+              } hover:bg-blue-50`}
               onClick={() => joinConversation(item.otherUser, item.chatId)}
+              style={{
+                transform: "none",
+                boxSizing: "border-box",
+              }}
             >
-              <div className="w-[60px] h-[60px]">
+              <div className="w-[60px] h-[60px] flex-shrink-0">
                 <img
                   src={item.otherUser.profilePicture || "/default-avatar.png"}
                   alt={`${item.otherUser.name}'s avatar`}
                   className="rounded-full w-full h-full object-cover"
                 />
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-grow">
                 <span className="font-medium">{item.otherUser.name}</span>
                 <span className="text-sm text-gray-500">
                   {item.lastMessage.text}
@@ -237,7 +241,7 @@ function Messages() {
         </div>
       </div>
 
-      <div className="flex flex-col bg-white rounded-lg shadow-lg h-full">
+      <div className="flex flex-col bg-white rounded-lg shadow-lg h-[90%]">
         {selectedUser ? (
           <>
             <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
