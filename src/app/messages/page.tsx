@@ -223,18 +223,26 @@ function Messages() {
               </div>
               <div className="flex flex-col flex-grow">
                 <span className="font-medium">{item.otherUser.name}</span>
-                <span className="text-sm text-gray-500">
-                  {item.lastMessage.text}
-                  <span className="text-xs text-gray-400">
-                    {" "}
-                    - {calculateDateDifference(item.lastMessage.createdAt)}
+                {item.lastMessage ? (
+                  <>
+                    <span className="text-sm text-gray-500">
+                      {item.lastMessage.text}
+                      <span className="text-xs text-gray-400">
+                        {" "}
+                        - {calculateDateDifference(item.lastMessage.createdAt)}
+                      </span>
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {item.lastMessage.senderId === item.otherUser.userId
+                        ? "Received"
+                        : "Sent"}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-gray-500 italic">
+                    No messages yet
                   </span>
-                </span>
-                <span className="text-xs text-gray-400">
-                  {item.lastMessage.senderId === item.otherUser.userId
-                    ? "Received"
-                    : "Sent"}
-                </span>
+                )}
               </div>
             </div>
           ))}
