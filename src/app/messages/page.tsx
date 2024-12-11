@@ -5,21 +5,38 @@ import { BiMessageRoundedAdd } from "react-icons/bi";
 import { FaExclamationCircle } from "react-icons/fa";
 import withAuth from "@/utils/withAuth";
 import { io, Socket } from "socket.io-client";
-
+import { getChat } from "@/services/chat";
+import jwt from "jsonwebtoken";
+import { Chat } from "@/types/chat/types";
 function Messages() {
-  const dm = [
-    { logo: "L1", name: "name1", id: 2 },
-    { logo: "L2", name: "name2", id: 3 },
-    { logo: "L3", name: "name3", id: 4 },
-    { logo: "L4", name: "name4", id: 5 },
-    { logo: "L5", name: "name5", id: 6 },
-    { logo: "L6", name: "name6", id: 7 },
-  ];
+  const [dm, setDm] = useState<Chat[]>([]);
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await getChat();
+        setDm(response);
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          try {
+            const decodedToken = jwt.decode(token);
+            const userIdFromToken = decodedToken?.sub;
+          } catch (error) {
+            console.error("Error decoding token:", error);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+      }
+    };
+
+    fetchChats();
+  }, []);
 
   const [selectedUser, setSelectedUser] = useState<{
-    logo: string;
+    profilePicture: string;
     name: string;
-    id: number;
+    userId: number;
   } | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [conversations, setConversations] = useState<{
@@ -59,13 +76,13 @@ function Messages() {
   }, []);
 
   const joinConversation = (user: {
-    logo: string;
+    profilePicture: string;
     name: string;
-    id: number;
+    userId: number;
   }) => {
     if (socket) {
-      socket.emit("joinChat", user.id);
-      console.log(`Joined chat with user ID: ${user.id}`);
+      socket.emit("joinChat", user.userId);
+      console.log(`Joined chat with user ID: ${user.userId}`);
     }
     setSelectedUser(user);
   };
@@ -74,22 +91,22 @@ function Messages() {
     if (socket && messageText.trim() && selectedUser) {
       const message = {
         senderId: 1,
-        receiverId: selectedUser.id,
+        receiverId: selectedUser.userId,
         text: messageText,
       };
       socket.emit("sendMessage", message);
 
       setConversations((prev) => ({
         ...prev,
-        [selectedUser.id]: [
-          ...(prev[selectedUser.id] || []),
+        [selectedUser.userId]: [
+          ...(prev[selectedUser.userId] || []),
           { sender: "me", text: messageText },
         ],
       }));
 
       setTimeout(() => {
         socket.emit("receiveMessage", {
-          senderId: selectedUser.id,
+          senderId: selectedUser.userId,
           text: `Echo: ${messageText}`,
         });
       }, 500);
@@ -107,21 +124,25 @@ function Messages() {
         </div>
 
         <div className="flex flex-col py-4 gap-4 text-lg overflow-y-auto">
-          {dm.map((item) => (
+          {dm.map((item, index) => (
             <div
-              key={item.id}
+              key={index}
               className={`flex items-center gap-4 p-4 rounded-lg transition-transform transform hover:scale-95 cursor-pointer ${
-                selectedUser?.id === item.id
+                selectedUser?.userId === item.otherUser.userId
                   ? "bg-blue-100 shadow-inner"
                   : "bg-white"
               }`}
-              onClick={() => joinConversation(item)}
+              onClick={() => joinConversation(item.otherUser)}
             >
-              <div className="bg-blue-500 rounded-full w-[60px] h-[60px] flex justify-center items-center text-white text-lg font-bold">
-                {item.logo}
+              <div className="w-[60px] h-[60px]">
+                <img
+                  src={item.otherUser.profilePicture || "/default-avatar.png"}
+                  alt={`${item.otherUser.name}'s avatar`}
+                  className="rounded-full w-full h-full object-cover"
+                />
               </div>
               <div className="flex flex-col">
-                <span className="font-medium">{item.name}</span>
+                <span className="font-medium">{item.otherUser.name}</span>
               </div>
             </div>
           ))}
@@ -139,7 +160,7 @@ function Messages() {
             </div>
 
             <div className="flex flex-col flex-1 p-6 gap-4 overflow-y-auto bg-gray-50">
-              {(conversations[selectedUser.id] || []).map((msg, index) => (
+              {(conversations[selectedUser.userId] || []).map((msg, index) => (
                 <div
                   key={index}
                   className={`flex ${
