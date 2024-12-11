@@ -16,7 +16,11 @@ function Messages() {
     { logo: "L6", name: "name6", id: 7 },
   ];
 
-  const [selectedUser, setSelectedUser] = useState(dm[0]);
+  const [selectedUser, setSelectedUser] = useState<{
+    logo: string;
+    name: string;
+    id: number;
+  } | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [conversations, setConversations] = useState<{
     [key: number]: { sender: string; text: string }[];
@@ -31,7 +35,6 @@ function Messages() {
     socketConnection.on("connect", () => {
       console.log("Connected to server");
       setIsConnected(true);
-      socketConnection.emit("joinChat", 1);
     });
 
     socketConnection.on("receiveMessage", (message) => {
@@ -55,8 +58,20 @@ function Messages() {
     };
   }, []);
 
+  const joinConversation = (user: {
+    logo: string;
+    name: string;
+    id: number;
+  }) => {
+    if (socket) {
+      socket.emit("joinChat", user.id);
+      console.log(`Joined chat with user ID: ${user.id}`);
+    }
+    setSelectedUser(user);
+  };
+
   const handleSendMessage = () => {
-    if (socket && messageText.trim()) {
+    if (socket && messageText.trim() && selectedUser) {
       const message = {
         senderId: 1,
         receiverId: selectedUser.id,
@@ -96,11 +111,11 @@ function Messages() {
             <div
               key={item.id}
               className={`flex items-center gap-4 p-4 rounded-lg transition-transform transform hover:scale-95 cursor-pointer ${
-                selectedUser.id === item.id
+                selectedUser?.id === item.id
                   ? "bg-blue-100 shadow-inner"
                   : "bg-white"
               }`}
-              onClick={() => setSelectedUser(item)}
+              onClick={() => joinConversation(item)}
             >
               <div className="bg-blue-500 rounded-full w-[60px] h-[60px] flex justify-center items-center text-white text-lg font-bold">
                 {item.logo}
@@ -114,44 +129,56 @@ function Messages() {
       </div>
 
       <div className="flex flex-col bg-white rounded-lg shadow-lg h-full">
-        <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
-          <span className="text-2xl font-semibold">{selectedUser.name}</span>
-          <FaExclamationCircle size={36} className="cursor-pointer" />
-        </div>
-
-        <div className="flex flex-col flex-1 p-6 gap-4 overflow-y-auto bg-gray-50">
-          {(conversations[selectedUser.id] || []).map((msg, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                msg.sender === "me" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`px-4 py-3 rounded-lg shadow-sm ${
-                  msg.sender === "me" ? "bg-blue-500 text-white" : "bg-gray-200"
-                }`}
-              >
-                {msg.text}
-              </div>
+        {selectedUser ? (
+          <>
+            <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
+              <span className="text-2xl font-semibold">
+                {selectedUser.name}
+              </span>
+              <FaExclamationCircle size={36} className="cursor-pointer" />
             </div>
-          ))}
-        </div>
 
-        <div className="flex items-center p-6 bg-gray-100 rounded-b-lg">
-          <input
-            placeholder="Type a message..."
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-blue-300"
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-          />
-          <button
-            className="ml-4 bg-blue-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:bg-blue-600 transition"
-            onClick={handleSendMessage}
-          >
-            Send
-          </button>
-        </div>
+            <div className="flex flex-col flex-1 p-6 gap-4 overflow-y-auto bg-gray-50">
+              {(conversations[selectedUser.id] || []).map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${
+                    msg.sender === "me" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`px-4 py-3 rounded-lg shadow-sm ${
+                      msg.sender === "me"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center p-6 bg-gray-100 rounded-b-lg">
+              <input
+                placeholder="Type a message..."
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-blue-300"
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+              />
+              <button
+                className="ml-4 bg-blue-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:bg-blue-600 transition"
+                onClick={handleSendMessage}
+              >
+                Send
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-center flex-1 text-gray-500">
+            Select a conversation to start messaging
+          </div>
+        )}
       </div>
     </div>
   );

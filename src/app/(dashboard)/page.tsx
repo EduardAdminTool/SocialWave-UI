@@ -20,20 +20,18 @@ function Home() {
 
   const fetchPosts = useCallback(
     async (page: number) => {
-      // Prevent refetching the same page
       if (isLoading || fetchedPagesRef.current.has(page) || !hasMore) return;
-      
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
         const fetchedPosts = await getFeed(page);
-        
+
         if (fetchedPosts.length === 0) {
           setHasMore(false);
         } else {
           setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
-          // Mark this page as fetched
           fetchedPagesRef.current.add(page);
         }
       } catch (err) {
@@ -48,29 +46,24 @@ function Home() {
 
   const lastPostRef = useCallback(
     (node: HTMLDivElement | null) => {
-      // Disconnect previous observer
       if (observer.current) observer.current.disconnect();
 
-      // Create new intersection observer
       observer.current = new IntersectionObserver(
         (entries) => {
-          // Only trigger fetch when the last post is visible, not loading, and more posts exist
           if (
-            entries[0].isIntersecting && 
-            !isLoading && 
-            hasMore && 
+            entries[0].isIntersecting &&
+            !isLoading &&
+            hasMore &&
             !fetchedPagesRef.current.has(currentPage + 1)
           ) {
-            // Increment page and trigger fetch
             setCurrentPage((prevPage) => prevPage + 1);
           }
         },
-        { 
-          rootMargin: "200px" 
+        {
+          rootMargin: "200px",
         }
       );
 
-      // Observe the new last post element
       if (node) observer.current.observe(node);
     },
     [isLoading, hasMore, currentPage]
