@@ -9,6 +9,7 @@ import { getChat } from "@/services/chat";
 import jwt from "jsonwebtoken";
 import { Chat } from "@/types/chat/types";
 import { calculateDateDifference } from "@/utils/calculateDate";
+import { useParams } from "next/navigation";
 function Messages() {
   const [dm, setDm] = useState<Chat[]>([]);
   const [selectedUser, setSelectedUser] = useState<{
@@ -25,15 +26,27 @@ function Messages() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [chat, setChat] = useState<number | null>(null);
+  const { id } = useParams(); // Access the dynamic `id` from the URL
 
   useEffect(() => {
     const fetchChats = async () => {
       try {
         const response = await getChat();
         setDm(response);
+
+        // Preselect chat if `id` exists
+        if (id) {
+          const chatToSelect = response.find(
+            (chat) => chat.chatId === parseInt(id as string, 10)
+          );
+          if (chatToSelect) {
+            joinConversation(chatToSelect.otherUser, chatToSelect.chatId);
+          }
+        }
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
+
       const token = localStorage.getItem("authToken");
       if (token) {
         try {
@@ -49,7 +62,7 @@ function Messages() {
     };
 
     fetchChats();
-  }, []);
+  }, [id]); // Include `id` in the dependency array to trigger when it changes
 
   useEffect(() => {
     const socketConnection = io("ws://localhost:3001/chat");
