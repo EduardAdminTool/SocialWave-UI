@@ -61,10 +61,8 @@ function Messages() {
     });
 
     socketConnection.on("receiveMessage", (message) => {
-      setConversations((prev) => {
-        const exists = prev.some((msg) => msg.messageId === message.messageId);
-        return exists ? prev : [...prev, message];
-      });
+      setConversations((prev) => [...prev, message[0]]);
+      scrollToBottom();
     });
 
     socketConnection.on("disconnect", () => {
@@ -77,6 +75,7 @@ function Messages() {
     };
   }, [token]);
 
+  // Typing events
   useEffect(() => {
     if (socket) {
       socket.on("receiveTyping", (data) => {
@@ -98,14 +97,15 @@ function Messages() {
         socket.off("receiveStopTyping");
       }
     };
-  }, [socket, token]);
+  }, [socket]);
 
+  // Handle joining a conversation
   const joinConversation = (
     user: { profilePicture: string; name: string; userId: number },
     chatId: number
   ) => {
     if (socket) {
-      socket.emit("joinChat", { chatId, token });
+      socket.emit("joinChat", { chatId, token }); // Emit to server to join the chat room
     }
     setSelectedUser(user);
     setChat(chatId);
@@ -119,6 +119,7 @@ function Messages() {
     });
   };
 
+  // Send message to the receiver
   const handleSendMessage = () => {
     if (socket && messageText.trim() && selectedUser && chat != null) {
       const message = {
@@ -131,29 +132,15 @@ function Messages() {
         isRead: false,
       };
 
-      // Emit the message to the server
-      socket.emit("sendMessage", message);
-
-      // Add the sent message to the conversation
-      setConversations((prevConversations) => [...prevConversations, message]);
-
-      // Simulate receiving the message for the recipient's perspective
-      const receivedMessage = {
-        ...message,
-        senderId: selectedUser.userId,
-        receiverId: Number(token),
-      };
-      setConversations((prevConversations) => [
-        ...prevConversations,
-        receivedMessage,
-      ]);
-
+      socket.emit("sendMessage", message); // Emit message to server
+      setConversations((prevConversations) => [...prevConversations, message]); // Update local state
       setMessageText("");
       stopTyping();
       scrollToBottom();
     }
   };
 
+  // Handle typing status
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageText(e.target.value);
 
@@ -184,6 +171,7 @@ function Messages() {
     }
   };
 
+  // Scroll to bottom of the chat
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -261,7 +249,7 @@ function Messages() {
 
             <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
               {Array.isArray(conversations) && conversations.length > 0 ? (
-                [...conversations].reverse().map((msg, index) => (
+                conversations.map((msg, index) => (
                   <div
                     key={index}
                     className={`group flex ${
@@ -270,11 +258,9 @@ function Messages() {
                         : "justify-start"
                     } relative`}
                   >
-                    {/* Your Message */}
-                    {msg.senderId == Number(token) && (
+                    {msg.senderId === Number(token) && (
                       <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                         {msg.text}
-                        {/* Timestamp on the left for your message */}
                         <span className="absolute mr-4 whitespace-nowrap right-full top-1/2 transform -translate-y-1/2 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
                           {calculateDateDifference(
                             new Date(msg.createdAt).toLocaleString()
@@ -283,8 +269,7 @@ function Messages() {
                       </div>
                     )}
 
-                    {/* Other User's Message */}
-                    {msg.senderId != Number(token) && (
+                    {msg.receiverId === Number(token) && (
                       <div className="flex gap-2">
                         <div className="w-[40px] h-[40px] ml-3">
                           <img
@@ -298,7 +283,6 @@ function Messages() {
                         </div>
                         <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
                           {msg.text}
-                          {/* Timestamp on the right for other user's message */}
                           <span className="absolute ml-4 whitespace-nowrap left-full top-1/2 transform -translate-y-1/2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
                             {calculateDateDifference(
                               new Date(msg.createdAt).toLocaleString()

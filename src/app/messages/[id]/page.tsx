@@ -65,6 +65,7 @@ function Messages() {
         const exists = prev.some((msg) => msg.messageId === message.messageId);
         return exists ? prev : [...prev, message];
       });
+      scrollToBottom();
     });
 
     socketConnection.on("disconnect", () => {
@@ -136,17 +137,6 @@ function Messages() {
 
       // Add the sent message to the conversation
       setConversations((prevConversations) => [...prevConversations, message]);
-
-      // Simulate receiving the message for the recipient's perspective
-      const receivedMessage = {
-        ...message,
-        senderId: selectedUser.userId,
-        receiverId: Number(token),
-      };
-      setConversations((prevConversations) => [
-        ...prevConversations,
-        receivedMessage,
-      ]);
 
       setMessageText("");
       stopTyping();
@@ -261,7 +251,7 @@ function Messages() {
 
             <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
               {Array.isArray(conversations) && conversations.length > 0 ? (
-                [...conversations].reverse().map((msg, index) => (
+                conversations.map((msg, index) => (
                   <div
                     key={index}
                     className={`group flex ${
@@ -270,11 +260,9 @@ function Messages() {
                         : "justify-start"
                     } relative`}
                   >
-                    {/* Your Message */}
                     {msg.senderId == Number(token) && (
                       <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                         {msg.text}
-                        {/* Timestamp on the left for your message */}
                         <span className="absolute mr-4 whitespace-nowrap right-full top-1/2 transform -translate-y-1/2 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
                           {calculateDateDifference(
                             new Date(msg.createdAt).toLocaleString()
@@ -283,7 +271,6 @@ function Messages() {
                       </div>
                     )}
 
-                    {/* Other User's Message */}
                     {msg.senderId != Number(token) && (
                       <div className="flex gap-2">
                         <div className="w-[40px] h-[40px] ml-3">
@@ -298,7 +285,6 @@ function Messages() {
                         </div>
                         <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
                           {msg.text}
-                          {/* Timestamp on the right for other user's message */}
                           <span className="absolute ml-4 whitespace-nowrap left-full top-1/2 transform -translate-y-1/2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
                             {calculateDateDifference(
                               new Date(msg.createdAt).toLocaleString()
