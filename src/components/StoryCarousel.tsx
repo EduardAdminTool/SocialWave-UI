@@ -1,45 +1,44 @@
 "use client";
+
 import React, { useState } from "react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Story, StoryCarouselProps, StoryItemProps } from "@/types/story/types";
-import OpenedStory from "@/components/OpenedStory";
+import { StoryModal } from "./StoryModal";
+import { Story } from "@/types/story/types";
+
+interface StoryCarouselProps {
+  stories: Story[];
+}
 
 export function StoryCarousel({ stories }: StoryCarouselProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+
+  const openStoryModal = (index: number) => {
+    setSelectedStoryIndex(index);
+    setIsModalOpen(true);
+  };
+
   return (
-    <div className="rounded-xl p-4">
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex space-x-4">
-          {stories.map((story) => (
-            <div key={story.name}>
-              <div className="flex flex-col items-center space-y-2">
-                <div
-                  className={`p-[3px] rounded-full 
-                bg-blue-200
-              `}
-                  onClick={() => setIsOpen(!isOpen)}
-                >
-                  <Avatar className="h-16 w-16 border-2 border-white hover:scale-105 cursor-pointer">
-                    {/* <AvatarImage src={story.image} alt={story.name} /> */}
-                    <AvatarFallback className="bg-blue-300 text-blue-800">
-                      {story.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-                <span className="text-xs font-medium text-blue-800 truncate w-16 text-center">
-                  {story.name}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-        <ScrollBar
-          orientation="horizontal"
-          className="opacity-0 transition-opacity hover:opacity-100"
-        />
-      </ScrollArea>
-      <OpenedStory isOpen={isOpen} setIsOpen={setIsOpen} />
-    </div>
+    <>
+      {stories.map((story, index) => (
+        <button
+          key={story.storyId}
+          className="flex flex-col items-center space-y-1"
+          onClick={() => openStoryModal(index)}
+        >
+          <Avatar className="w-16 h-16 ring-2 ring-blue-500 ring-offset-2">
+            <AvatarImage src={story.profilePicture} alt={story.name} />
+            <AvatarFallback>{story.name[0]}</AvatarFallback>
+          </Avatar>
+          <span className="text-xs font-medium">{story.name}</span>
+        </button>
+      ))}
+      <StoryModal
+        stories={stories}
+        initialStoryIndex={selectedStoryIndex}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 }
