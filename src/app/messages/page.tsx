@@ -108,6 +108,24 @@ function Messages() {
     };
   }, [socket]);
 
+  useEffect(() => {
+    if (isTyping) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isTyping]);
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  };
+
   const joinConversation = (
     user: { profilePicture: string; name: string; userId: number },
     chatId: number
@@ -180,13 +198,6 @@ function Messages() {
         chatId: chat,
       });
     }
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -314,14 +325,12 @@ function Messages() {
               )}
 
               <div ref={messagesEndRef} />
-
-              {isTyping && (
-                <div className="text-gray-500 text-sm italic">
-                  {selectedUser?.name} is typing...
-                </div>
-              )}
             </div>
-
+            {isTyping && (
+              <div className="p-2 bg-gray-100 text-gray-500 text-sm italic">
+                {selectedUser?.name} is typing...
+              </div>
+            )}
             <div className="flex items-center p-6 bg-gray-100 rounded-b-lg">
               <input
                 placeholder="Type a message..."
