@@ -120,6 +120,7 @@ function Messages() {
 
     socket?.on("receiveMessages", (response) => {
       if (Array.isArray(response.messages)) {
+        console.log(response.messages);
         setConversations(response.messages);
       } else {
         console.error("Received messages is not an array", response);
