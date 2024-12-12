@@ -87,14 +87,6 @@ function Home() {
   return (
     <div className="text-blue-500 min-h-screen">
       <div className="h-[120px] flex items-center bg-gradient-to-b from-blue-100 to-white border rounded-md">
-        <div className="flex flex-col justify-start px-8 space-y-2">
-          <div className="h-16 w-16 flex justify-center items-center rounded-full bg-blue-200">
-            Poza
-          </div>
-          <div className="text-xs font-medium text-blue-800 truncate w-16 text-center">
-            Your Story
-          </div>
-        </div>
         <ScrollArea className="w-128 whitespace-nowrap">
           <div className="flex w-max space-x-4 p-4">
             <StoryCarousel stories={story} />
