@@ -61,7 +61,17 @@ function Messages() {
     });
 
     socketConnection.on("receiveMessage", (message) => {
-      setConversations((prev) => [...prev, message[0]]);
+      setConversations((prev) => {
+        const isMessageExist = prev.some(
+          (msg) =>
+            msg.chatId === message[0].chatId &&
+            msg.createdAt === message[0].createdAt
+        );
+        if (!isMessageExist) {
+          return [...prev, message[0]];
+        }
+        return prev;
+      });
       scrollToBottom();
     });
 
@@ -75,7 +85,6 @@ function Messages() {
     };
   }, [token]);
 
-  // Typing events
   useEffect(() => {
     if (socket) {
       socket.on("receiveTyping", (data) => {
@@ -99,13 +108,12 @@ function Messages() {
     };
   }, [socket]);
 
-  // Handle joining a conversation
   const joinConversation = (
     user: { profilePicture: string; name: string; userId: number },
     chatId: number
   ) => {
     if (socket) {
-      socket.emit("joinChat", { chatId, token }); // Emit to server to join the chat room
+      socket.emit("joinChat", { chatId, token });
     }
     setSelectedUser(user);
     setChat(chatId);
@@ -119,7 +127,6 @@ function Messages() {
     });
   };
 
-  // Send message to the receiver
   const handleSendMessage = () => {
     if (socket && messageText.trim() && selectedUser && chat != null) {
       const message = {
@@ -132,15 +139,25 @@ function Messages() {
         isRead: false,
       };
 
-      socket.emit("sendMessage", message); // Emit message to server
-      setConversations((prevConversations) => [...prevConversations, message]); // Update local state
+      socket.emit("sendMessage", message);
+
+      setConversations((prevConversations) => {
+        const isMessageExist = prevConversations.some(
+          (msg) =>
+            msg.createdAt === message.createdAt && msg.chatId === message.chatId
+        );
+        if (!isMessageExist) {
+          return [...prevConversations, message];
+        }
+        return prevConversations;
+      });
+
       setMessageText("");
       stopTyping();
       scrollToBottom();
     }
   };
 
-  // Handle typing status
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageText(e.target.value);
 
@@ -158,6 +175,7 @@ function Messages() {
         receiverId: selectedUser.userId,
         chatId: chat,
       });
+      scrollToBottom();
     }
   };
 
@@ -171,7 +189,6 @@ function Messages() {
     }
   };
 
-  // Scroll to bottom of the chat
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
