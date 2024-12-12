@@ -26,6 +26,7 @@ function Home() {
       if (isLoading || fetchedPagesRef.current.has(page) || !hasMore) return;
       setIsLoading(true);
       setError(null);
+
       try {
         const fetchedPosts = await getFeed(page);
 
