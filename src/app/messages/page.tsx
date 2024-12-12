@@ -142,15 +142,8 @@ function Messages() {
 
       socket.emit("sendMessage", message);
 
-      setConversations((prevConversations) => {
-        const isMessageExist = prevConversations.some(
-          (msg) => msg.text === message.text && msg.chatId === message.chatId
-        );
-        if (!isMessageExist) {
-          return [...prevConversations, message];
-        }
-        return prevConversations;
-      });
+      // Remove the local addition of the message
+      // The message will be added when it's received from the server
 
       setMessageText("");
       stopTyping();
