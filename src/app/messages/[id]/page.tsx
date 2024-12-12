@@ -259,7 +259,7 @@ function Messages() {
 
             <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
               {Array.isArray(conversations) && conversations.length > 0 ? (
-                conversations.reverse().map((msg, index) => (
+                conversations.map((msg, index) => (
                   <div
                     key={index}
                     className={`flex ${
