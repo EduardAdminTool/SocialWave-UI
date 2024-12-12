@@ -9,6 +9,8 @@ import { getChat } from "@/services/chat";
 import jwt from "jsonwebtoken";
 import { Chat } from "@/types/chat/types";
 import { calculateDateDifference } from "@/utils/calculateDate";
+import { MessagesProps } from "@/types/chat/types";
+import { MessagesType } from "@/types/chat/types";
 
 function Messages() {
   const [dm, setDm] = useState<Chat[]>([]);
@@ -18,23 +20,14 @@ function Messages() {
     userId: number;
   } | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [conversations, setConversations] = useState<
-    {
-      text: string;
-      chatId: number;
-      createdAt: string;
-      isRead: boolean;
-      messageId: number;
-      receiverId: number;
-      senderId: number;
-    }[]
-  >([]);
+  const [conversations, setConversations] = useState<MessagesType[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [chat, setChat] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -67,23 +60,11 @@ function Messages() {
     socketConnection.on("connect", () => {
       setIsConnected(true);
     });
-    socketConnection.on("receiveMessages", (messages) => {
-      setConversations(messages);
-    });
+
     socketConnection.on("receiveMessage", (message) => {
+      console.log(message);
       if (message[0].senderId !== token) {
-        setConversations((prev) => [
-          ...prev,
-          {
-            text: message[0].text,
-            chatId: message[0].chatId,
-            createdAt: message[0].createdAt,
-            isRead: message[0].isRead,
-            messageId: message[0].messageId,
-            receiverId: message[0].receiverId,
-            senderId: message[0].senderId,
-          },
-        ]);
+        // Handle receiving new message logic if needed
       }
     });
 
@@ -122,12 +103,49 @@ function Messages() {
     };
   }, [socket, token]);
 
-  useEffect(() => {
-    if (conversations.length > 0) {
-      scrollToBottom();
+  const joinConversation = (
+    user: { profilePicture: string; name: string; userId: number },
+    chatId: number
+  ) => {
+    if (socket) {
+      socket.emit("joinChat", { chatId, token });
     }
-    console.log(conversations);
-  }, [conversations]);
+    setSelectedUser(user);
+    setChat(chatId);
+
+    socket?.on("receiveMessages", (response) => {
+      if (Array.isArray(response.messages)) {
+        setConversations(response.messages);
+      } else {
+        console.error("Received messages is not an array", response);
+      }
+    });
+  };
+
+  const handleSendMessage = () => {
+    if (socket && messageText.trim() && selectedUser) {
+      const message = {
+        senderId: token,
+        receiverId: selectedUser.userId,
+        chatId: chat,
+        text: messageText,
+      };
+
+      socket.emit("sendMessage", message);
+      setMessageText("");
+      stopTyping();
+    }
+  };
+
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageText(e.target.value);
+
+    if (e.target.value) {
+      sendTyping();
+    } else {
+      stopTyping();
+    }
+  };
 
   const sendTyping = () => {
     if (socket && selectedUser) {
@@ -146,60 +164,6 @@ function Messages() {
         receiverId: selectedUser.userId,
         chatId: chat,
       });
-    }
-  };
-
-  const joinConversation = (
-    user: { profilePicture: string; name: string; userId: number },
-    chatId: number
-  ) => {
-    if (socket) {
-      socket.emit("joinChat", { chatId, token });
-    }
-    setSelectedUser(user);
-    setChat(chatId);
-    socket?.on("receiveMessages", (messages) => {
-      console.log(messages);
-      setConversations(messages);
-    });
-  };
-
-  const handleSendMessage = () => {
-    if (socket && messageText.trim() && selectedUser) {
-      const message = {
-        senderId: token,
-        receiverId: selectedUser.userId,
-        chatId: chat,
-        text: messageText,
-      };
-
-      socket.emit("sendMessage", message);
-
-      setConversations((prev) => [
-        ...prev,
-        {
-          text: messageText,
-          chatId: chat!,
-          createdAt: new Date().toISOString(),
-          isRead: false,
-          messageId: 0,
-          receiverId: selectedUser.userId,
-          senderId: Number(token),
-        },
-      ]);
-
-      setMessageText("");
-      stopTyping();
-    }
-  };
-
-  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessageText(e.target.value);
-
-    if (e.target.value) {
-      sendTyping();
-    } else {
-      stopTyping();
     }
   };
 
@@ -275,39 +239,43 @@ function Messages() {
             </div>
 
             <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
-              {conversations.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`flex ${
-                    msg.senderId == Number(token)
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
-                >
-                  {msg.senderId == Number(token) && (
-                    <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
-                      {msg.text}
-                    </div>
-                  )}
-
-                  {msg.senderId != Number(token) && (
-                    <div className="flex gap-2">
-                      <div className="w-[40px] h-[40px] ml-3">
-                        <img
-                          src={
-                            selectedUser.profilePicture || "/default-avatar.png"
-                          }
-                          alt={`${selectedUser.name}'s avatar`}
-                          className="rounded-full w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
+              {Array.isArray(conversations) && conversations.length > 0 ? (
+                conversations.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`flex ${
+                      msg.receiverId == Number(token)
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
+                    {msg.senderId == Number(token) && (
+                      <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                         {msg.text}
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                    {msg.senderId != Number(token) && (
+                      <div className="flex gap-2">
+                        <div className="w-[40px] h-[40px] ml-3">
+                          <img
+                            src={
+                              selectedUser?.profilePicture ||
+                              "/default-avatar.png"
+                            }
+                            alt={`${selectedUser?.name}'s avatar`}
+                            className="rounded-full w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
+                          {msg.text}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-gray-500">No messages yet.</div>
+              )}
               <div ref={messagesEndRef} />
 
               {isTyping && (
