@@ -16,6 +16,39 @@ export const getPosts = async () => {
   return response.json();
 };
 
+export const createStory = async (media: File[]) => {
+  const formData = new FormData();
+
+  media.forEach((file, index) => {
+    if (file.type.startsWith("image/")) {
+      formData.append(
+        "images",
+        file,
+        `image_${index}.${file.name.split(".").pop()}`
+      );
+    } else if (file.type.startsWith("video/")) {
+      formData.append(
+        "videos",
+        file,
+        `video_${index}.${file.name.split(".").pop()}`
+      );
+    }
+  });
+  const response = await fetch("http://localhost:3001/story", {
+    method: "POST",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
 export const createPost = async (
   description: string,
   createdAt: string,

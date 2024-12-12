@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, Image, Video, X } from "lucide-react";
 import imageCompression from "browser-image-compression";
-import { createPost } from "@/services/posts";
+import { createPost, createStory } from "@/services/posts";
 import withAuth from "@/utils/withAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tab";
@@ -50,6 +50,7 @@ function CreatePostPage() {
       }
 
       if (activeTab === "story") {
+        console.log("Setting media and previews for story");
         setMedia([processedFile]);
         setPreviews([URL.createObjectURL(processedFile)]);
       } else {
@@ -141,11 +142,11 @@ function CreatePostPage() {
         setSuccess("Post created successfully");
       } else {
         // Implement createStory function in your services
-        // await createStory(localTimeString, localTimeString, media);
+        await createStory(media);
         setSuccess("Story created successfully");
       }
 
-      router.push("/");
+      // router.push("/");
     } catch (err) {
       console.error(err);
       setError(`Failed to create ${activeTab}. Please try again.`);
@@ -161,8 +162,16 @@ function CreatePostPage() {
   };
 
   const handleDeleteMedia = (index: number) => {
-    setMedia((prevFiles) => prevFiles.filter((_, i) => i !== index));
-    setPreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
+    if (activeTab === "story") {
+      console.log("Clearing media and previews for story");
+      // Clear both media and previews when on the "story" tab
+      setMedia([]);
+      setPreviews([]);
+    } else {
+      // Remove specific index when on the "post" tab
+      setMedia((prevFiles) => prevFiles.filter((_, i) => i !== index));
+      setPreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
+    }
   };
 
   return (
