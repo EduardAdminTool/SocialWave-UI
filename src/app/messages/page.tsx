@@ -140,15 +140,17 @@ function Messages() {
         isRead: false,
       };
 
+      // Send the message to the server
       socket.emit("sendMessage", message);
 
+      // Only add the message to the conversations locally
       setConversations((prevConversations) => {
         const isMessageExist = prevConversations.some(
           (msg) =>
             msg.createdAt === message.createdAt && msg.chatId === message.chatId
         );
         if (!isMessageExist) {
-          return [...prevConversations, message];
+          return [...prevConversations, message]; // Add the message if it doesn't exist already
         }
         return prevConversations;
       });
