@@ -375,7 +375,7 @@ function Messages() {
                               new Date(msg.createdAt).toLocaleString()
                             )}
                           </span>
-                          {msg.isRead && (
+                          {msg.isRead && index == 1 && (
                             <span className="absolute top-full right-0 text-xs text-blue-200">
                               Read
                             </span>
