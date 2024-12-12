@@ -61,21 +61,10 @@ function Messages() {
     });
 
     socketConnection.on("receiveMessage", (message) => {
-      console.log(message);
-      // if (message[0].senderId !== token) {
-      //   setConversations((prev) => [
-      //     ...prev,
-      //     {
-      //       text: message[0].text,
-      //       chatId: message[0].chatId,
-      //       createdAt: message[0].createdAt,
-      //       isRead: false,
-      //       messageId: message[0].messageId,
-      //       receiverId: message[0].receiverId,
-      //       senderId: message[0].senderId,
-      //     },
-      //   ]);
-      // }
+      setConversations((prev) => {
+        const exists = prev.some((msg) => msg.messageId === message.messageId);
+        return exists ? prev : [...prev, message];
+      });
     });
 
     socketConnection.on("disconnect", () => {
@@ -92,14 +81,12 @@ function Messages() {
     if (socket) {
       socket.on("receiveTyping", (data) => {
         if (data.senderId !== token) {
-          console.log(`${data.senderId} is typing...`);
           setIsTyping(true);
         }
       });
 
       socket.on("receiveStopTyping", (data) => {
         if (data.senderId !== token) {
-          console.log(`${data.senderId} stopped typing.`);
           setIsTyping(false);
         }
       });
@@ -144,8 +131,23 @@ function Messages() {
         isRead: false,
       };
 
+      // Emit the message to the server
       socket.emit("sendMessage", message);
+
+      // Add the sent message to the conversation
       setConversations((prevConversations) => [...prevConversations, message]);
+
+      // Simulate receiving the message for the recipient's perspective
+      const receivedMessage = {
+        ...message,
+        senderId: selectedUser.userId,
+        receiverId: Number(token),
+      };
+      setConversations((prevConversations) => [
+        ...prevConversations,
+        receivedMessage,
+      ]);
+
       setMessageText("");
       stopTyping();
       scrollToBottom();
@@ -259,20 +261,29 @@ function Messages() {
 
             <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
               {Array.isArray(conversations) && conversations.length > 0 ? (
-                conversations.map((msg, index) => (
+                [...conversations].reverse().map((msg, index) => (
                   <div
                     key={index}
-                    className={`flex ${
+                    className={`group flex ${
                       msg.senderId == Number(token)
                         ? "justify-end"
                         : "justify-start"
-                    }`}
+                    } relative`}
                   >
+                    {/* Your Message */}
                     {msg.senderId == Number(token) && (
-                      <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
+                      <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                         {msg.text}
+                        {/* Timestamp on the left for your message */}
+                        <span className="absolute mr-4 whitespace-nowrap right-full top-1/2 transform -translate-y-1/2 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {calculateDateDifference(
+                            new Date(msg.createdAt).toLocaleString()
+                          )}
+                        </span>
                       </div>
                     )}
+
+                    {/* Other User's Message */}
                     {msg.senderId != Number(token) && (
                       <div className="flex gap-2">
                         <div className="w-[40px] h-[40px] ml-3">
@@ -285,8 +296,14 @@ function Messages() {
                             className="rounded-full w-full h-full object-cover"
                           />
                         </div>
-                        <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
+                        <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
                           {msg.text}
+                          {/* Timestamp on the right for other user's message */}
+                          <span className="absolute ml-4 whitespace-nowrap left-full top-1/2 transform -translate-y-1/2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {calculateDateDifference(
+                              new Date(msg.createdAt).toLocaleString()
+                            )}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -295,6 +312,7 @@ function Messages() {
               ) : (
                 <div className="text-gray-500">No messages yet.</div>
               )}
+
               <div ref={messagesEndRef} />
 
               {isTyping && (
