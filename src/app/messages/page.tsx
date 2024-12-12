@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 import { Chat } from "@/types/chat/types";
 import { calculateDateDifference } from "@/utils/calculateDate";
 import { MessagesType } from "@/types/chat/types";
+import { getChatPage } from "@/services/chat";
 
 function Messages() {
   const [dm, setDm] = useState<Chat[]>([]);
@@ -26,6 +27,10 @@ function Messages() {
   const [token, setToken] = useState<string | null>(null);
   const [chat, setChat] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesStartRef = useRef<HTMLDivElement | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -68,7 +73,7 @@ function Messages() {
             msg.createdAt === message[0].createdAt
         );
         if (!isMessageExist) {
-          return [...prev, message[0]];
+          return [message[0], ...prev];
         }
         return prev;
       });
@@ -98,15 +103,25 @@ function Messages() {
           setIsTyping(false);
         }
       });
+
+      socket.on("receiveMessages", (response) => {
+        if (Array.isArray(response.messages)) {
+          setConversations(response.messages);
+          setHasMoreMessages(response.hasMore);
+        } else {
+          console.error("Received messages is not an array", response);
+        }
+      });
     }
 
     return () => {
       if (socket) {
         socket.off("receiveTyping");
         socket.off("receiveStopTyping");
+        socket.off("receiveMessages");
       }
     };
-  }, [socket]);
+  }, [socket, token]);
 
   useEffect(() => {
     if (isTyping) {
@@ -126,7 +141,7 @@ function Messages() {
     }
   };
 
-  const joinConversation = (
+  const joinConversation = async (
     user: { profilePicture: string; name: string; userId: number },
     chatId: number
   ) => {
@@ -135,15 +150,17 @@ function Messages() {
     }
     setSelectedUser(user);
     setChat(chatId);
+    setConversations([]);
+    setPage(1);
+    setHasMoreMessages(true);
 
-    socket?.on("receiveMessages", (response) => {
-      if (Array.isArray(response.messages)) {
-        console.log(response.messages);
-        setConversations(response.messages);
-      } else {
-        console.error("Received messages is not an array", response);
-      }
-    });
+    try {
+      const response = await getChatPage(chatId, 1);
+      setConversations(response.messages);
+      setHasMoreMessages(response.hasMore);
+    } catch (error) {
+      console.error("Error fetching initial messages:", error);
+    }
   };
 
   const handleSendMessage = () => {
@@ -160,9 +177,7 @@ function Messages() {
 
       socket.emit("sendMessage", message);
 
-      // Remove the local addition of the message
-      // The message will be added when it's received from the server
-
+      setConversations((prev) => [message, ...prev]);
       setMessageText("");
       stopTyping();
       scrollToBottom();
@@ -186,7 +201,6 @@ function Messages() {
         receiverId: selectedUser.userId,
         chatId: chat,
       });
-      scrollToBottom();
     }
   };
 
@@ -206,9 +220,54 @@ function Messages() {
     }
   };
 
+  const loadMoreMessages = async () => {
+    if (isLoadingMore || !hasMoreMessages || !chat) return;
+
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const response = await getChatPage(chat, nextPage);
+      if (response.messages.length > 0) {
+        setConversations((prevMessages) => [
+          ...prevMessages,
+          ...response.messages,
+        ]);
+        setPage(nextPage);
+      }
+      setHasMoreMessages(response.hasMore);
+    } catch (error) {
+      console.error("Error loading more messages:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
-    scrollToBottom();
-  }, [conversations]);
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.1,
+    };
+
+    const handleObserver = (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+      if (target.isIntersecting && hasMoreMessages && !isLoadingMore) {
+        loadMoreMessages();
+      }
+    };
+
+    const observer = new IntersectionObserver(handleObserver, options);
+
+    if (observer && messagesStartRef.current) {
+      observer.observe(messagesStartRef.current);
+    }
+
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [hasMoreMessages, isLoadingMore, loadMoreMessages]);
 
   return (
     <div className="grid grid-cols-2 px-8 py-12 bg-blue-50 h-screen gap-8">
@@ -274,7 +333,8 @@ function Messages() {
               <FaExclamationCircle size={36} className="cursor-pointer" />
             </div>
 
-            <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
+            <div className="flex-1 flex flex-col-reverse p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
+              <div ref={messagesEndRef} />
               {Array.isArray(conversations) && conversations.length > 0 ? (
                 conversations.map((msg, index) => (
                   <div
@@ -323,8 +383,12 @@ function Messages() {
               ) : (
                 <div className="text-gray-500">No messages yet.</div>
               )}
-
-              <div ref={messagesEndRef} />
+              {isLoadingMore && (
+                <div className="text-center text-gray-500">
+                  Loading more messages...
+                </div>
+              )}
+              <div ref={messagesStartRef} />
             </div>
             {isTyping && (
               <div className="p-2 bg-gray-100 text-gray-500 text-sm italic">
