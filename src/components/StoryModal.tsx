@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Story } from "@/types/story/types";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface StoryModalProps {
   stories: Story[];
@@ -73,13 +74,18 @@ export function StoryModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogTitle></DialogTitle>
       <DialogContent className="max-w-screen-md h-[80vh] p-0 overflow-hidden">
         <div className="relative w-full h-full">
+          {/* Progress Bars */}
           <div className="absolute top-0 left-0 right-0 z-10 flex">
             {stories.map((_, index) => (
-              <div key={index} className="flex-1 h-1 bg-gray-200 mr-1">
+              <div
+                key={index}
+                className="flex-1 h-1 bg-blue-200 mr-1 rounded-sm"
+              >
                 <div
-                  className="h-full bg-white"
+                  className="h-full bg-blue-500 rounded-sm"
                   style={{
                     width: `${
                       index < currentStoryIndex
@@ -94,6 +100,7 @@ export function StoryModal({
               </div>
             ))}
           </div>
+
           {currentStory?.videoUrl ? (
             <video
               ref={videoRef}
@@ -110,6 +117,7 @@ export function StoryModal({
               className="w-full h-full object-cover"
             />
           )}
+
           <div className="absolute top-4 left-4 flex items-center bg-black bg-opacity-50 rounded-full p-2">
             <img
               src={currentStory?.profilePicture}
@@ -120,18 +128,12 @@ export function StoryModal({
               {currentStory?.name}
             </span>
           </div>
+
+          {/* Arrow Buttons */}
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-4 right-4 text-white"
-            onClick={onClose}
-          >
-            <X className="h-6 w-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-blue-500 focus:bg-blue-500"
             onClick={handlePrevStory}
             disabled={currentStoryIndex === 0}
           >
@@ -140,7 +142,7 @@ export function StoryModal({
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-blue-500 focus:bg-blue-500"
             onClick={handleNextStory}
           >
             <ChevronRight className="h-8 w-8" />

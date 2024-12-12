@@ -23,7 +23,7 @@ export function StoryCarousel({ stories }: StoryCarouselProps) {
       {stories.map((story, index) => (
         <button
           key={story.storyId}
-          className="flex flex-col items-center space-y-1"
+          className="flex flex-col items-center space-y-1 transform origin-center transition-transform duration-200 hover:scale-110"
           onClick={() => openStoryModal(index)}
         >
           <Avatar className="w-16 h-16 ring-2 ring-blue-500 ring-offset-2">
