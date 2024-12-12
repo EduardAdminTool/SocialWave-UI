@@ -41,7 +41,6 @@ function Messages() {
       try {
         const response = await getChat();
         setDm(response);
-        
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
@@ -65,15 +64,15 @@ function Messages() {
   useEffect(() => {
     const socketConnection = io("ws://localhost:3001/chat");
     setSocket(socketConnection);
-  
+
     socketConnection.on("connect", () => {
       setIsConnected(true);
     });
-  
+
     socketConnection.on("receiveMessages", (messages) => {
       setConversations(messages);
     });
-  
+
     socketConnection.on("receiveMessage", (message) => {
       if (message[0].senderId !== token) {
         setConversations((prev) => [
@@ -91,12 +90,12 @@ function Messages() {
       }
       console.log(message);
     });
-  
+
     socketConnection.on("disconnect", () => {
       console.log("Disconnected from server");
       setIsConnected(false);
     });
-  
+
     return () => {
       socketConnection.disconnect();
     };
@@ -183,7 +182,7 @@ function Messages() {
           chatId: chat!,
           createdAt: new Date().toISOString(),
           isRead: false,
-          messageId: 0,
+          messageId: prev.length > 0 ? prev[prev.length - 1].messageId + 1 : 1,
           receiverId: selectedUser.userId,
           senderId: Number(token),
         },
@@ -276,7 +275,7 @@ function Messages() {
             </div>
 
             <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
-            {[...conversations].reverse().map((msg, index) => (
+              {conversations.map((msg, index) => (
                 <div
                   key={index}
                   className={`flex ${

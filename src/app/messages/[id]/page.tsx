@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, MutableRefObject } from "react";
 import { BiMessageRoundedAdd } from "react-icons/bi";
 import { FaExclamationCircle } from "react-icons/fa";
 import withAuth from "@/utils/withAuth";
@@ -9,7 +9,7 @@ import { getChat } from "@/services/chat";
 import jwt from "jsonwebtoken";
 import { Chat } from "@/types/chat/types";
 import { calculateDateDifference } from "@/utils/calculateDate";
-import { useParams } from "next/navigation";
+
 function Messages() {
   const [dm, setDm] = useState<Chat[]>([]);
   const [selectedUser, setSelectedUser] = useState<{
@@ -19,34 +19,31 @@ function Messages() {
   } | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [conversations, setConversations] = useState<
-    { sender: string; text: string; senderVerify: string }[]
+    {
+      text: string;
+      chatId: number;
+      createdAt: string;
+      isRead: boolean;
+      messageId: number;
+      receiverId: number;
+      senderId: number;
+    }[]
   >([]);
   const [isTyping, setIsTyping] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [chat, setChat] = useState<number | null>(null);
-  const { id } = useParams(); // Access the dynamic `id` from the URL
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchChats = async () => {
       try {
         const response = await getChat();
         setDm(response);
-
-        // Preselect chat if `id` exists
-        if (id) {
-          const chatToSelect = response.find(
-            (chat) => chat.chatId === parseInt(id as string, 10)
-          );
-          if (chatToSelect) {
-            joinConversation(chatToSelect.otherUser, chatToSelect.chatId);
-          }
-        }
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
-
       const token = localStorage.getItem("authToken");
       if (token) {
         try {
@@ -62,7 +59,7 @@ function Messages() {
     };
 
     fetchChats();
-  }, [id]); // Include `id` in the dependency array to trigger when it changes
+  }, []);
 
   useEffect(() => {
     const socketConnection = io("ws://localhost:3001/chat");
@@ -71,16 +68,27 @@ function Messages() {
     socketConnection.on("connect", () => {
       setIsConnected(true);
     });
+
     socketConnection.on("receiveMessages", (messages) => {
       setConversations(messages);
     });
+
     socketConnection.on("receiveMessage", (message) => {
       if (message[0].senderId !== token) {
         setConversations((prev) => [
           ...prev,
-          { sender: "other", text: message[0].text, senderVerify: "other" },
+          {
+            text: message[0].text,
+            chatId: message[0].chatId,
+            createdAt: message[0].createdAt,
+            isRead: false,
+            messageId: message[0].messageId,
+            receiverId: message[0].receiverId,
+            senderId: message[0].senderId,
+          },
         ]);
       }
+      console.log(message);
     });
 
     socketConnection.on("disconnect", () => {
@@ -92,10 +100,10 @@ function Messages() {
       socketConnection.disconnect();
     };
   }, [token]);
+
   useEffect(() => {
     if (socket) {
       socket.on("receiveTyping", (data) => {
-        // Only show "is typing" if the sender is not the current user
         if (data.senderId !== token) {
           console.log(`${data.senderId} is typing...`);
           setIsTyping(true);
@@ -103,7 +111,6 @@ function Messages() {
       });
 
       socket.on("receiveStopTyping", (data) => {
-        // Stop showing "is typing" only if the sender is not the current user
         if (data.senderId !== token) {
           console.log(`${data.senderId} stopped typing.`);
           setIsTyping(false);
@@ -118,6 +125,13 @@ function Messages() {
       }
     };
   }, [socket, token]);
+
+  useEffect(() => {
+    if (conversations.length > 0) {
+      scrollToBottom();
+    }
+    console.log(conversations);
+  }, [conversations]);
 
   const sendTyping = () => {
     if (socket && selectedUser) {
@@ -139,22 +153,6 @@ function Messages() {
     }
   };
 
-  const receiveTyping = () => {
-    if (socket) {
-      socket.on("receiveTyping", (data) => {
-        console.log(data);
-      });
-    }
-  };
-
-  const receiveStopTyping = () => {
-    if (socket) {
-      socket.on("receiveStopTyping", (data) => {
-        console.log(data);
-      });
-    }
-  };
-
   const joinConversation = (
     user: { profilePicture: string; name: string; userId: number },
     chatId: number
@@ -165,14 +163,7 @@ function Messages() {
     setSelectedUser(user);
     setChat(chatId);
   };
-  const handleMessageTextChange = (e) => {
-    setMessageText(e.target.value);
-    if (e.target.value) {
-      sendTyping();
-    } else {
-      stopTyping();
-    }
-  };
+
   const handleSendMessage = () => {
     if (socket && messageText.trim() && selectedUser) {
       const message = {
@@ -186,7 +177,15 @@ function Messages() {
 
       setConversations((prev) => [
         ...prev,
-        { sender: "me", text: messageText, senderVerify: "sendByMe" },
+        {
+          text: messageText,
+          chatId: chat!,
+          createdAt: new Date().toISOString(),
+          isRead: false,
+          messageId: prev.length > 0 ? prev[prev.length - 1].messageId + 1 : 1,
+          receiverId: selectedUser.userId,
+          senderId: Number(token),
+        },
       ]);
 
       setMessageText("");
@@ -194,7 +193,7 @@ function Messages() {
     }
   };
 
-  const handleTyping = (e) => {
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageText(e.target.value);
 
     if (e.target.value) {
@@ -204,53 +203,68 @@ function Messages() {
     }
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  };
+
   return (
     <div className="grid grid-cols-2 px-8 py-12 bg-blue-50 h-screen gap-8">
-      <div className="flex flex-col bg-white rounded-lg shadow-lg h-full">
+      <div className="flex flex-col bg-white rounded-lg shadow-lg h-[90vh]">
         <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
           <span className="text-2xl font-semibold">Direct</span>
           <BiMessageRoundedAdd size={36} className="cursor-pointer" />
         </div>
 
-        <div className="flex flex-col py-4 gap-4 text-lg overflow-y-auto px-4">
+        <div className="flex-1 flex flex-col py-4 gap-4 text-lg overflow-y-auto px-4">
           {dm.map((item, index) => (
             <div
               key={index}
-              className={`flex items-center gap-4 p-4 rounded-lg transition-transform transform hover:scale-95 cursor-pointer ${
+              className={`flex items-center gap-4 p-4 rounded-lg transition-all cursor-pointer ${
                 selectedUser?.userId === item.otherUser.userId
-                  ? "bg-blue-100 shadow-inner"
+                  ? "bg-blue-100 shadow-inner border-2 border-blue-500"
                   : "bg-white"
-              }`}
+              } hover:bg-blue-50`}
               onClick={() => joinConversation(item.otherUser, item.chatId)}
             >
-              <div className="w-[60px] h-[60px]">
+              <div className="w-[60px] h-[60px] flex-shrink-0">
                 <img
                   src={item.otherUser.profilePicture || "/default-avatar.png"}
                   alt={`${item.otherUser.name}'s avatar`}
                   className="rounded-full w-full h-full object-cover"
                 />
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-grow">
                 <span className="font-medium">{item.otherUser.name}</span>
-                <span className="text-sm text-gray-500">
-                  {item.lastMessage?.text}
-                  <span className="text-xs text-gray-400">
-                    {" "}
-                    - {calculateDateDifference(item.lastMessage?.createdAt)}
+                {item.lastMessage ? (
+                  <>
+                    <span className="text-sm text-gray-500">
+                      {item.lastMessage.text}
+                      <span className="text-xs text-gray-400">
+                        {" "}
+                        - {calculateDateDifference(item.lastMessage.createdAt)}
+                      </span>
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {item.lastMessage.senderId === item.otherUser.userId
+                        ? "Received"
+                        : "Sent"}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-gray-500 italic">
+                    No messages yet
                   </span>
-                </span>
-                <span className="text-xs text-gray-400">
-                  {item.lastMessage?.senderId === item.otherUser.userId
-                    ? "Received"
-                    : "Sent"}
-                </span>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex flex-col bg-white rounded-lg shadow-lg h-full">
+      <div className="flex flex-col bg-white rounded-lg shadow-lg h-[90vh]">
         {selectedUser ? (
           <>
             <div className="flex items-center justify-between p-6 bg-blue-500 text-white rounded-t-lg">
@@ -260,23 +274,23 @@ function Messages() {
               <FaExclamationCircle size={36} className="cursor-pointer" />
             </div>
 
-            <div className="flex flex-col flex-1 p-6 gap-4 overflow-y-auto bg-gray-50">
+            <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
               {conversations.map((msg, index) => (
                 <div
                   key={index}
                   className={`flex ${
-                    msg.sender === "me" ? "justify-end" : "justify-start"
+                    msg.senderId == Number(token)
+                      ? "justify-end"
+                      : "justify-start"
                   }`}
                 >
-                  {msg.sender === "me" && (
-                    <div
-                      className={`px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white`}
-                    >
+                  {msg.senderId == Number(token) && (
+                    <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                       {msg.text}
                     </div>
                   )}
 
-                  {msg.sender === "other" && (
+                  {msg.senderId != Number(token) && (
                     <div className="flex gap-2">
                       <div className="w-[40px] h-[40px] ml-3">
                         <img
@@ -287,15 +301,14 @@ function Messages() {
                           className="rounded-full w-full h-full object-cover"
                         />
                       </div>
-                      <div
-                        className={`px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black"`}
-                      >
+                      <div className="px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
                         {msg.text}
                       </div>
                     </div>
                   )}
                 </div>
               ))}
+              <div ref={messagesEndRef} />
 
               {isTyping && (
                 <div className="text-gray-500 text-sm italic">
