@@ -140,17 +140,14 @@ function Messages() {
         isRead: false,
       };
 
-      // Send the message to the server
       socket.emit("sendMessage", message);
 
-      // Only add the message to the conversations locally
       setConversations((prevConversations) => {
         const isMessageExist = prevConversations.some(
-          (msg) =>
-            msg.createdAt === message.createdAt && msg.chatId === message.chatId
+          (msg) => msg.text === message.text && msg.chatId === message.chatId
         );
         if (!isMessageExist) {
-          return [...prevConversations, message]; // Add the message if it doesn't exist already
+          return [...prevConversations, message];
         }
         return prevConversations;
       });
@@ -197,6 +194,12 @@ function Messages() {
       behavior: "smooth",
       block: "end",
     });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
   };
 
   useEffect(() => {
@@ -332,6 +335,7 @@ function Messages() {
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-blue-300"
                 value={messageText}
                 onChange={handleTyping}
+                onKeyDown={handleKeyDown}
               />
               <button
                 className="ml-4 bg-blue-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:bg-blue-600 transition"

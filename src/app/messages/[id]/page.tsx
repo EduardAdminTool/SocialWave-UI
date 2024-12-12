@@ -62,8 +62,15 @@ function Messages() {
 
     socketConnection.on("receiveMessage", (message) => {
       setConversations((prev) => {
-        const exists = prev.some((msg) => msg.messageId === message.messageId);
-        return exists ? prev : [...prev, message];
+        const isMessageExist = prev.some(
+          (msg) =>
+            msg.chatId === message[0].chatId &&
+            msg.createdAt === message[0].createdAt
+        );
+        if (!isMessageExist) {
+          return [...prev, message[0]];
+        }
+        return prev;
       });
       scrollToBottom();
     });
@@ -99,7 +106,7 @@ function Messages() {
         socket.off("receiveStopTyping");
       }
     };
-  }, [socket, token]);
+  }, [socket]);
 
   const joinConversation = (
     user: { profilePicture: string; name: string; userId: number },
@@ -113,6 +120,7 @@ function Messages() {
 
     socket?.on("receiveMessages", (response) => {
       if (Array.isArray(response.messages)) {
+        console.log(response.messages);
         setConversations(response.messages);
       } else {
         console.error("Received messages is not an array", response);
@@ -132,11 +140,17 @@ function Messages() {
         isRead: false,
       };
 
-      // Emit the message to the server
       socket.emit("sendMessage", message);
 
-      // Add the sent message to the conversation
-      setConversations((prevConversations) => [...prevConversations, message]);
+      setConversations((prevConversations) => {
+        const isMessageExist = prevConversations.some(
+          (msg) => msg.text === message.text && msg.chatId === message.chatId
+        );
+        if (!isMessageExist) {
+          return [...prevConversations, message];
+        }
+        return prevConversations;
+      });
 
       setMessageText("");
       stopTyping();
@@ -161,6 +175,7 @@ function Messages() {
         receiverId: selectedUser.userId,
         chatId: chat,
       });
+      scrollToBottom();
     }
   };
 
@@ -179,6 +194,12 @@ function Messages() {
       behavior: "smooth",
       block: "end",
     });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
   };
 
   useEffect(() => {
@@ -260,7 +281,7 @@ function Messages() {
                         : "justify-start"
                     } relative`}
                   >
-                    {msg.senderId == Number(token) && (
+                    {msg.senderId === Number(token) && (
                       <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                         {msg.text}
                         <span className="absolute mr-4 whitespace-nowrap right-full top-1/2 transform -translate-y-1/2 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -271,7 +292,7 @@ function Messages() {
                       </div>
                     )}
 
-                    {msg.senderId != Number(token) && (
+                    {msg.receiverId === Number(token) && (
                       <div className="flex gap-2">
                         <div className="w-[40px] h-[40px] ml-3">
                           <img
@@ -314,6 +335,7 @@ function Messages() {
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-blue-300"
                 value={messageText}
                 onChange={handleTyping}
+                onKeyDown={handleKeyDown}
               />
               <button
                 className="ml-4 bg-blue-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:bg-blue-600 transition"
