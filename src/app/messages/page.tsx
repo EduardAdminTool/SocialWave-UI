@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, MutableRefObject } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BiMessageRoundedAdd } from "react-icons/bi";
 import { FaExclamationCircle } from "react-icons/fa";
 import withAuth from "@/utils/withAuth";
@@ -9,7 +9,6 @@ import { getChat } from "@/services/chat";
 import jwt from "jsonwebtoken";
 import { Chat } from "@/types/chat/types";
 import { calculateDateDifference } from "@/utils/calculateDate";
-import { MessagesProps } from "@/types/chat/types";
 import { MessagesType } from "@/types/chat/types";
 
 function Messages() {
@@ -63,9 +62,20 @@ function Messages() {
 
     socketConnection.on("receiveMessage", (message) => {
       console.log(message);
-      if (message[0].senderId !== token) {
-        // Handle receiving new message logic if needed
-      }
+      // if (message[0].senderId !== token) {
+      //   setConversations((prev) => [
+      //     ...prev,
+      //     {
+      //       text: message[0].text,
+      //       chatId: message[0].chatId,
+      //       createdAt: message[0].createdAt,
+      //       isRead: false,
+      //       messageId: message[0].messageId,
+      //       receiverId: message[0].receiverId,
+      //       senderId: message[0].senderId,
+      //     },
+      //   ]);
+      // }
     });
 
     socketConnection.on("disconnect", () => {
@@ -123,17 +133,22 @@ function Messages() {
   };
 
   const handleSendMessage = () => {
-    if (socket && messageText.trim() && selectedUser) {
+    if (socket && messageText.trim() && selectedUser && chat != null) {
       const message = {
-        senderId: token,
+        senderId: Number(token),
         receiverId: selectedUser.userId,
-        chatId: chat,
         text: messageText,
+        chatId: chat,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isRead: false,
       };
 
       socket.emit("sendMessage", message);
+      setConversations((prevConversations) => [...prevConversations, message]);
       setMessageText("");
       stopTyping();
+      scrollToBottom();
     }
   };
 
@@ -173,6 +188,10 @@ function Messages() {
       block: "end",
     });
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversations]);
 
   return (
     <div className="grid grid-cols-2 px-8 py-12 bg-blue-50 h-screen gap-8">
@@ -244,7 +263,7 @@ function Messages() {
                   <div
                     key={index}
                     className={`flex ${
-                      msg.receiverId == Number(token)
+                      msg.senderId == Number(token)
                         ? "justify-end"
                         : "justify-start"
                     }`}

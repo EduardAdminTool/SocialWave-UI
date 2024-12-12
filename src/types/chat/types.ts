@@ -27,7 +27,7 @@ export interface MessagesType {
   chatId: number;
   createdAt: string;
   isRead: boolean;
-  messageId: number;
+  messageId?: number;
   receiverId: number;
   senderId: number;
   text: string;
