@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryCarousel } from "@/components/StoryCarousel";
@@ -6,6 +7,8 @@ import { getFeed } from "@/services/feed";
 import { FeedProps } from "@/types/types";
 import { PostCard } from "@/components/PostCard";
 import withAuth from "@/utils/withAuth";
+import { Story } from "@/types/story/types";
+import { getStories } from "@/services/story";
 
 function Home() {
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +19,7 @@ function Home() {
   const observer = useRef<IntersectionObserver | null>(null);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
   const firstLoadRef = useRef(true);
+  const [stories, setStories] = useState<Story[]>([]);
 
   const fetchPosts = useCallback(
     async (page: number) => {
@@ -40,6 +44,19 @@ function Home() {
     },
     [isLoading, hasMore]
   );
+
+  const fetchStories = useCallback(async () => {
+    try {
+      const response = await getStories();
+      console.log("Stories fetched:", response);
+
+      setStories(response);
+      console.log("Stories set:", stories);
+    } catch (error) {
+      console.error("Failed to fetch stories:", error);
+      return [];
+    }
+  }, []);
 
   const lastPostRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -67,6 +84,10 @@ function Home() {
   );
 
   useEffect(() => {
+    fetchStories();
+  }, [fetchStories]);
+
+  useEffect(() => {
     if (firstLoadRef.current) {
       firstLoadRef.current = false;
       fetchPosts(1);
@@ -79,17 +100,12 @@ function Home() {
     }
   }, [currentPage, fetchPosts]);
 
-  const story = [
-    { image: "poza", name: "Andrei" },
-    { image: "poza1", name: "Matei1" },
-  ];
-
   return (
     <div className="text-blue-500 min-h-screen">
       <div className="h-[120px] flex items-center bg-gradient-to-b from-blue-100 to-white border rounded-md">
-        <ScrollArea className="w-128 whitespace-nowrap">
+        <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex w-max space-x-4 p-4">
-            <StoryCarousel stories={story} />
+            <StoryCarousel stories={stories} />
           </div>
           <ScrollBar orientation="horizontal" className="opacity-0" />
         </ScrollArea>
