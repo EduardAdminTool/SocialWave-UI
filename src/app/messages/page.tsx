@@ -161,6 +161,7 @@ function Messages() {
     setSelectedUser(user);
     setChat(chatId);
     setConversations([]);
+    setPage(0);
     setHasMoreMessages(true);
   };
 
