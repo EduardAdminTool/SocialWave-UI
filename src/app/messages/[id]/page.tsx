@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 import { Chat } from "@/types/chat/types";
 import { calculateDateDifference } from "@/utils/calculateDate";
 import { MessagesType } from "@/types/chat/types";
+import { getChatPage } from "@/services/chat";
 
 function Messages() {
   const [dm, setDm] = useState<Chat[]>([]);
@@ -26,6 +27,10 @@ function Messages() {
   const [token, setToken] = useState<string | null>(null);
   const [chat, setChat] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesStartRef = useRef<HTMLDivElement | null>(null);
+  const [page, setPage] = useState<number>(0);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -61,18 +66,17 @@ function Messages() {
     });
 
     socketConnection.on("receiveMessage", (message) => {
+      console.log(message);
       setConversations((prev) => {
         const isMessageExist = prev.some(
           (msg) =>
-            msg.chatId === message[0].chatId &&
-            msg.createdAt === message[0].createdAt
+            msg.chatId === message[0].chatId && msg.text === message[0].text
         );
         if (!isMessageExist) {
-          return [...prev, message[0]];
+          return [message[0], ...prev];
         }
         return prev;
       });
-      scrollToBottom();
     });
 
     socketConnection.on("disconnect", () => {
@@ -98,17 +102,61 @@ function Messages() {
           setIsTyping(false);
         }
       });
+
+      socket.on("receiveMessages", (response) => {
+        console.log(response);
+        if (Array.isArray(response.messages)) {
+          setConversations((prevConversations) => {
+            const reversedMessages = [...response.messages].reverse();
+
+            const newConversations = reversedMessages.filter(
+              (newMsg) =>
+                !prevConversations.some(
+                  (prevMsg) =>
+                    prevMsg.chatId === newMsg.chatId &&
+                    prevMsg.text === newMsg.text
+                )
+            );
+
+            return [...newConversations, ...prevConversations];
+          });
+
+          setHasMoreMessages(response.hasMore);
+          setPage(0);
+        } else {
+          console.error("Received messages is not an array", response);
+        }
+      });
     }
 
     return () => {
       if (socket) {
         socket.off("receiveTyping");
         socket.off("receiveStopTyping");
+        socket.off("receiveMessages");
       }
     };
-  }, [socket]);
+  }, [socket, token]);
 
-  const joinConversation = (
+  useEffect(() => {
+    if (isTyping) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isTyping]);
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  };
+
+  const joinConversation = async (
     user: { profilePicture: string; name: string; userId: number },
     chatId: number
   ) => {
@@ -117,15 +165,9 @@ function Messages() {
     }
     setSelectedUser(user);
     setChat(chatId);
-
-    socket?.on("receiveMessages", (response) => {
-      if (Array.isArray(response.messages)) {
-        console.log(response.messages);
-        setConversations(response.messages);
-      } else {
-        console.error("Received messages is not an array", response);
-      }
-    });
+    setConversations([]);
+    setPage(0);
+    setHasMoreMessages(true);
   };
 
   const handleSendMessage = () => {
@@ -142,16 +184,7 @@ function Messages() {
 
       socket.emit("sendMessage", message);
 
-      setConversations((prevConversations) => {
-        const isMessageExist = prevConversations.some(
-          (msg) => msg.text === message.text && msg.chatId === message.chatId
-        );
-        if (!isMessageExist) {
-          return [...prevConversations, message];
-        }
-        return prevConversations;
-      });
-
+      setConversations((prev) => [message, ...prev]);
       setMessageText("");
       stopTyping();
       scrollToBottom();
@@ -175,7 +208,6 @@ function Messages() {
         receiverId: selectedUser.userId,
         chatId: chat,
       });
-      scrollToBottom();
     }
   };
 
@@ -189,16 +221,60 @@ function Messages() {
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+
+  const loadMoreMessages = async () => {
+    if (isLoadingMore || !hasMoreMessages || !chat) return;
+
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const response = await getChatPage(chat, nextPage);
+      if (response.messages.length > 0) {
+        setConversations((prevMessages) => [
+          ...prevMessages,
+          ...response.messages,
+        ]);
+        setPage(nextPage);
+      }
+      setHasMoreMessages(response.hasMore);
+    } catch (error) {
+      console.error("Error loading more messages:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [conversations]);
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.1,
+    };
+
+    const handleObserver = (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+      if (target.isIntersecting && hasMoreMessages && !isLoadingMore) {
+        loadMoreMessages();
+      }
+    };
+
+    const observer = new IntersectionObserver(handleObserver, options);
+
+    if (observer && messagesStartRef.current) {
+      observer.observe(messagesStartRef.current);
+    }
+
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [hasMoreMessages, isLoadingMore, loadMoreMessages]);
 
   return (
     <div className="grid grid-cols-2 px-8 py-12 bg-blue-50 h-screen gap-8">
@@ -264,7 +340,8 @@ function Messages() {
               <FaExclamationCircle size={36} className="cursor-pointer" />
             </div>
 
-            <div className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
+            <div className="flex-1 flex flex-col-reverse p-6 gap-4 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
+              <div ref={messagesEndRef} />
               {Array.isArray(conversations) && conversations.length > 0 ? (
                 conversations.map((msg, index) => (
                   <div
@@ -305,6 +382,49 @@ function Messages() {
                               new Date(msg.createdAt).toLocaleString()
                             )}
                           </span>
+                          {msg.isRead && index == 0 && (
+                            <span className="absolute bottom-0 right-0 flex">
+                              {msg.isRead && index === 0 ? (
+                                <>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-5 h-5 text-blue-500"
+                                  >
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                  </svg>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-5 h-5 text-blue-500 -ml-3"
+                                  >
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                  </svg>
+                                </>
+                              ) : (
+                                <>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-5 h-5 text-gray-400"
+                                  >
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                  </svg>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-5 h-5 text-gray-400 -ml-3"
+                                  >
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                  </svg>
+                                </>
+                              )}
+                            </span>
+                          )}
                         </div>
                       </div>
                     )}
@@ -313,22 +433,25 @@ function Messages() {
               ) : (
                 <div className="text-gray-500">No messages yet.</div>
               )}
-
-              <div ref={messagesEndRef} />
-
-              {isTyping && (
-                <div className="text-gray-500 text-sm italic">
-                  {selectedUser?.name} is typing...
+              {isLoadingMore && (
+                <div className="text-center text-gray-500">
+                  Loading more messages...
                 </div>
               )}
+              <div ref={messagesStartRef} />
             </div>
-
+            {isTyping && (
+              <div className="p-2 bg-gray-100 text-gray-500 text-sm italic">
+                {selectedUser?.name} is typing...
+              </div>
+            )}
             <div className="flex items-center p-6 bg-gray-100 rounded-b-lg">
               <input
                 placeholder="Type a message..."
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-blue-300"
                 value={messageText}
                 onChange={handleTyping}
+                onKeyDown={handleKeyDown}
               />
               <button
                 className="ml-4 bg-blue-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:bg-blue-600 transition"

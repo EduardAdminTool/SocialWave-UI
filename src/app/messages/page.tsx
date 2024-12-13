@@ -108,14 +108,19 @@ function Messages() {
         if (Array.isArray(response.messages)) {
           setConversations((prevConversations) => {
             const reversedMessages = [...response.messages].reverse();
-            if (
-              JSON.stringify(prevConversations) !==
-              JSON.stringify(reversedMessages)
-            ) {
-              return reversedMessages;
-            }
-            return prevConversations;
+
+            const newConversations = reversedMessages.filter(
+              (newMsg) =>
+                !prevConversations.some(
+                  (prevMsg) =>
+                    prevMsg.chatId === newMsg.chatId &&
+                    prevMsg.text === newMsg.text
+                )
+            );
+
+            return [...newConversations, ...prevConversations];
           });
+
           setHasMoreMessages(response.hasMore);
           setPage(0);
         } else {
