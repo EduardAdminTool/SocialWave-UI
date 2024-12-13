@@ -196,12 +196,6 @@ function Messages() {
     });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSendMessage();
-    }
-  };
-
   useEffect(() => {
     scrollToBottom();
   }, [conversations]);
@@ -335,7 +329,6 @@ function Messages() {
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring focus:ring-blue-300"
                 value={messageText}
                 onChange={handleTyping}
-                onKeyDown={handleKeyDown}
               />
               <button
                 className="ml-4 bg-blue-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:bg-blue-600 transition"

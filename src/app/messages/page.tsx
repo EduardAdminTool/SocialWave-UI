@@ -69,15 +69,13 @@ function Messages() {
       setConversations((prev) => {
         const isMessageExist = prev.some(
           (msg) =>
-            msg.chatId === message[0].chatId &&
-            msg.createdAt === message[0].createdAt
+            msg.chatId === message[0].chatId && msg.text === message[0].text
         );
         if (!isMessageExist) {
-          return [message[0], ...prev];
+          return [...prev, message[0]];
         }
         return prev;
       });
-      scrollToBottom();
     });
 
     socketConnection.on("disconnect", () => {
@@ -106,7 +104,16 @@ function Messages() {
 
       socket.on("receiveMessages", (response) => {
         if (Array.isArray(response.messages)) {
-          setConversations(response.messages);
+          setConversations((prevConversations) => {
+            const reversedMessages = [...response.messages].reverse();
+            if (
+              JSON.stringify(prevConversations) !==
+              JSON.stringify(reversedMessages)
+            ) {
+              return reversedMessages;
+            }
+            return prevConversations;
+          });
           setHasMoreMessages(response.hasMore);
         } else {
           console.error("Received messages is not an array", response);
@@ -151,16 +158,8 @@ function Messages() {
     setSelectedUser(user);
     setChat(chatId);
     setConversations([]);
-    setPage(1);
+    setPage(0);
     setHasMoreMessages(true);
-
-    try {
-      const response = await getChatPage(chatId, 1);
-      setConversations(response.messages);
-      setHasMoreMessages(response.hasMore);
-    } catch (error) {
-      console.error("Error fetching initial messages:", error);
-    }
   };
 
   const handleSendMessage = () => {
@@ -379,24 +378,44 @@ function Messages() {
                             <span className="absolute bottom-0 right-0 flex">
                               {msg.isRead && index === 0 ? (
                                 <>
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-blue-500">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-5 h-5 text-blue-500"
+                                  >
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                                   </svg>
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-blue-500 -ml-3">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-5 h-5 text-blue-500 -ml-3"
+                                  >
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                                   </svg>
                                 </>
                               ) : (
                                 <>
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-gray-400">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-5 h-5 text-gray-400"
+                                  >
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                                   </svg>
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-gray-400 -ml-3">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-5 h-5 text-gray-400 -ml-3"
+                                  >
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                                   </svg>
                                 </>
                               )}
-                          </span>
+                            </span>
                           )}
                         </div>
                       </div>
