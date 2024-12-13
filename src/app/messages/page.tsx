@@ -28,7 +28,7 @@ function Messages() {
   const [chat, setChat] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesStartRef = useRef<HTMLDivElement | null>(null);
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(0);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [hasMoreMessages, setHasMoreMessages] = useState<boolean>(true);
 
@@ -66,13 +66,14 @@ function Messages() {
     });
 
     socketConnection.on("receiveMessage", (message) => {
+      console.log(message);
       setConversations((prev) => {
         const isMessageExist = prev.some(
           (msg) =>
             msg.chatId === message[0].chatId && msg.text === message[0].text
         );
         if (!isMessageExist) {
-          return [...prev, message[0]];
+          return [message[0], ...prev];
         }
         return prev;
       });
@@ -103,6 +104,7 @@ function Messages() {
       });
 
       socket.on("receiveMessages", (response) => {
+        console.log(response);
         if (Array.isArray(response.messages)) {
           setConversations((prevConversations) => {
             const reversedMessages = [...response.messages].reverse();
@@ -115,6 +117,7 @@ function Messages() {
             return prevConversations;
           });
           setHasMoreMessages(response.hasMore);
+          setPage(0);
         } else {
           console.error("Received messages is not an array", response);
         }
@@ -158,7 +161,6 @@ function Messages() {
     setSelectedUser(user);
     setChat(chatId);
     setConversations([]);
-    setPage(0);
     setHasMoreMessages(true);
   };
 
