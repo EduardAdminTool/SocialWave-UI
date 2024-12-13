@@ -117,6 +117,7 @@ function Messages() {
             return prevConversations;
           });
           setHasMoreMessages(response.hasMore);
+          setPage(0);
         } else {
           console.error("Received messages is not an array", response);
         }
