@@ -188,7 +188,6 @@ function Messages() {
       setMessageText("");
       stopTyping();
     }
-    scrollToBottom();
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -360,6 +359,49 @@ function Messages() {
                             ? calculateDateDifference(msg.createdAt)
                             : "Unknown time"}
                         </span>
+                        {msg.isRead && index == 0 && (
+                          <span className="absolute bottom-0 right-0 flex">
+                            {msg.isRead && index === 0 ? (
+                              <>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="w-5 h-5 text-white"
+                                >
+                                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="w-5 h-5 text-white -ml-3"
+                                >
+                                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                </svg>
+                              </>
+                            ) : (
+                              <>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="w-5 h-5 text-gray-300"
+                                >
+                                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="w-5 h-5 text-gray-300 -ml-3"
+                                >
+                                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                </svg>
+                              </>
+                            )}
+                          </span>
+                        )}
                       </div>
                     )}
 
@@ -382,49 +424,6 @@ function Messages() {
                               ? calculateDateDifference(msg.createdAt)
                               : "Unknown time"}
                           </span>
-                          {msg.isRead && index == 0 && (
-                            <span className="absolute bottom-0 right-0 flex">
-                              {msg.isRead && index === 0 ? (
-                                <>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    className="w-5 h-5 text-blue-500"
-                                  >
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                                  </svg>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    className="w-5 h-5 text-blue-500 -ml-3"
-                                  >
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                                  </svg>
-                                </>
-                              ) : (
-                                <>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    className="w-5 h-5 text-gray-400"
-                                  >
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                                  </svg>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    className="w-5 h-5 text-gray-400 -ml-3"
-                                  >
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                                  </svg>
-                                </>
-                              )}
-                            </span>
-                          )}
                         </div>
                       </div>
                     )}
