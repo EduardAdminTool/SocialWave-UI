@@ -185,11 +185,10 @@ function Messages() {
 
       socket.emit("sendMessage", message);
 
-      setConversations((prev) => [message, ...prev]);
       setMessageText("");
       stopTyping();
-      scrollToBottom();
     }
+    scrollToBottom();
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
