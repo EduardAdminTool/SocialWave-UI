@@ -188,7 +188,6 @@ function Messages() {
       setMessageText("");
       stopTyping();
     }
-    scrollToBottom();
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
