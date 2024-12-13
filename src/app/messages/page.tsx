@@ -114,7 +114,7 @@ function Messages() {
                 !prevConversations.some(
                   (prevMsg) =>
                     prevMsg.chatId === newMsg.chatId &&
-                    prevMsg.text === newMsg.text
+                    prevMsg.createdAt === newMsg.createdAt
                 )
             );
 
@@ -235,6 +235,7 @@ function Messages() {
       const nextPage = page + 1;
       const response = await getChatPage(chat, nextPage);
       if (response.messages.length > 0) {
+        console.log(response);
         setConversations((prevMessages) => [
           ...prevMessages,
           ...response.messages,
