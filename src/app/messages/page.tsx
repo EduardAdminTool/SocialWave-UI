@@ -107,7 +107,7 @@ function Messages() {
         console.log(response);
         if (Array.isArray(response.messages)) {
           setConversations((prevConversations) => {
-            const reversedMessages = [...response.messages].reverse();
+            const reversedMessages = [...response.messages];
 
             const newConversations = reversedMessages.filter(
               (newMsg) =>
@@ -235,7 +235,6 @@ function Messages() {
       const nextPage = page + 1;
       const response = await getChatPage(chat, nextPage);
       if (response.messages.length > 0) {
-        console.log(response);
         setConversations((prevMessages) => [
           ...prevMessages,
           ...response.messages,
