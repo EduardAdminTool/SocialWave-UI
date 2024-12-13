@@ -356,9 +356,9 @@ function Messages() {
                       <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                         {msg.text}
                         <span className="absolute mr-4 whitespace-nowrap right-full top-1/2 transform -translate-y-1/2 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {calculateDateDifference(
-                            new Date(msg.createdAt).toLocaleString()
-                          )}
+                          {msg.createdAt
+                            ? calculateDateDifference(msg.createdAt)
+                            : "Unknown time"}
                         </span>
                       </div>
                     )}
@@ -378,9 +378,9 @@ function Messages() {
                         <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
                           {msg.text}
                           <span className="absolute ml-4 whitespace-nowrap left-full top-1/2 transform -translate-y-1/2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {calculateDateDifference(
-                              new Date(msg.createdAt).toLocaleString()
-                            )}
+                            {msg.createdAt
+                              ? calculateDateDifference(msg.createdAt)
+                              : "Unknown time"}
                           </span>
                           {msg.isRead && index == 0 && (
                             <span className="absolute bottom-0 right-0 flex">
