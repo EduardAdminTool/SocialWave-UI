@@ -49,10 +49,7 @@ function Home() {
   const fetchStories = useCallback(async () => {
     try {
       const response = await getStories();
-      console.log("Stories fetched:", response);
-
       setStories(response);
-      console.log("Stories set:", stories);
     } catch (error) {
       console.error("Failed to fetch stories:", error);
       return [];

@@ -9,10 +9,11 @@ export interface StoryItemProps {
 }
 
 export interface Story {
-  storyId: string;
+  storyId: number;
   imageUrl?: string;
   videoUrl?: string;
   createdAt: string;
+  userId: number;
   name: string;
   profilePicture: string;
 }

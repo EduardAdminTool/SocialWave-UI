@@ -4,18 +4,46 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StoryModal } from "./StoryModal";
 import { Story } from "@/types/story/types";
+import { useEffect } from "react";
 
 interface StoryCarouselProps {
   stories: Story[];
 }
 
-export function StoryCarousel({ stories }: StoryCarouselProps) {
+export function StoryCarousel({ stories: initialStories }: StoryCarouselProps) {
+  const [stories, setStories] = useState<Story[]>(initialStories);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(
+    null
+  );
+
+  useEffect(() => {
+    setStories(initialStories);
+  }, [initialStories]);
 
   const openStoryModal = (index: number) => {
     setSelectedStoryIndex(index);
     setIsModalOpen(true);
+  };
+
+  const closeStoryModal = () => {
+    // Delay state reset slightly to ensure React lifecycle stability
+    setTimeout(() => {
+      setIsModalOpen(false);
+      setSelectedStoryIndex(null);
+    }, 0);
+  };
+
+  const handleDeleteStory = (index: number) => {
+    const updatedStories = stories.filter((_, i) => i !== index);
+    setStories(updatedStories);
+
+    // Adjust selected story index if needed
+    if (updatedStories.length === 0) {
+      closeStoryModal();
+    } else if (index >= updatedStories.length) {
+      setSelectedStoryIndex(updatedStories.length - 1);
+    }
   };
 
   return (
@@ -28,17 +56,20 @@ export function StoryCarousel({ stories }: StoryCarouselProps) {
         >
           <Avatar className="w-16 h-16 ring-2 ring-blue-500 ring-offset-2">
             <AvatarImage src={story.profilePicture} alt={story.name} />
-            <AvatarFallback>{story.name[0]}</AvatarFallback>
+            <AvatarFallback>{story.name}</AvatarFallback>
           </Avatar>
           <span className="text-xs font-medium">{story.name}</span>
         </button>
       ))}
-      <StoryModal
-        stories={stories}
-        initialStoryIndex={selectedStoryIndex}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      {isModalOpen && selectedStoryIndex !== null && (
+        <StoryModal
+          stories={stories}
+          initialStoryIndex={selectedStoryIndex}
+          isOpen={isModalOpen}
+          onClose={closeStoryModal}
+          onDeleteStory={handleDeleteStory}
+        />
+      )}
     </>
   );
 }
