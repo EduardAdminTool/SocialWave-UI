@@ -70,7 +70,8 @@ function Messages() {
       setConversations((prev) => {
         const isMessageExist = prev.some(
           (msg) =>
-            msg.chatId === message[0].chatId && msg.text === message[0].text
+            msg.chatId === message[0].chatId &&
+            msg.createdAt === message[0].createdAt
         );
         if (!isMessageExist) {
           return [message[0], ...prev];
@@ -107,14 +108,14 @@ function Messages() {
         console.log(response);
         if (Array.isArray(response.messages)) {
           setConversations((prevConversations) => {
-            const reversedMessages = [...response.messages].reverse();
+            const reversedMessages = [...response.messages];
 
             const newConversations = reversedMessages.filter(
               (newMsg) =>
                 !prevConversations.some(
                   (prevMsg) =>
                     prevMsg.chatId === newMsg.chatId &&
-                    prevMsg.text === newMsg.text
+                    prevMsg.createdAt === newMsg.createdAt
                 )
             );
 
@@ -356,9 +357,9 @@ function Messages() {
                       <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-blue-500 text-white">
                         {msg.text}
                         <span className="absolute mr-4 whitespace-nowrap right-full top-1/2 transform -translate-y-1/2 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {calculateDateDifference(
-                            new Date(msg.createdAt).toLocaleString()
-                          )}
+                          {msg.createdAt
+                            ? calculateDateDifference(msg.createdAt)
+                            : "Unknown time"}
                         </span>
                       </div>
                     )}
@@ -378,9 +379,9 @@ function Messages() {
                         <div className="relative px-4 py-3 rounded-lg shadow-sm max-w-[75%] bg-gray-200 text-black">
                           {msg.text}
                           <span className="absolute ml-4 whitespace-nowrap left-full top-1/2 transform -translate-y-1/2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {calculateDateDifference(
-                              new Date(msg.createdAt).toLocaleString()
-                            )}
+                            {msg.createdAt
+                              ? calculateDateDifference(msg.createdAt)
+                              : "Unknown time"}
                           </span>
                           {msg.isRead && index == 0 && (
                             <span className="absolute bottom-0 right-0 flex">

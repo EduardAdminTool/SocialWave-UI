@@ -70,7 +70,8 @@ function Messages() {
       setConversations((prev) => {
         const isMessageExist = prev.some(
           (msg) =>
-            msg.chatId === message[0].chatId && msg.text === message[0].text
+            msg.chatId === message[0].chatId &&
+            msg.createdAt === message[0].createdAt
         );
         if (!isMessageExist) {
           return [message[0], ...prev];
