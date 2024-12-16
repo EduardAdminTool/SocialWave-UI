@@ -4,26 +4,13 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StoryModal } from "./StoryModal";
 import { Story } from "@/types/story/types";
-import { useEffect } from "react";
+import { StoryCarouselProps } from "@/types/story/types";
 
-interface StoryCarouselProps {
-  stories: Story[];
-  type?: string;
-}
-
-export function StoryCarousel({
-  stories: initialStories,
-  type,
-}: StoryCarouselProps) {
-  const [stories, setStories] = useState<Story[]>(initialStories);
+export function StoryCarousel({ stories, type }: StoryCarouselProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(
     null
   );
-
-  useEffect(() => {
-    setStories(initialStories);
-  }, [initialStories]);
 
   const openStoryModal = (index: number) => {
     setSelectedStoryIndex(index);
@@ -39,7 +26,7 @@ export function StoryCarousel({
 
   const handleDeleteStory = (index: number) => {
     const updatedStories = stories.filter((_, i) => i !== index);
-    setStories(updatedStories);
+    // setStories(updatedStories); // If you're using state for stories, update here.
 
     if (updatedStories.length === 0) {
       closeStoryModal();
@@ -65,6 +52,7 @@ export function StoryCarousel({
           </span>
         </button>
       ))}
+
       {isModalOpen && selectedStoryIndex !== null && (
         <StoryModal
           stories={stories}

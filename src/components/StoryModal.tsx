@@ -31,6 +31,26 @@ export function StoryModal({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isPaused, setIsPaused] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
 
   const startTimer = () => {
     stopTimer();
@@ -102,22 +122,6 @@ export function StoryModal({
     });
   };
 
-  const handlePrevStory = () => {
-    if (currentStoryIndex > 0) {
-      setCurrentStoryIndex(currentStoryIndex - 1);
-      setProgress(0);
-    }
-  };
-
-  const handleNextStory = () => {
-    if (currentStoryIndex < stories.length - 1) {
-      setCurrentStoryIndex(currentStoryIndex + 1);
-      setProgress(0);
-    } else {
-      onClose();
-    }
-  };
-
   const handleDeleteStory = async () => {
     const currentStory = stories[currentStoryIndex];
     if (!currentStory) return;
@@ -139,39 +143,37 @@ export function StoryModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="max-w-screen-md h-[80vh] p-0 overflow-hidden">
-        {/* <Button
+      <DialogContent
+        className="max-w-screen-md h-[80vh] p-0 overflow-hidden"
+        ref={modalRef}
+      >
+        <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-4 text-white z-10"
+          className="absolute top-4 right-4 z-20 bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 rounded-full"
           onClick={onClose}
         >
           <X className="h-6 w-6" />
-        </Button> */}
+        </Button>
         <DialogTitle className="sr-only">Story Viewer</DialogTitle>
 
         <div className="relative w-full h-full">
           <div className="absolute top-0 left-0 right-0 z-10 flex">
-            {stories.map((_, index) => (
+            <div className="flex-1 h-1 bg-blue-200 mr-1 rounded-sm">
               <div
-                key={index}
-                className="flex-1 h-1 bg-blue-200 mr-1 rounded-sm"
-              >
-                <div
-                  className="h-full bg-blue-500 rounded-sm"
-                  style={{
-                    width: `${
-                      index < currentStoryIndex
-                        ? 100
-                        : index === currentStoryIndex
-                        ? progress
-                        : 0
-                    }%`,
-                    transition: "width 0.05s linear",
-                  }}
-                />
-              </div>
-            ))}
+                className="h-full bg-blue-500 rounded-sm"
+                // style={{
+                //   width: `${
+                //     index < currentStoryIndex
+                //       ? 100
+                //       : index === currentStoryIndex
+                //       ? progress
+                //       : 0
+                //   }%`,
+                //   transition: "width 0.05s linear",
+                // }}
+              />
+            </div>
           </div>
 
           {currentStory?.videoUrl ? (
@@ -189,9 +191,9 @@ export function StoryModal({
               src={currentStory?.imageUrl}
               alt={currentStory?.name}
               className="w-full h-full object-cover"
+              onClick={handlePauseToggle}
             />
           )}
-
           <div className="absolute top-4 left-4 flex items-center bg-black bg-opacity-50 rounded-full p-2">
             <img
               src={currentStory?.profilePicture}
@@ -201,42 +203,12 @@ export function StoryModal({
             <span className="text-white font-semibold">
               {currentStory?.name}
             </span>
-            <span className="text-white ml-2">
-              {currentStoryIndex + 1} / {stories.length}
-            </span>
           </div>
           <div className="absolute top-4 right-[100px] bg-black bg-opacity-50 px-4 py-1 rounded-full">
             <span className="text-white text-sm font-medium">
               {calculateDateDifference(currentStory?.createdAt)}
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white"
-            onClick={handlePrevStory}
-            // disabled={currentStoryIndex === 0}
-          >
-            <ChevronLeft className="h-8 w-8" />
-          </Button>
-          {Number(currentUserId) === currentStory?.userId && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-4 right-16 text-white"
-              onClick={() => setIsConfirmModalOpen(true)}
-            >
-              <Trash className="h-6 w-6" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-blue-500 focus:bg-blue-500"
-            onClick={handleNextStory}
-          >
-            <ChevronRight className="h-8 w-8" />
-          </Button>
         </div>
         {successMessage && (
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-lg">

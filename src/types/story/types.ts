@@ -1,5 +1,6 @@
 export interface StoryCarouselProps {
   stories: Story[];
+  type?: string;
 }
 
 export interface StoryItemProps {
