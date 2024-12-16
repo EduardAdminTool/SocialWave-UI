@@ -19,6 +19,7 @@ interface StoryModalProps {
   stories: Story[];
   initialStoryIndex: number;
   isOpen: boolean;
+  type: string;
   onClose: () => void;
   onDeleteStory: (index: number) => void;
 }
@@ -27,6 +28,7 @@ export function StoryModal({
   stories,
   initialStoryIndex,
   isOpen,
+  type,
   onClose,
   onDeleteStory,
 }: StoryModalProps) {
@@ -156,14 +158,16 @@ export function StoryModal({
         ref={modalRef}
       >
         <div className="absolute top-4 right-4 z-20 flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 rounded-full p-2"
-            onClick={handleDeleteStory}
-          >
-            <Trash2 className="h-6 w-6" />
-          </Button>
+          {type === "account" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 rounded-full p-2"
+              onClick={handleDeleteStory}
+            >
+              <Trash2 className="h-6 w-6" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"

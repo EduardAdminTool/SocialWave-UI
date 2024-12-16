@@ -176,7 +176,11 @@ function AccountPage({ params }: { params: { id: string } }) {
 
       <ScrollArea className="w-full whitespace-nowrap mb-8">
         <div className="flex w-max space-x-4 p-4">
-          <StoryCarousel stories={stories} type="account" />
+          <StoryCarousel
+            stories={stories}
+            type="account"
+            setStories={setStories}
+          />
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>

@@ -60,6 +60,7 @@ export function StoryCarousel({
       {isModalOpen && selectedStoryIndex !== null && (
         <StoryModal
           stories={stories}
+          type={type || ""}
           initialStoryIndex={selectedStoryIndex}
           isOpen={isModalOpen}
           onClose={closeStoryModal}
