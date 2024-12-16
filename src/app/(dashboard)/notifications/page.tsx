@@ -67,7 +67,9 @@ function Notifications() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="bg-blue-700 rounded-full border w-[20px] h-[20px]"></div>
+          {FollowRequestNumber.length > 0 && (
+            <div className="bg-blue-700 rounded-full border w-[20px] h-[20px]"></div>
+          )}
           <div>
             <MdArrowForwardIos size={20} />
           </div>
