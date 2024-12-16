@@ -98,10 +98,12 @@ function Notifications() {
           </div>
           <span className="text-2xl py-4">Notifications</span>
         </div>
-
-        {notifications.map((item) => (
-          <div>
-            <span className="text-lg">{item.type}</span>
+        <span className="text-lg">Follow</span>
+        {notifications.map((item, index) => (
+          <div className="flex flex-col" key={index}>
+            <span>
+              {item.userId} sent a {item.text}
+            </span>
           </div>
         ))}
       </div>
