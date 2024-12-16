@@ -138,8 +138,8 @@ export function StoryModal({
 
     try {
       await deleteStory(currentStory.storyId);
-
       onDeleteStory(currentStoryIndex);
+      onClose();
 
       if (currentStoryIndex >= stories.length - 1) {
         setCurrentStoryIndex(stories.length - 2);
