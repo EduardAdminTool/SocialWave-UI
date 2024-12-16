@@ -21,31 +21,6 @@ function Home() {
   const firstLoadRef = useRef(true);
   const [stories, setStories] = useState<Story[]>([]);
 
-  const fetchPosts = useCallback(
-    async (page: number) => {
-      if (isLoading || fetchedPagesRef.current.has(page) || !hasMore) return;
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const fetchedPosts = await getFeed(page);
-
-        if (fetchedPosts.length === 0) {
-          setHasMore(false);
-        } else {
-          setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
-          fetchedPagesRef.current.add(page);
-        }
-      } catch (err) {
-        setError("Failed to fetch posts");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [isLoading, hasMore]
-  );
-
   const fetchStories = useCallback(async () => {
     try {
       const response = await getStories();
@@ -55,6 +30,10 @@ function Home() {
       return [];
     }
   }, []);
+
+  useEffect(() => {
+    fetchStories();
+  }, [fetchStories]);
 
   const lastPostRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -82,18 +61,39 @@ function Home() {
   );
 
   useEffect(() => {
-    fetchStories();
-  }, [fetchStories]);
-
-  useEffect(() => {
     if (firstLoadRef.current) {
       firstLoadRef.current = false;
       fetchPosts(0);
     }
   }, []);
 
+  const fetchPosts = useCallback(
+    async (page: number) => {
+      if (isLoading || fetchedPagesRef.current.has(page) || !hasMore) return;
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const fetchedPosts = await getFeed(page);
+
+        if (fetchedPosts.length === 0) {
+          setHasMore(false);
+        } else {
+          setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
+          fetchedPagesRef.current.add(page);
+        }
+      } catch (err) {
+        setError("Failed to fetch posts");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, hasMore]
+  );
+
   useEffect(() => {
-    if (currentPage > 1 && !fetchedPagesRef.current.has(currentPage)) {
+    if (currentPage > 0 && !fetchedPagesRef.current.has(currentPage)) {
       fetchPosts(currentPage);
     }
   }, [currentPage, fetchPosts]);
