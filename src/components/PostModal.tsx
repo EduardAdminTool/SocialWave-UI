@@ -213,12 +213,12 @@ export function PostModal({
               </div>
             )}
           </div>
-          <div className="w-full md:w-1/3 p-4 flex flex-col">
+          <div className="w-full md:w-1/3 py-4 flex flex-col">
             <DialogHeader>
               <DialogTitle className="flex items-center space-x-2" />
             </DialogHeader>
             <div className="flex-grow overflow-y-auto">
-              <p className="text-sm mt-2">{post.description}</p>
+              <p className="text-sm mt-2 px-4">{post.description}</p>
             </div>
             <div className="mt-4 space-y-2">
               <div className="flex justify-between">
@@ -244,10 +244,10 @@ export function PostModal({
                   <MdDelete className="h-6 w-6" />
                 </Button>
               </div>
-              <p className="font-bold cursor-pointer" onClick={openLikes}>
+              <p className="font-bold cursor-pointer px-4" onClick={openLikes}>
                 {likesArray.length} Likes
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 px-4">
                 {new Date(post.createdAt).toLocaleDateString()}
               </p>
             </div>
