@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
   Pause,
   Play,
-  Trash,
   Trash2,
   X,
 } from "lucide-react";
@@ -37,14 +36,29 @@ export function StoryModal({
 }: StoryModalProps) {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(initialStoryIndex);
   const [progress, setProgress] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [isPaused, setIsPaused] = useState(false);
-  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -91,20 +105,6 @@ export function StoryModal({
       timerRef.current = null;
     }
   };
-
-  useEffect(() => {
-    const getTokenUserId = () => {
-      const token = localStorage.getItem("authToken");
-      if (!token) return null;
-
-      const [, payload] = token.split(".");
-      const decodedPayload = atob(payload);
-      const { sub } = JSON.parse(decodedPayload);
-      return sub;
-    };
-
-    setCurrentUserId(getTokenUserId());
-  }, []);
 
   useEffect(() => {
     if (isOpen && !isPaused) {
@@ -155,18 +155,21 @@ export function StoryModal({
 
   const currentStory = stories[currentStoryIndex];
 
-  return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogTitle></DialogTitle>
-      <DialogContent
-        className="max-w-screen-md h-[80vh] p-0 overflow-hidden bg-gray-900"
+  if (!isOpen) return null;
+
+  const modal = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div
         ref={modalRef}
+        className="relative w-full max-w-screen-md h-[80vh] bg-gray-900 rounded-lg overflow-hidden"
       >
         <div className="relative w-full h-full flex flex-col">
+          {/* Progress bar */}
           <div className="absolute top-0 left-0 right-0 z-10 p-2">
             <Progress value={progress} className="h-1" />
           </div>
 
+          {/* Header */}
           <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-4 bg-gradient-to-b from-black/50 to-transparent">
             <div className="flex items-center space-x-2">
               <Avatar>
@@ -207,6 +210,7 @@ export function StoryModal({
             </div>
           </div>
 
+          {/* Story content */}
           <div className="flex-1 flex items-center justify-center">
             {currentStory?.videoUrl ? (
               <video
@@ -228,6 +232,7 @@ export function StoryModal({
             )}
           </div>
 
+          {/* Controls */}
           <div className="absolute bottom-0 left-0 right-0 z-20 flex justify-between items-center p-4 bg-gradient-to-t from-black/50 to-transparent">
             <Button
               variant="ghost"
@@ -249,33 +254,35 @@ export function StoryModal({
             {successMessage}
           </div>
         )}
-      </DialogContent>
-      <Dialog
-        open={isConfirmModalOpen}
-        onOpenChange={() => setIsConfirmModalOpen(false)}
-      >
-        <DialogContent>
-          <DialogTitle>Confirm Deletion</DialogTitle>
-          <p>Are you sure you want to delete this story?</p>
-          <div className="flex justify-end space-x-2">
-            <Button
-              variant="secondary"
-              onClick={() => setIsConfirmModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setIsConfirmModalOpen(false);
-                handleDeleteStory();
-              }}
-            >
-              Delete
-            </Button>
+      </div>
+
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
+            <p className="mb-6">Are you sure you want to delete this story?</p>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondary"
+                onClick={() => setIsConfirmModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setIsConfirmModalOpen(false);
+                  handleDeleteStory();
+                }}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </Dialog>
+        </div>
+      )}
+    </div>
   );
+
+  return createPortal(modal, document.body);
 }
