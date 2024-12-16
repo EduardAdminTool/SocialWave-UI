@@ -15,6 +15,9 @@ import {
 import { Story } from "@/types/story/types";
 import { deleteStory } from "@/services/story";
 import { calculateDateDifference } from "@/utils/calculateDate";
+import { Avatar } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+
 interface StoryModalProps {
   stories: Story[];
   initialStoryIndex: number;
@@ -64,6 +67,7 @@ export function StoryModal({
 
   const startTimer = () => {
     stopTimer();
+    setProgress(0);
     timerRef.current = setInterval(() => {
       setProgress((prevProgress) => {
         if (prevProgress >= 100) {
@@ -153,85 +157,93 @@ export function StoryModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
+      <DialogTitle></DialogTitle>
       <DialogContent
-        className="max-w-screen-md h-[80vh] p-0 overflow-hidden"
+        className="max-w-screen-md h-[80vh] p-0 overflow-hidden bg-gray-900"
         ref={modalRef}
       >
-        <div className="absolute top-4 right-4 z-20 flex items-center space-x-2">
-          {type === "account" && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 rounded-full p-2"
-              onClick={handleDeleteStory}
-            >
-              <Trash2 className="h-6 w-6" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 rounded-full p-2"
-            onClick={onClose}
-          >
-            <X className="h-6 w-6" />
-          </Button>
-        </div>
-        <DialogTitle className="sr-only">Story Viewer</DialogTitle>
+        <div className="relative w-full h-full flex flex-col">
+          <div className="absolute top-0 left-0 right-0 z-10 p-2">
+            <Progress value={progress} className="h-1" />
+          </div>
 
-        <div className="relative w-full h-full">
-          <div className="absolute top-0 left-0 right-0 z-10 flex">
-            <div className="flex-1 h-1 bg-blue-200 mr-1 rounded-sm">
-              <div
-                className="h-full bg-blue-500 rounded-sm"
-                // style={{
-                //   width: `${
-                //     index < currentStoryIndex
-                //       ? 100
-                //       : index === currentStoryIndex
-                //       ? progress
-                //       : 0
-                //   }%`,
-                //   transition: "width 0.05s linear",
-                // }}
-              />
+          <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-4 bg-gradient-to-b from-black/50 to-transparent">
+            <div className="flex items-center space-x-2">
+              <Avatar>
+                <img
+                  src={currentStory?.profilePicture}
+                  alt={currentStory?.name}
+                  className="w-10 h-10 rounded-full"
+                />
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-white font-semibold">
+                  {currentStory?.name}
+                </span>
+                <span className="text-white/70 text-sm">
+                  {calculateDateDifference(currentStory?.createdAt)}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              {type === "account" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/20 rounded-full"
+                  onClick={() => setIsConfirmModalOpen(true)}
+                >
+                  <Trash2 className="h-5 w-5" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20 rounded-full"
+                onClick={onClose}
+              >
+                <X className="h-5 w-5" />
+              </Button>
             </div>
           </div>
 
-          {currentStory?.videoUrl ? (
-            <video
-              ref={videoRef}
-              src={currentStory.videoUrl}
-              className="w-full h-full object-cover"
-              autoPlay
-              muted
-              playsInline
-              onClick={handlePauseToggle}
-            />
-          ) : (
-            <img
-              src={currentStory?.imageUrl}
-              alt={currentStory?.name}
-              className="w-full h-full object-cover"
-              onClick={handlePauseToggle}
-            />
-          )}
-          <div className="absolute top-4 left-4 flex items-center bg-black bg-opacity-50 rounded-full p-2">
-            <img
-              src={currentStory?.profilePicture}
-              alt={currentStory?.name}
-              className="w-8 h-8 rounded-full mr-2"
-            />
-            <span className="text-white font-semibold">
-              {currentStory?.name}
-            </span>
+          <div className="flex-1 flex items-center justify-center">
+            {currentStory?.videoUrl ? (
+              <video
+                ref={videoRef}
+                src={currentStory.videoUrl}
+                className="w-full h-full object-contain"
+                autoPlay
+                muted
+                playsInline
+                onClick={handlePauseToggle}
+              />
+            ) : (
+              <img
+                src={currentStory?.imageUrl}
+                alt={currentStory?.name}
+                className="w-full h-full object-contain"
+                onClick={handlePauseToggle}
+              />
+            )}
           </div>
-          <div className="absolute top-4 right-[100px] bg-black bg-opacity-50 px-4 py-1 rounded-full">
-            <span className="text-white text-sm font-medium">
-              {calculateDateDifference(currentStory?.createdAt)}
-            </span>
+
+          <div className="absolute bottom-0 left-0 right-0 z-20 flex justify-between items-center p-4 bg-gradient-to-t from-black/50 to-transparent">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20 rounded-full"
+              onClick={handlePauseToggle}
+            >
+              {isPaused ? (
+                <Play className="h-6 w-6" />
+              ) : (
+                <Pause className="h-6 w-6" />
+              )}
+            </Button>
           </div>
         </div>
+
         {successMessage && (
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
             {successMessage}
