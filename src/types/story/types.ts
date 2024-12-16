@@ -1,6 +1,7 @@
 export interface StoryCarouselProps {
   stories: Story[];
   type?: string;
+  setStories: React.Dispatch<React.SetStateAction<Story[]>>;
 }
 
 export interface StoryItemProps {

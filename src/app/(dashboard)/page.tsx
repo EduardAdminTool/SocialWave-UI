@@ -103,7 +103,7 @@ function Home() {
       <div className="h-[120px] flex items-center bg-gradient-to-b from-blue-100 to-white border rounded-md">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex w-max space-x-4 p-4">
-            <StoryCarousel stories={stories} />
+            <StoryCarousel stories={stories} setStories={setStories} />
           </div>
           <ScrollBar orientation="horizontal" className="opacity-0" />
         </ScrollArea>

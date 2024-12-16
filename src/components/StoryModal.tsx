@@ -3,7 +3,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Pause, Play, Trash, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+  Trash,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Story } from "@/types/story/types";
 import { deleteStory } from "@/services/story";
 import { calculateDateDifference } from "@/utils/calculateDate";
@@ -147,14 +155,24 @@ export function StoryModal({
         className="max-w-screen-md h-[80vh] p-0 overflow-hidden"
         ref={modalRef}
       >
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 right-4 z-20 bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 rounded-full"
-          onClick={onClose}
-        >
-          <X className="h-6 w-6" />
-        </Button>
+        <div className="absolute top-4 right-4 z-20 flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 rounded-full p-2"
+            onClick={handleDeleteStory}
+          >
+            <Trash2 className="h-6 w-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-all duration-200 rounded-full p-2"
+            onClick={onClose}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+        </div>
         <DialogTitle className="sr-only">Story Viewer</DialogTitle>
 
         <div className="relative w-full h-full">

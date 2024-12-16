@@ -6,7 +6,11 @@ import { StoryModal } from "./StoryModal";
 import { Story } from "@/types/story/types";
 import { StoryCarouselProps } from "@/types/story/types";
 
-export function StoryCarousel({ stories, type }: StoryCarouselProps) {
+export function StoryCarousel({
+  stories,
+  type,
+  setStories,
+}: StoryCarouselProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(
     null
@@ -26,7 +30,7 @@ export function StoryCarousel({ stories, type }: StoryCarouselProps) {
 
   const handleDeleteStory = (index: number) => {
     const updatedStories = stories.filter((_, i) => i !== index);
-    // setStories(updatedStories); // If you're using state for stories, update here.
+    setStories(updatedStories);
 
     if (updatedStories.length === 0) {
       closeStoryModal();

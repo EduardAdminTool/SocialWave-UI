@@ -7,9 +7,14 @@ import withAuth from "@/utils/withAuth";
 import { getFollows } from "@/services/follow";
 import { FollowRequestsProps } from "@/types/types";
 import NotificationModal from "@/components/NotificationModal";
+import { getNotifications } from "@/services/notifications";
+import { IoIosNotifications } from "react-icons/io";
+
+import { Notification } from "@/types/notifications/types";
 function Notifications() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [FollowRequestNumber, setFollowRequestNumber] = useState<
     FollowRequestsProps[]
   >([]);
@@ -20,13 +25,17 @@ function Notifications() {
 
   useEffect(() => {
     fetchFollows();
-    // fetchFollowersFollowing();
+    fetchNotifications();
   }, []);
 
-  // const fetchFollowersFollowing = async () => {
-  //   const fetchedFollowers = await getFollowers();
-  //   const fetchedFollowing = await getFollowing();
-  // };
+  const fetchNotifications = async () => {
+    try {
+      const fetchedNotifications = await getNotifications();
+      setNotifications(fetchedNotifications);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const fetchFollows = async () => {
     setError(null);
@@ -55,7 +64,7 @@ function Notifications() {
           </div>
           <div className="flex flex-col">
             <span className="text-2xl">Follow-up requests</span>
-            <span className="text-xl">
+            <span className="text-lg">
               {FollowRequestNumber.length > 1
                 ? `${FollowRequestNumber[0].name || "Unknown User"} and ${
                     FollowRequestNumber.length - 1
@@ -75,65 +84,26 @@ function Notifications() {
           </div>
         </div>
       </div>
-      <div className="w-[600px] gap-4 flex flex-col px-4 py-4">
-        <span className="text-3xl">Today</span>
-        <div className="flex justify-between">
-          <div className="flex gap-2">
-            <div className="inset-0 border-2 border-black flex justify-center items-center rounded-full bg-green-500 w-10 h-10">
-              <span className="text-white text-xl font-bold">+</span>
+      <div className="flex flex-col justify-between w-[600px] p-2">
+        <div className="flex gap-4">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 top-2 flex justify-center items-center rounded-full bg-blue-600 w-10 h-10">
+              <span className="text-white text-xl font-bold"></span>
             </div>
-            <div className="flex flex-col">
-              <p>
-                <span className="font-bold">Account name</span> started
-                following you
-              </p>
-              <span>This is an message bla bla</span>
+            <div className="absolute inset-0 left-4 top-4 flex justify-center items-center rounded-full bg-green-500 w-10 h-10">
+              <span className="text-white text-xl font-bold">
+                <IoIosNotifications />
+              </span>
             </div>
           </div>
+          <span className="text-2xl py-4">Notifications</span>
+        </div>
 
-          <Button
-            variant={followClicked ? "outline" : "default"}
-            className="w-24"
-            onClick={handleFollowButton}
-          >
-            {followClicked ? "Following" : "Follow"}
-          </Button>
-        </div>
-      </div>
-      <div className="w-[600px] px-4 py-4 flex flex-col gap-4">
-        <span className="text-3xl">In the last 7 days</span>
-        <div className="flex gap-2">
-          <div className="inset-0 border-2 border-red-500 flex justify-center items-center rounded-full bg-blue-500 w-10 h-10">
-            <span className="text-white text-xl font-bold">+</span>
+        {notifications.map((item) => (
+          <div>
+            <span className="text-lg">{item.type}</span>
           </div>
-          <div className="flex flex-col">
-            <p>
-              <span className="font-bold">Account name</span> posted a thread
-            </p>
-            <span>
-              This a thread posted by Account name to describe instagram
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="w-[600px] px-4 py-4 flex flex-col gap-4">
-        <span className="text-3xl">In the last 30 days</span>
-        <div className="flex gap-2">
-          <div className="inset-0 border-2 border-red-500 flex justify-center items-center rounded-full bg-blue-500 w-10 h-10">
-            <span className="text-white text-xl font-bold">+</span>
-          </div>
-          <div className="flex flex-col">
-            <p>
-              <span className="font-bold">Account name</span> posted a thread
-            </p>
-            <span>
-              This a thread posted by Account name to describe instagram
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="flex px-4 py-20 flex-col w-[600px]">
-        <span className="text-3xl">People you might know</span>
+        ))}
       </div>
       <NotificationModal
         isOpen={isOpen}
