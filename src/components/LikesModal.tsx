@@ -10,8 +10,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LikesModalProps } from "@/types/posts/types";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export function LikesModal({ likes, isOpen, onClose }: LikesModalProps) {
+  const router = useRouter();
   if (!isOpen) return null;
 
   return (
@@ -27,14 +29,16 @@ export function LikesModal({ likes, isOpen, onClose }: LikesModalProps) {
           {likes.length > 0 ? (
             likes.map((like, index) => (
               <div
+                onClick={() => router.push(`/account/${like.userId}`)}
                 key={like.name}
-                className={`flex items-center space-x-4 p-4 hover:bg-gray-100 transition-all duration-200 ${
+                className={`flex items-center cursor-pointer space-x-4 p-4 hover:bg-gray-100 transition-all duration-200 ${
                   index !== likes.length - 1 ? "border-b border-gray-200" : ""
                 }`}
               >
                 <Avatar className="h-12 w-12">
                   <AvatarImage
-                    className="rounded-full object-cover"
+                    onClick={() => router.push(`/account/${like.userId}`)}
+                    className="rounded-full object-cover cursor-pointer"
                     src={like.profilePicture}
                   />
                   <AvatarFallback>{like.name[0]}</AvatarFallback>
