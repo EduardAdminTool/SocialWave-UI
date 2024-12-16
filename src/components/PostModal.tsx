@@ -251,10 +251,10 @@ export function PostModal({
                   <Button variant="ghost">
                     <Send className="h-6 w-6" />
                   </Button>
+                  <Button variant="ghost">
+                    <Bookmark className="h-6 w-6" />
+                  </Button>
                 </div>
-                <Button variant="ghost">
-                  <Bookmark className="h-6 w-6" />
-                </Button>
                 {userId === userFromToken && (
                   <Button variant="ghost" onClick={deletePostButton}>
                     <MdDelete className="h-6 w-6" />
