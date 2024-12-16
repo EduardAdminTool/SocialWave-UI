@@ -12,10 +12,12 @@ export default function NotificationModal({
   isOpen,
   setIsOpen,
   fetchedAccount,
+  updateFollowRequests, // <-- New prop for updating requests
 }: {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   fetchedAccount: FollowRequestsProps[];
+  updateFollowRequests: (updatedRequests: FollowRequestsProps[]) => void; // <-- Function type
 }) {
   const [requests, setRequests] = useState<FollowRequestsProps[]>([]);
 
@@ -32,9 +34,11 @@ export default function NotificationModal({
   const handleAccept = async (userId: number) => {
     try {
       await acceptFollow(userId);
-      setRequests((prev) =>
-        prev.filter((request) => request.userId !== userId)
+      const updatedRequests = requests.filter(
+        (request) => request.userId !== userId
       );
+      setRequests(updatedRequests);
+      updateFollowRequests(updatedRequests);
     } catch (error) {
       console.error("Error accepting follow request:", error);
     }
@@ -43,9 +47,11 @@ export default function NotificationModal({
   const handleReject = async (userId: number) => {
     try {
       await rejectFollow(userId);
-      setRequests((prev) =>
-        prev.filter((request) => request.userId !== userId)
+      const updatedRequests = requests.filter(
+        (request) => request.userId !== userId
       );
+      setRequests(updatedRequests);
+      updateFollowRequests(updatedRequests);
     } catch (error) {
       console.error("Error rejecting follow request:", error);
     }

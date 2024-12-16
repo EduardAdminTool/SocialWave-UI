@@ -42,6 +42,10 @@ function Notifications() {
     }
   };
 
+  const updateFollowRequests = (updatedRequests: FollowRequestsProps[]) => {
+    setFollowRequestNumber(updatedRequests);
+  };
+
   return (
     <div className="flex flex-col items-center gap-6 bg-gradient-to-br from-blue-50 via-white to-blue-100 min-h-screen py-8 px-4">
       <div
@@ -115,6 +119,7 @@ function Notifications() {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         fetchedAccount={FollowRequestNumber}
+        updateFollowRequests={updateFollowRequests} 
       />
     </div>
   );
