@@ -21,8 +21,8 @@ import { deleteRequest } from "@/services/follow";
 import { unfollowFollow } from "@/services/follow";
 import { useRouter } from "next/navigation";
 import { createChat } from "@/services/chat";
-import { getStories } from "@/services/story";
 import { Story } from "@/types/story/types";
+import { getStoriesByMe } from "@/services/story";
 function AccountPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -115,8 +115,19 @@ function AccountPage({ params }: { params: { id: string } }) {
 
   const fetchStories = async () => {
     try {
-      const response = await getStories();
-      setStories(response);
+      const response = await getStoriesByMe();
+      try {
+        for (let i = 0; i < response.length; i++) {
+          if (params.id === response[i].userId) {
+            console.log(response);
+            setStories(response);
+          } else {
+            console.error("No 'sub' claim in token or it's not a valid number");
+          }
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
     } catch (err) {
       console.log(err);
     }

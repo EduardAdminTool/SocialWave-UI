@@ -145,7 +145,7 @@ function CreatePostPage() {
         setSuccess("Story created successfully");
       }
 
-      // router.push("/");
+      router.push("/");
     } catch (err) {
       console.error(err);
       setError(`Failed to create ${activeTab}. Please try again.`);

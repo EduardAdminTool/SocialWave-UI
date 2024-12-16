@@ -14,7 +14,7 @@ import withAuth from "@/utils/withAuth";
 import { Grid, MessageSquare, Bookmark, MoreHorizontal } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
 import { TbLogout } from "react-icons/tb";
-import { getStories } from "@/services/story";
+import { getStoriesByMe } from "@/services/story";
 import { Story } from "@/types/story/types";
 import {
   DropdownMenu,
@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import jwt from "jsonwebtoken";
 import { FollowersFollowingModal } from "@/components/FollowersFollowingModal";
 
 function AccountPage() {
@@ -63,7 +64,25 @@ function AccountPage() {
 
   const fetchStories = async () => {
     try {
-      const response = await getStories();
+      const token = localStorage.getItem("authToken");
+      const response = await getStoriesByMe();
+      if (token) {
+        try {
+          const decodedToken = jwt.decode(token);
+          const userIdFromToken = decodedToken?.sub;
+          for (let i = 0; i < response.length; i++) {
+            if (userIdFromToken === response[i].userId) {
+              setStories(response);
+            } else {
+              console.error(
+                "No 'sub' claim in token or it's not a valid number"
+              );
+            }
+          }
+        } catch (error) {
+          console.error("Error decoding token:", error);
+        }
+      }
       setStories(response);
     } catch (err) {
       console.log(err);
