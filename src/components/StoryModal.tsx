@@ -164,12 +164,10 @@ export function StoryModal({
         className="relative w-full max-w-screen-md h-[80vh] bg-gray-900 rounded-lg overflow-hidden"
       >
         <div className="relative w-full h-full flex flex-col">
-          {/* Progress bar */}
           <div className="absolute top-0 left-0 right-0 z-10 p-2">
             <Progress value={progress} className="h-1" />
           </div>
 
-          {/* Header */}
           <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-4 bg-gradient-to-b from-black/50 to-transparent">
             <div className="flex items-center space-x-2">
               <Avatar>
@@ -210,7 +208,6 @@ export function StoryModal({
             </div>
           </div>
 
-          {/* Story content */}
           <div className="flex-1 flex items-center justify-center">
             {currentStory?.videoUrl ? (
               <video
