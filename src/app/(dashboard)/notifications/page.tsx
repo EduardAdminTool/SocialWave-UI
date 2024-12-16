@@ -70,13 +70,14 @@ function Notifications() {
                 ? "No follow requests"
                 : FollowRequestNumber[0].name}
             </span>
+            {FollowRequestNumber.length > 0 && (
+              <div className="mt-2 text-blue-700 text-sm font-medium">
+                {FollowRequestNumber.length} new requests
+              </div>
+            )}
           </div>
         </div>
-        {FollowRequestNumber.length > 0 && (
-          <div className="mt-2 text-blue-700 text-sm font-medium">
-            {FollowRequestNumber.length} new requests
-          </div>
-        )}
+
         <div className="flex justify-end">
           <MdArrowForwardIos size={20} className="text-gray-500" />
         </div>

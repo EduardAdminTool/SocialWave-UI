@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FollowRequestsProps } from "@/types/types";
 import { acceptFollow, rejectFollow } from "@/services/follow";
+
 export default function NotificationModal({
   isOpen,
   setIsOpen,
@@ -16,6 +17,12 @@ export default function NotificationModal({
   setIsOpen: (open: boolean) => void;
   fetchedAccount: FollowRequestsProps[];
 }) {
+  const [requests, setRequests] = useState<FollowRequestsProps[]>([]);
+
+  useEffect(() => {
+    setRequests(fetchedAccount);
+  }, [fetchedAccount]);
+
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       setIsOpen(false);
@@ -23,11 +30,25 @@ export default function NotificationModal({
   };
 
   const handleAccept = async (userId: number) => {
-    const response = await acceptFollow(userId);
+    try {
+      await acceptFollow(userId);
+      setRequests((prev) =>
+        prev.filter((request) => request.userId !== userId)
+      );
+    } catch (error) {
+      console.error("Error accepting follow request:", error);
+    }
   };
 
   const handleReject = async (userId: number) => {
-    const response = await rejectFollow(userId);
+    try {
+      await rejectFollow(userId);
+      setRequests((prev) =>
+        prev.filter((request) => request.userId !== userId)
+      );
+    } catch (error) {
+      console.error("Error rejecting follow request:", error);
+    }
   };
 
   if (!isOpen) return null;
@@ -49,7 +70,7 @@ export default function NotificationModal({
         </div>
 
         <ScrollArea className="h-[70vh]">
-          {fetchedAccount.map((request) => (
+          {requests.map((request) => (
             <div
               key={request.userId}
               className="flex items-center justify-between p-4 border-b"
@@ -66,7 +87,7 @@ export default function NotificationModal({
                 </Avatar>
                 <div>
                   <p className="font-semibold">{request.name}</p>
-                  <p className="text-sm text-gray-500">Wants to follow you</p>
+                  <p className="text-sm text-gray-500">{request.email}</p>
                 </div>
               </div>
               <div className="flex space-x-2">
@@ -88,6 +109,11 @@ export default function NotificationModal({
               </div>
             </div>
           ))}
+          {requests.length === 0 && (
+            <div className="p-4 text-center text-gray-500">
+              No follow requests
+            </div>
+          )}
         </ScrollArea>
       </div>
     </div>
