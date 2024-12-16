@@ -9,88 +9,65 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StoryCarousel } from "@/components/StoryCarousel";
 import { Account } from "@/types/account/types";
 import { Post } from "@/types/posts/types";
+import { getAccountInfo } from "@/services/account";
 import withAuth from "@/utils/withAuth";
-import jwt from "jsonwebtoken";
-import { Grid, MessageSquare, Bookmark } from "lucide-react";
+import { Grid, MessageSquare, Bookmark, MoreHorizontal } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
-import { getUserAccount } from "@/services/account";
-import { useSearchParams } from "next/navigation";
-import { requestFollow } from "@/services/follow";
-import { getUserFollow } from "@/services/follow";
-import { deleteRequest } from "@/services/follow";
-import { unfollowFollow } from "@/services/follow";
-import { useRouter } from "next/navigation";
-import { createChat } from "@/services/chat";
-function AccountPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
+import { TbLogout } from "react-icons/tb";
+import { getStories } from "@/services/story";
+import { Story } from "@/types/story/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FollowersFollowingModal } from "@/components/FollowersFollowingModal";
 
-  const searchParams = useSearchParams();
+function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
-  const [followRequest, setFollowRequest] = useState("");
   const [error, setError] = useState<string | null>("");
   const [activePost, setActivePost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
-
-  const story = [
-    { image: "poza", name: "Andrei" },
-    { image: "poza1", name: "Matei1" },
-  ];
-
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-
-    if (token) {
-      try {
-        const decodedToken = jwt.decode(token);
-        const userIdFromToken = decodedToken?.sub || null;
-        setToken(userIdFromToken);
-      } catch (error) {
-        console.error("Error decoding token:", error);
-      }
-    }
-  }, []);
+  const [isFollowersFollowingModalOpen, setIsFollowersFollowingModalOpen] =
+    useState(false);
+  const [isPostDeleted, setIsPostDeleted] = useState(false);
+  const [modalType, setModalType] = useState<string | null>("");
+  const [stories, setStories] = useState<Story[]>([]);
 
   useEffect(() => {
     fetchAccount();
   }, []);
 
+  useEffect(() => {
+    if (isPostDeleted) {
+      fetchAccount();
+      setIsPostDeleted(false);
+    }
+  }, [isPostDeleted]);
+
+  useEffect(() => {
+    fetchStories();
+  }, []);
+
   const fetchAccount = async () => {
     setError(null);
     try {
-      const fetchedAccount = await getUserAccount(Number(params.id));
+      const fetchedAccount = await getAccountInfo();
       setAccountInfo(fetchedAccount);
-      const response = await getUserFollow(Number(params.id));
-
-      if (response.message === "Not following") setFollowRequest("Follow");
-      else if (response.message === "Following") {
-        setFollowRequest("Following");
-      } else {
-        setFollowRequest("Follow request already sent");
-      }
     } catch (err) {
       setError("Nu s-au putut obtine date");
-      setFollowRequest("Failed to Follow");
     }
   };
 
-  const handleFollowButton = async () => {
+  const fetchStories = async () => {
     try {
-      if (followRequest === "Follow request already sent") {
-        await deleteRequest(Number(params.id));
-        setFollowRequest("Follow");
-      } else if (followRequest === "Following") {
-        await unfollowFollow(Number(params.id));
-        setFollowRequest("Follow");
-      } else {
-        const response = await requestFollow(Number(params.id));
-        setFollowRequest("Follow request already sent");
-      }
+      const response = await getStories();
+      setStories(response);
     } catch (err) {
-      console.error("Error requesting follow:", err);
+      console.log(err);
     }
-    setIsFollowClicked(!followClicked);
   };
 
   const openPostModal = (post: Post) => {
@@ -98,18 +75,18 @@ function AccountPage({ params }: { params: { id: string } }) {
     setIsModalOpen(true);
   };
 
-  const goToMessage = async (userId: number) => {
-    if (token) {
-      if (token) {
-        const response = await createChat(userId);
-
-        router.push(`/messages/${response.chatId}`);
-      } else {
-        console.error("Invalid token or missing user ID in token");
-      }
-    } else {
-      console.error("No token available");
+  const openFollowersFollowingModal = (type: string) => {
+    if (type === "Followers") {
+      setModalType("Followers");
+    } else if (type === "Following") {
+      setModalType("Following");
     }
+    setIsFollowersFollowingModalOpen(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    location.reload();
   };
 
   return (
@@ -123,28 +100,38 @@ function AccountPage({ params }: { params: { id: string } }) {
           <AvatarFallback>{accountInfo?.name?.charAt(0) || "?"}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col items-center md:items-start space-y-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             <h2 className="text-2xl font-semibold">
               {accountInfo?.name || "Loading..."}
             </h2>
-            <Button className="w-auto" onClick={handleFollowButton}>
-              {followRequest}
-            </Button>
-            <Button
-              className="bg-blue-500"
-              onClick={() => goToMessage(Number(accountInfo?.userId))}
-            >
-              Send a Message
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleLogout}>
+                  <TbLogout className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex space-x-8">
             <span className="font-medium">
               {accountInfo?.posts?.length || 0} posts
             </span>
-            <span className="font-medium">
+            <span
+              className="font-medium cursor-pointer"
+              onClick={() => openFollowersFollowingModal("Followers")}
+            >
               {accountInfo?.followers.length} Followers
             </span>
-            <span className="font-medium">
+            <span
+              className="font-medium cursor-pointer"
+              onClick={() => openFollowersFollowingModal("Following")}
+            >
               {accountInfo?.following.length} Following
             </span>
           </div>
@@ -156,7 +143,7 @@ function AccountPage({ params }: { params: { id: string } }) {
 
       <ScrollArea className="w-full whitespace-nowrap mb-8">
         <div className="flex w-max space-x-4 p-4">
-          <StoryCarousel stories={story} />
+          <StoryCarousel stories={stories} />
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
@@ -208,6 +195,22 @@ function AccountPage({ params }: { params: { id: string } }) {
         name={accountInfo?.name!}
         profilePicture={accountInfo?.profilePicture!}
       />
+
+      {modalType === "Followers" ? (
+        <FollowersFollowingModal
+          type={"Followers"}
+          FollowersFollowing={accountInfo?.followers || []}
+          isOpen={isFollowersFollowingModalOpen}
+          onClose={() => setIsFollowersFollowingModalOpen(false)}
+        />
+      ) : (
+        <FollowersFollowingModal
+          type={"Following"}
+          FollowersFollowing={accountInfo?.following || []}
+          isOpen={isFollowersFollowingModalOpen}
+          onClose={() => setIsFollowersFollowingModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

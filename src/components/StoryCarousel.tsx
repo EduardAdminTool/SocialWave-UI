@@ -8,9 +8,13 @@ import { useEffect } from "react";
 
 interface StoryCarouselProps {
   stories: Story[];
+  type?: string;
 }
 
-export function StoryCarousel({ stories: initialStories }: StoryCarouselProps) {
+export function StoryCarousel({
+  stories: initialStories,
+  type,
+}: StoryCarouselProps) {
   const [stories, setStories] = useState<Story[]>(initialStories);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(
@@ -27,7 +31,6 @@ export function StoryCarousel({ stories: initialStories }: StoryCarouselProps) {
   };
 
   const closeStoryModal = () => {
-    // Delay state reset slightly to ensure React lifecycle stability
     setTimeout(() => {
       setIsModalOpen(false);
       setSelectedStoryIndex(null);
@@ -38,7 +41,6 @@ export function StoryCarousel({ stories: initialStories }: StoryCarouselProps) {
     const updatedStories = stories.filter((_, i) => i !== index);
     setStories(updatedStories);
 
-    // Adjust selected story index if needed
     if (updatedStories.length === 0) {
       closeStoryModal();
     } else if (index >= updatedStories.length) {
@@ -58,7 +60,9 @@ export function StoryCarousel({ stories: initialStories }: StoryCarouselProps) {
             <AvatarImage src={story.profilePicture} alt={story.name} />
             <AvatarFallback>{story.name}</AvatarFallback>
           </Avatar>
-          <span className="text-xs font-medium">{story.name}</span>
+          <span className="text-xs font-medium">
+            {type === "account" ? null : story.name}
+          </span>
         </button>
       ))}
       {isModalOpen && selectedStoryIndex !== null && (

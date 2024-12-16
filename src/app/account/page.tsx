@@ -14,6 +14,8 @@ import withAuth from "@/utils/withAuth";
 import { Grid, MessageSquare, Bookmark, MoreHorizontal } from "lucide-react";
 import { PostModal } from "@/components/PostModal";
 import { TbLogout } from "react-icons/tb";
+import { getStories } from "@/services/story";
+import { Story } from "@/types/story/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FollowersFollowingModal } from "@/components/FollowersFollowingModal";
+
 function AccountPage() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
@@ -31,11 +34,7 @@ function AccountPage() {
     useState(false);
   const [isPostDeleted, setIsPostDeleted] = useState(false);
   const [modalType, setModalType] = useState<string | null>("");
-
-  const story = [
-    { image: "poza", name: "Andrei" },
-    { image: "poza1", name: "Matei1" },
-  ];
+  const [stories, setStories] = useState<Story[]>([]);
 
   useEffect(() => {
     fetchAccount();
@@ -48,6 +47,10 @@ function AccountPage() {
     }
   }, [isPostDeleted]);
 
+  useEffect(() => {
+    fetchStories();
+  }, []);
+
   const fetchAccount = async () => {
     setError(null);
     try {
@@ -55,6 +58,15 @@ function AccountPage() {
       setAccountInfo(fetchedAccount);
     } catch (err) {
       setError("Nu s-au putut obtine date");
+    }
+  };
+
+  const fetchStories = async () => {
+    try {
+      const response = await getStories();
+      setStories(response);
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -131,7 +143,7 @@ function AccountPage() {
 
       <ScrollArea className="w-full whitespace-nowrap mb-8">
         <div className="flex w-max space-x-4 p-4">
-          <StoryCarousel stories={story} />
+          <StoryCarousel stories={stories} type={"account"} />
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>

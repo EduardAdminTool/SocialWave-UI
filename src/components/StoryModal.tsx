@@ -20,8 +20,7 @@ export function StoryModal({
   isOpen,
   onClose,
   onDeleteStory,
-}: //
-StoryModalProps) {
+}: StoryModalProps) {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(initialStoryIndex);
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -111,12 +110,18 @@ StoryModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogTitle></DialogTitle>
       <DialogContent className="max-w-screen-md h-[80vh] p-0 overflow-hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 text-white z-10"
+          onClick={onClose}
+        >
+          <X className="h-6 w-6" />
+        </Button>
         <DialogTitle className="sr-only">Story Viewer</DialogTitle>
 
         <div className="relative w-full h-full">
-          {/* Progress Bars */}
           <div className="absolute top-0 left-0 right-0 z-10 flex">
             {stories.map((_, index) => (
               <div
@@ -168,15 +173,6 @@ StoryModalProps) {
             </span>
           </div>
 
-          {/* Arrow Buttons */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 text-white"
-            onClick={onClose}
-          >
-            <X className="h-6 w-6" />
-          </Button>
           <Button
             variant="ghost"
             size="icon"

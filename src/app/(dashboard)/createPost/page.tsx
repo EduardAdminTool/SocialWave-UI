@@ -141,7 +141,6 @@ function CreatePostPage() {
         await createPost(description, localTimeString, localTimeString, media);
         setSuccess("Post created successfully");
       } else {
-        // Implement createStory function in your services
         await createStory(media);
         setSuccess("Story created successfully");
       }
@@ -164,11 +163,9 @@ function CreatePostPage() {
   const handleDeleteMedia = (index: number) => {
     if (activeTab === "story") {
       console.log("Clearing media and previews for story");
-      // Clear both media and previews when on the "story" tab
       setMedia([]);
       setPreviews([]);
     } else {
-      // Remove specific index when on the "post" tab
       setMedia((prevFiles) => prevFiles.filter((_, i) => i !== index));
       setPreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
     }
@@ -193,16 +190,10 @@ function CreatePostPage() {
             onValueChange={(value) => setActiveTab(value as "post" | "story")}
           >
             <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger
-                value="post"
-                className="py-2 text-lg font-semibold transition-all duration-300 ease-in-out"
-              >
+              <TabsTrigger value="post" className="py-2 text-lg font-semibold">
                 Post
               </TabsTrigger>
-              <TabsTrigger
-                value="story"
-                className="py-2 text-lg font-semibold transition-all duration-300 ease-in-out"
-              >
+              <TabsTrigger value="story" className="py-2 text-lg font-semibold">
                 Story
               </TabsTrigger>
             </TabsList>
