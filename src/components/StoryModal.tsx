@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Trash, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play, Trash, X } from "lucide-react";
 import { Story } from "@/types/story/types";
 import { deleteStory } from "@/services/story";
+import { calculateDateDifference } from "@/utils/calculateDate";
 interface StoryModalProps {
   stories: Story[];
   initialStoryIndex: number;
@@ -24,9 +25,40 @@ export function StoryModal({
   const [currentStoryIndex, setCurrentStoryIndex] = useState(initialStoryIndex);
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null); // Ref to manage the timer
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Utility to start the timer
+  const startTimer = () => {
+    stopTimer(); // Clear existing timer
+    timerRef.current = setInterval(() => {
+      setProgress((prevProgress) => {
+        if (prevProgress >= 100) {
+          if (currentStoryIndex < stories.length - 1) {
+            setCurrentStoryIndex((prevIndex) => prevIndex + 1);
+            return 0;
+          } else {
+            stopTimer(); // End of stories
+            onClose();
+            return 100;
+          }
+        }
+        return prevProgress + 1;
+      });
+    }, 50);
+  };
+
+  // Utility to stop the timer
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   useEffect(() => {
     const getTokenUserId = () => {
@@ -39,39 +71,20 @@ export function StoryModal({
       return sub;
     };
 
-    const userId = getTokenUserId();
-    setCurrentUserId(userId);
+    setCurrentUserId(getTokenUserId());
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      const timer = setInterval(() => {
-        setProgress((prevProgress) => {
-          if (prevProgress >= 100) {
-            if (currentStoryIndex < stories.length - 1) {
-              setCurrentStoryIndex(currentStoryIndex + 1);
-              return 0;
-            } else {
-              clearInterval(timer);
-              onClose();
-              return 100;
-            }
-          }
-          return prevProgress + 1;
-        });
-      }, 50);
-
-      return () => clearInterval(timer);
+    if (isOpen && !isPaused) {
+      startTimer();
+    } else {
+      stopTimer();
     }
-  }, [isOpen, currentStoryIndex, stories.length, onClose]);
 
-  useEffect(() => {
-    setProgress(0);
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play();
-    }
-  }, [currentStoryIndex]);
+    return stopTimer; // Cleanup on unmount
+  }, [isOpen, isPaused, currentStoryIndex]);
+
+  const handlePauseToggle = () => setIsPaused((prev) => !prev);
 
   const handlePrevStory = () => {
     if (currentStoryIndex > 0) {
@@ -171,16 +184,35 @@ export function StoryModal({
             <span className="text-white font-semibold">
               {currentStory?.name}
             </span>
+            <span className="text-white ml-2">
+              {currentStoryIndex + 1} / {stories.length}
+            </span>
           </div>
-
+          <div className="absolute top-4 right-[100px] bg-black bg-opacity-50 px-4 py-1 rounded-full">
+            <span className="text-white text-sm font-medium">
+              {calculateDateDifference(currentStory?.createdAt)}
+            </span>
+          </div>
           <Button
             variant="ghost"
             size="icon"
             className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white"
             onClick={handlePrevStory}
-            disabled={currentStoryIndex === 0}
+            // disabled={currentStoryIndex === 0}
           >
             <ChevronLeft className="h-8 w-8" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute text-white top-1/2 "
+              onClick={handlePauseToggle}
+            >
+              {isPaused ? (
+                <Play className="h-6 w-6" />
+              ) : (
+                <Pause className="h-6 w-6" />
+              )}
+            </Button>
           </Button>
           {Number(currentUserId) === currentStory?.userId && (
             <Button
