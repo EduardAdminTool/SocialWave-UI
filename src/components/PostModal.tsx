@@ -38,6 +38,21 @@ export function PostModal({
   const [isLiked, setIsLiked] = useState(false);
   const [isLikesOpen, setIsLikesOpen] = useState(false);
   const [likesArray, setLikesArray] = useState<Likes[]>(post?.likes || []);
+  const [userFromToken, setUserFromToken] = useState<number>(0);
+
+  useEffect(() => {
+    const getTokenUserId = () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) return null;
+
+      const [, payload] = token.split(".");
+      const decodedPayload = atob(payload);
+      const { sub } = JSON.parse(decodedPayload);
+      return sub;
+    };
+
+    setUserFromToken(getTokenUserId());
+  }, []);
 
   useEffect(() => {
     setIsLiked(false);
@@ -240,9 +255,11 @@ export function PostModal({
                 <Button variant="ghost">
                   <Bookmark className="h-6 w-6" />
                 </Button>
-                <Button variant="ghost" onClick={deletePostButton}>
-                  <MdDelete className="h-6 w-6" />
-                </Button>
+                {userId === userFromToken && (
+                  <Button variant="ghost" onClick={deletePostButton}>
+                    <MdDelete className="h-6 w-6" />
+                  </Button>
+                )}
               </div>
               <p className="font-bold cursor-pointer px-4" onClick={openLikes}>
                 {likesArray.length} Likes
