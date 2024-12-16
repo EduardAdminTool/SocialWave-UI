@@ -15,7 +15,7 @@ function Home() {
   const [posts, setPosts] = useState<FeedProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const observer = useRef<IntersectionObserver | null>(null);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
   const firstLoadRef = useRef(true);
@@ -88,9 +88,9 @@ function Home() {
   useEffect(() => {
     if (firstLoadRef.current) {
       firstLoadRef.current = false;
-      fetchPosts(1);
+      fetchPosts(0);
     }
-  }, [fetchPosts]);
+  }, []);
 
   useEffect(() => {
     if (currentPage > 1 && !fetchedPagesRef.current.has(currentPage)) {

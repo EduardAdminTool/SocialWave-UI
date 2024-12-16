@@ -25,7 +25,6 @@ import { Story } from "@/types/story/types";
 import { getStoriesByMe } from "@/services/story";
 function AccountPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [followClicked, setIsFollowClicked] = useState(false);
   const [accountInfo, setAccountInfo] = useState<Account | null>(null);
   const [followRequest, setFollowRequest] = useState("");
