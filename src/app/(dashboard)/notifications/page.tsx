@@ -7,7 +7,6 @@ import withAuth from "@/utils/withAuth";
 import { getFollows } from "@/services/follow";
 import { FollowRequestsProps } from "@/types/types";
 import NotificationModal from "@/components/NotificationModal";
-import { getFollowers, getFollowing } from "@/services/follow";
 function Notifications() {
   const [followClicked, setIsFollowClicked] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -21,13 +20,13 @@ function Notifications() {
 
   useEffect(() => {
     fetchFollows();
-    fetchFollowersFollowing();
+    // fetchFollowersFollowing();
   }, []);
 
-  const fetchFollowersFollowing = async () => {
-    const fetchedFollowers = await getFollowers();
-    const fetchedFollowing = await getFollowing();
-  };
+  // const fetchFollowersFollowing = async () => {
+  //   const fetchedFollowers = await getFollowers();
+  //   const fetchedFollowing = await getFollowing();
+  // };
 
   const fetchFollows = async () => {
     setError(null);
@@ -57,11 +56,13 @@ function Notifications() {
           <div className="flex flex-col">
             <span className="text-2xl">Follow-up requests</span>
             <span className="text-xl">
-              {FollowRequestNumber.length > 0
+              {FollowRequestNumber.length > 1
                 ? `${FollowRequestNumber[0].name || "Unknown User"} and ${
                     FollowRequestNumber.length - 1
                   } others`
-                : "No follow requests"}
+                : FollowRequestNumber.length === 0
+                ? "No follow requests"
+                : FollowRequestNumber[0].name}
             </span>
           </div>
         </div>

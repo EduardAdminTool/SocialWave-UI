@@ -26,15 +26,14 @@ export function StoryModal({
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null); // Ref to manage the timer
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isPaused, setIsPaused] = useState(false);
 
-  // Utility to start the timer
   const startTimer = () => {
-    stopTimer(); // Clear existing timer
+    stopTimer();
     timerRef.current = setInterval(() => {
       setProgress((prevProgress) => {
         if (prevProgress >= 100) {
@@ -42,7 +41,7 @@ export function StoryModal({
             setCurrentStoryIndex((prevIndex) => prevIndex + 1);
             return 0;
           } else {
-            stopTimer(); // End of stories
+            stopTimer();
             onClose();
             return 100;
           }
@@ -52,7 +51,6 @@ export function StoryModal({
     }, 50);
   };
 
-  // Utility to stop the timer
   const stopTimer = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -77,14 +75,32 @@ export function StoryModal({
   useEffect(() => {
     if (isOpen && !isPaused) {
       startTimer();
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
     } else {
       stopTimer();
+      if (videoRef.current) {
+        videoRef.current.pause();
+      }
     }
 
-    return stopTimer; // Cleanup on unmount
+    return stopTimer;
   }, [isOpen, isPaused, currentStoryIndex]);
 
-  const handlePauseToggle = () => setIsPaused((prev) => !prev);
+  const handlePauseToggle = () => {
+    setIsPaused((prev) => {
+      const newPausedState = !prev;
+      if (videoRef.current) {
+        if (newPausedState) {
+          videoRef.current.pause();
+        } else {
+          videoRef.current.play();
+        }
+      }
+      return newPausedState;
+    });
+  };
 
   const handlePrevStory = () => {
     if (currentStoryIndex > 0) {
@@ -122,16 +138,16 @@ export function StoryModal({
   const currentStory = stories[currentStoryIndex];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="max-w-screen-md h-[80vh] p-0 overflow-hidden">
-        <Button
+        {/* <Button
           variant="ghost"
           size="icon"
           className="absolute top-4 right-4 text-white z-10"
           onClick={onClose}
         >
           <X className="h-6 w-6" />
-        </Button>
+        </Button> */}
         <DialogTitle className="sr-only">Story Viewer</DialogTitle>
 
         <div className="relative w-full h-full">
@@ -166,6 +182,7 @@ export function StoryModal({
               autoPlay
               muted
               playsInline
+              onClick={handlePauseToggle}
             />
           ) : (
             <img
@@ -201,18 +218,6 @@ export function StoryModal({
             // disabled={currentStoryIndex === 0}
           >
             <ChevronLeft className="h-8 w-8" />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute text-white top-1/2 "
-              onClick={handlePauseToggle}
-            >
-              {isPaused ? (
-                <Play className="h-6 w-6" />
-              ) : (
-                <Pause className="h-6 w-6" />
-              )}
-            </Button>
           </Button>
           {Number(currentUserId) === currentStory?.userId && (
             <Button
